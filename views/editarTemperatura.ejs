@@ -1,0 +1,160 @@
+<%- include ('partials/header.ejs') %>
+<div class="app-shell min-h-screen bg-stone-100 lg:flex">
+  <%- include('partials/sidebar.ejs')%>
+  <div class="app-shell-content min-w-0 flex-1">
+    <%- include('partials/topBar.ejs')%>
+    <main class="space-y-6 p-4 sm:p-6">
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a
+          href="/receita/temperatura/editar/1"
+          class="rounded-2xl border-2 border-mash-orange bg-white p-5 text-center text-lg font-bold text-mash-orange"
+          >Temperatura</a
+        ><a
+          href="/receita/iodo/editar/1"
+          class="rounded-2xl bg-white p-5 text-center text-lg font-bold shadow-sm"
+          >Iodo</a
+        >
+      </div>
+      <form onsubmit="return false;">
+        <input type="hidden" name="receitaId" value="1" /><input
+          type="hidden"
+          name="temperaturaId"
+          value="1"
+        />
+        <div class="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
+          <div class="space-y-6">
+            <section>
+              <h2 class="mb-3 text-lg font-bold text-mash-brown">
+                Rampa de temperatura
+              </h2>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label
+                  class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+                  >Temperatura mín.<input
+                    required
+                    type="number"
+                    name="temperaturaMinima"
+                    value="64"
+                    class="mt-2 h-14 w-full rounded-xl border border-stone-200 text-center text-lg" /></label
+                ><label
+                  class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+                  >Temperatura máx.<input
+                    required
+                    type="number"
+                    name="temperaturaMaxima"
+                    value="66"
+                    class="mt-2 h-14 w-full rounded-xl border border-stone-200 text-center text-lg" /></label
+                ><label
+                  class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+                  >Temporizador<input
+                    required
+                    type="time"
+                    name="temporizador"
+                    step="1"
+                    value="01:00:00"
+                    class="mt-2 h-14 w-full rounded-xl border border-stone-200 text-center text-lg" /></label
+                ><label
+                  class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+                  >Inicialização<input
+                    required
+                    type="time"
+                    name="inicializacao"
+                    step="1"
+                    value="08:00:00"
+                    class="mt-2 h-14 w-full rounded-xl border border-stone-200 text-center text-lg"
+                /></label>
+              </div>
+            </section>
+            <div class="flex justify-center">
+              <button
+                type="submit"
+                class="min-h-12 rounded-xl bg-mash-orange px-8 font-bold uppercase text-white"
+              >
+                Alterar
+              </button>
+            </div>
+          </div>
+          <div class="space-y-6">
+            <section>
+              <h2 class="mb-3 text-lg font-bold text-mash-brown">
+                Limites aceitáveis
+              </h2>
+              <div class="grid gap-3 sm:grid-cols-2">
+                <label
+                  class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+                  >Temperatura mín.<input
+                    type="number"
+                    name="limiteMinimoTemperatura"
+                    value="62"
+                    class="mt-2 h-14 w-full rounded-xl border border-stone-200 text-center text-lg" /></label
+                ><label
+                  class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
+                  >Temperatura máx.<input
+                    type="number"
+                    name="limiteMaximoTemperatura"
+                    value="68"
+                    class="mt-2 h-14 w-full rounded-xl border border-stone-200 text-center text-lg"
+                /></label>
+              </div>
+            </section>
+            <section class="rounded-2xl bg-white p-6 text-center shadow-sm">
+              <h3 class="mb-4 text-xl font-bold text-mash-brown">
+                Tempo ideal
+              </h3>
+              <input
+                type="time"
+                name="tempoIdeal"
+                step="1"
+                value="01:00:00"
+                class="h-14 rounded-xl border border-stone-200 px-4 text-center text-2xl font-bold"
+              />
+            </section>
+          </div>
+        </div>
+      </form>
+      <section class="overflow-x-auto rounded-2xl bg-white p-5 shadow-sm">
+        <h2 class="mb-4 font-bold text-mash-brown">
+          Pré-definições de temperatura
+        </h2>
+        <table class="w-full min-w-[650px] text-left text-sm">
+          <thead>
+            <tr class="border-b text-stone-500">
+              <th class="pb-3">Início do timer</th>
+              <th class="pb-3">Temperatura mín.</th>
+              <th class="pb-3">Temperatura máx.</th>
+              <th class="pb-3">Tempo ativo</th>
+              <th class="pb-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b border-stone-50">
+              <td class="py-3">08:00:00</td>
+              <td>64°C</td>
+              <td>66°C</td>
+              <td>01:00:00</td>
+              <td><span class="font-bold text-green-600">Ativa</span></td>
+            </tr>
+            <tr class="border-b border-stone-50">
+              <td class="py-3">09:00:00</td>
+              <td>72°C</td>
+              <td>74°C</td>
+              <td>00:20:00</td>
+              <td>
+                <form onsubmit="return false;">
+                  <input type="hidden" name="receitaId" value="1" /><input
+                    type="hidden"
+                    name="temperaturaId"
+                    value="2"
+                  /><button class="font-bold text-mash-orange">
+                    Selecionar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>
+<%- include('partials/footer.ejs')%>

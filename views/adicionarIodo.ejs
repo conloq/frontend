@@ -1,0 +1,61 @@
+<%- include ('partials/header.ejs') %>
+<div class="app-shell min-h-screen bg-stone-100 lg:flex">
+  <%- include('partials/sidebar.ejs')%>
+  <div class="app-shell-content min-w-0 flex-1">
+    <%- include('partials/topBar.ejs')%>
+    <main class="space-y-6 p-4 sm:p-6">
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a
+          href="/receita/temperatura/editar/1"
+          class="rounded-2xl bg-white p-5 text-center text-lg font-bold shadow-sm"
+          >Temperatura</a
+        ><a
+          class="rounded-2xl border-2 border-mash-orange bg-white p-5 text-center text-lg font-bold text-mash-orange"
+          >Iodo</a
+        >
+      </div>
+      <form onsubmit="return false;">
+        <input type="hidden" name="receitaId" value="1" />
+        <div class="grid gap-5 md:grid-cols-3">
+          <label class="text-lg font-bold text-mash-brown"
+            >Tempo da primeira coleta<span
+              class="mt-4 block rounded-2xl bg-white p-5 text-sm font-semibold shadow-sm"
+              >Primeira coleta.<input
+                type="time"
+                name="primeiraColeta"
+                step="1"
+                value="0"
+                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base outline-none focus:border-mash-orange" /></span></label
+          ><label class="text-lg font-bold text-mash-brown"
+            >Quantidade de testes máxima<span
+              class="mt-4 block rounded-2xl bg-white p-5 text-sm font-semibold shadow-sm"
+              >Quantidade máxima.<input
+                type="number"
+                name="quantidadeMaxima"
+                step="1"
+                value="0"
+                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base outline-none focus:border-mash-orange" /></span></label
+          ><label class="text-lg font-bold text-mash-brown"
+            >Intervalo entre testes<span
+              class="mt-4 block rounded-2xl bg-white p-5 text-sm font-semibold shadow-sm"
+              >Intervalo.<input
+                type="time"
+                name="intervalo"
+                step="1"
+                value="0"
+                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base outline-none focus:border-mash-orange" /></span
+          ></label>
+        </div>
+        <div class="flex justify-end">
+          <button
+            type="submit"
+            class="min-h-12 rounded-xl bg-mash-orange px-8 font-bold uppercase text-white"
+          >
+            Finalizar
+          </button>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+<%- include('partials/footer.ejs')%>

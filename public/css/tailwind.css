@@ -1,0 +1,75 @@
+@import "tailwindcss" source(none);
+@source "../../views";
+@source "../js";
+
+@theme {
+  --color-mash-brown: #3f2a20;
+  --color-mash-orange: #d97706;
+  --color-mash-cream: #f7f3ee;
+}
+
+@layer base {
+  body {
+    background: var(--color-mash-cream);
+    color: #292524;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  @media (min-width: 1024px) {
+    .app-shell-content {
+      margin-left: 18rem;
+      transition: margin-left 200ms ease;
+    }
+
+    body.sidebar-collapsed .app-shell-content {
+      margin-left: 5rem;
+    }
+
+    #appSidebar[data-sidebar-state="expanded"] {
+      width: 18rem;
+      min-width: 18rem;
+    }
+
+    #appSidebar[data-sidebar-state="collapsed"] {
+      width: 5rem;
+      min-width: 5rem;
+    }
+
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-label {
+      display: none;
+    }
+
+    #appSidebar[data-sidebar-state="collapsed"] .menu-link {
+      justify-content: center;
+      padding-inline: 0.75rem;
+    }
+
+    #appSidebar[data-sidebar-state="collapsed"] .menu-link i {
+      margin-inline: auto;
+    }
+
+    #appSidebar[data-sidebar-state="collapsed"] > div:first-child {
+      justify-content: center;
+    }
+
+    .menu-link-active i {
+      color: var(--color-mash-orange);
+    }
+
+    #appSidebar[data-sidebar-state="collapsed"] > div:first-child > a {
+      justify-content: center;
+    }
+
+    #appSidebar .sidebar-collapse {
+      position: absolute;
+      right: -0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 1px solid rgb(231 229 228);
+      background: #ffffff;
+      color: #171717;
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-08-21",
+  "scope": "frontend-only",
+  "nativeFigmaFile": false,
+  "sources": {
+    "templates": "views/",
+    "styles": "public/css/tailwind.css",
+    "icons": "views/partials/header.ejs"
+  },
+  "screens": [
+    {
+      "id": "login",
+      "source": "views/login.ejs",
+      "viewport": "1140x695",
+      "format": "SVG",
+      "path": "screens/login.svg",
+      "status": "captured-reference",
+      "evidence": "Maestri Desktop snapshot at http://localhost:4000/"
+    },
+    {
+      "id": "cadastro",
+      "source": "views/cadastro.ejs",
+      "viewport": "1140x695",
+      "format": "PNG",
+      "path": "screens/cadastro-authenticated-session.png",
+      "status": "captured-reference",
+      "evidence": "Maestri Desktop navigation to http://localhost:4000/cadastro"
+    },
+    {
+      "id": "usuario",
+      "source": "views/usuario.ejs",
+      "viewport": "1140x695",
+      "format": "PNG",
+      "path": "screens/usuario-authenticated.png",
+      "status": "captured-authenticated",
+      "evidence": "Maestri Desktop authenticated session at http://localhost:4000/usuario"
+    },
+    {
+      "id": "receita",
+      "source": "views/receita.ejs",
+      "viewport": "1140x695",
+      "format": "PNG",
+      "path": "screens/receita-authenticated.png",
+      "status": "captured-authenticated",
+      "evidence": "Maestri Desktop after authenticated navigation to http://localhost:4000/receita"
+    },
+    { "id": "temperatura-create", "source": "views/adicionarTemperatura.ejs", "status": "requires-authenticated-session" },
+    { "id": "temperatura-edit", "source": "views/editarTemperatura.ejs", "status": "requires-authenticated-session" },
+    { "id": "iodo-create", "source": "views/adicionarIodo.ejs", "status": "requires-authenticated-session" },
+    { "id": "iodo-edit", "source": "views/editarIodo.ejs", "status": "requires-authenticated-session" }
+  ],
+  "states": [
+    { "id": "sidebar-collapsed", "status": "pending" },
+    { "id": "mobile-drawer", "status": "pending" },
+    { "id": "recipe-modal", "status": "requires-authenticated-session" }
+  ]
+}

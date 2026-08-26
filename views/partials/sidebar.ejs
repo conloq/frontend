@@ -1,0 +1,40 @@
+<aside id="appSidebar" class="fixed inset-y-0 left-0 z-40 flex w-72 shrink-0 -translate-x-full flex-col bg-white px-4 py-6 text-stone-950 shadow-xl transition-[width,transform] duration-200 lg:translate-x-0" aria-label="Navegação principal" data-sidebar-state="expanded">
+  <div class="mb-8 flex items-center justify-between gap-3">
+    <a href="/usuario" class="flex min-w-0 items-center gap-3" aria-label="Ir para o perfil">
+      <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-orange-100 text-orange-600"><i class="ph ph-flask" aria-hidden="true"></i></span>
+      <span class="sidebar-label truncate text-lg font-bold tracking-wide text-stone-950">MASH</span>
+    </a>
+    <div class="flex items-center gap-1">
+      <button type="button" class="sidebar-collapse hidden rounded-lg border border-stone-200 bg-white p-2 text-stone-950 transition hover:border-mash-orange hover:text-mash-orange lg:block" aria-label="Recolher menu" aria-controls="appSidebar" aria-expanded="true">
+        <i class="ph ph-caret-left text-xl" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="sidebar-close rounded-lg p-2 text-stone-600 transition hover:bg-stone-100 hover:text-mash-orange lg:hidden" aria-label="Fechar menu">
+        <i class="ph ph-x text-xl" aria-hidden="true"></i>
+      </button>
+    </div>
+  </div>
+
+  <nav class="flex flex-col gap-2">
+    <a href="/usuario" class="menu-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-stone-950 transition hover:bg-orange-50 hover:text-mash-orange" title="Painel">
+      <i class="ph ph-gauge text-2xl text-stone-950" aria-hidden="true"></i>
+      <span class="sidebar-label">Painel</span>
+    </a>
+    <a href="#" class="menu-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-stone-950 transition hover:bg-orange-50 hover:text-mash-orange" title="Iodo">
+      <i class="ph ph-drop text-2xl text-stone-950" aria-hidden="true"></i>
+      <span class="sidebar-label">Iodo</span>
+    </a>
+    <a href="#" class="menu-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-stone-950 transition hover:bg-orange-50 hover:text-mash-orange" title="Lotes">
+      <i class="ph ph-package text-2xl text-stone-950" aria-hidden="true"></i>
+      <span class="sidebar-label">Lotes</span>
+    </a>
+    <a href="/receita" class="menu-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-stone-950 transition hover:bg-orange-50 hover:text-mash-orange" title="Receitas">
+      <i class="ph ph-book-open-text text-2xl text-stone-950" aria-hidden="true"></i>
+      <span class="sidebar-label">Receitas</span>
+    </a>
+    <a href="#" class="menu-link flex min-h-11 items-center gap-3 rounded-xl px-3 py-2 text-stone-950 transition hover:bg-orange-50 hover:text-mash-orange" title="Configuração">
+      <i class="ph ph-gear text-2xl text-stone-950" aria-hidden="true"></i>
+      <span class="sidebar-label">Configuração</span>
+    </a>
+  </nav>
+</aside>
+<div id="sidebarOverlay" class="fixed inset-0 z-30 hidden bg-stone-950/50 lg:hidden" aria-hidden="true"></div>

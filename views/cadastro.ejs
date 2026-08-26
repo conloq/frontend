@@ -1,0 +1,98 @@
+<%- include ('partials/header.ejs') %>
+<div class="grid min-h-screen lg:grid-cols-2">
+  <section
+    class="order-2 flex items-center justify-center bg-mash-cream px-6 py-10 sm:px-10 lg:order-1"
+  >
+    <form class="w-full max-w-md" action="/cadastrar" method="post">
+      <div class="mb-8 text-center">
+        <p
+          class="text-sm font-semibold uppercase tracking-widest text-mash-orange"
+        >
+          Comece agora
+        </p>
+        <h1 class="mt-2 text-3xl font-bold text-mash-brown">
+          Crie a sua conta
+        </h1>
+        <p class="mt-2 text-stone-600">Inicie a sua jornada conosco</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="mb-2 block text-sm font-semibold" for="nome"
+            >Nome completo</label
+          ><input
+            id="nome"
+            type="text"
+            name="nome"
+            class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+            required
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-semibold" for="email"
+            >Email</label
+          ><input
+            id="email"
+            type="email"
+            name="email"
+            class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+            required
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-semibold" for="senha"
+            >Senha</label
+          ><input
+            id="senha"
+            type="password"
+            name="senha"
+            class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+            required
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-semibold" for="confirmarSenha"
+            >Confirmar senha</label
+          ><input
+            id="confirmarSenha"
+            type="password"
+            class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="mt-7 flex min-h-12 w-full items-center justify-center gap-3 rounded-xl bg-mash-orange px-5 py-3 font-bold uppercase tracking-wide text-white transition hover:bg-orange-700"
+      >
+        Criar <i class="ph ph-arrow-right text-xl" aria-hidden="true"></i>
+      </button>
+      <p class="mt-5 text-center text-sm text-stone-600">
+        Já possui uma conta?
+        <a href="/" class="font-bold text-mash-orange hover:underline">Entre</a>
+      </p>
+      <p class="mt-12 text-center text-xs text-stone-500">
+        @2026 Conloq. Todos os direitos reservados.
+      </p>
+    </form>
+  </section>
+  <section
+    class="relative order-1 hidden overflow-hidden bg-mash-brown lg:order-2 lg:block"
+  >
+    <img
+      src="/img/mash.png"
+      alt=""
+      class="absolute inset-0 size-full object-cover opacity-60"
+    />
+    <div class="absolute inset-0 bg-mash-brown/60"></div>
+    <div class="relative flex h-full items-end p-10 xl:p-16">
+      <div class="max-w-xl text-white">
+        <h2 class="text-4xl font-bold xl:text-5xl">
+          Produza com mais precisão.
+        </h2>
+        <p class="mt-4 text-lg leading-8 text-white/80">
+          Tenha controle dos seus processos e decisões em cada etapa.
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+<%- include ('partials/footer.ejs') %>

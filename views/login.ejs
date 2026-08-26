@@ -1,0 +1,95 @@
+<%- include ('partials/header.ejs') %>
+<div class="grid min-h-screen lg:grid-cols-2">
+  <section class="relative hidden overflow-hidden bg-mash-brown lg:block">
+    <img
+      src="/img/mash.png"
+      alt=""
+      class="absolute inset-0 size-full object-cover opacity-60"
+    />
+    <div class="absolute inset-0 bg-mash-brown/60"></div>
+    <div class="relative flex h-full items-end p-10 xl:p-16">
+      <div class="max-w-xl text-white">
+        <p
+          class="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-orange-200"
+        >
+          Projeto Cervejaria
+        </p>
+        <h1 class="text-4xl font-bold leading-tight xl:text-5xl">
+          Bem-vindo de volta!
+        </h1>
+        <p class="mt-4 text-lg leading-8 text-white/80">
+          A automação para o seu teste de iodo, com segurança para seguir até a
+          fervura no momento perfeito.
+        </p>
+      </div>
+    </div>
+  </section>
+  <section
+    class="flex items-center justify-center bg-mash-cream px-6 py-10 sm:px-10"
+  >
+    <form class="w-full max-w-md" action="/login" method="post">
+      <div class="mb-10">
+        <p
+          class="text-sm font-semibold uppercase tracking-widest text-mash-orange"
+        >
+          Acesse sua conta
+        </p>
+        <h1 class="mt-2 text-4xl font-bold text-mash-brown">Login</h1>
+      </div>
+      <div class="space-y-5">
+        <div>
+          <label class="mb-2 block text-sm font-semibold" for="email"
+            >Email</label
+          ><input
+            id="email"
+            type="email"
+            name="email"
+            class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none transition focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+            required
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-semibold" for="senha"
+            >Senha</label
+          >
+          <div class="relative">
+            <input
+              id="senha"
+              type="password"
+              name="senha"
+              class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 pr-12 outline-none transition focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+              required
+            /><button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-stone-500"
+              aria-label="Mostrar senha"
+            >
+              ◉
+            </button>
+          </div>
+          <a
+            class="mt-2 inline-block text-sm font-semibold text-mash-orange hover:underline"
+            href="/recuperar-senha"
+            >Esqueceu a senha?</a
+          >
+        </div>
+      </div>
+      <button
+        type="submit"
+        class="mt-8 flex min-h-12 w-full items-center justify-center gap-3 rounded-xl bg-mash-orange px-5 py-3 font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-orange-700"
+      >
+        Entrar <i class="ph ph-sign-in text-xl" aria-hidden="true"></i>
+      </button>
+      <p class="mt-5 text-center text-sm text-stone-600">
+        Não possui conta?
+        <a href="/cadastro" class="font-bold text-mash-orange hover:underline"
+          >Crie agora</a
+        >
+      </p>
+      <p class="mt-16 text-center text-xs text-stone-500">
+        @2026 Conloq. Todos os direitos reservados.
+      </p>
+    </form>
+  </section>
+</div>
+<%- include ('partials/footer.ejs') %>

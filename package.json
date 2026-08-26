@@ -1,0 +1,25 @@
+{
+  "name": "mash",
+  "version": "1.0.0",
+  "description": "Preview EJS mockado do Sistema MASH",
+  "license": "ISC",
+  "author": "",
+  "main": "preview-server.js",
+  "scripts": {
+    "test": "node --check preview-server.js",
+    "start": "npx nodemon preview-server.js",
+    "build:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css",
+    "watch:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css --watch"
+  },
+  "dependencies": {
+    "@phosphor-icons/web": "^2.1.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}

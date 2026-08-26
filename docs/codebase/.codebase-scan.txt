@@ -1,0 +1,287 @@
+
+=== DIRECTORY TREE (max depth 3, source files only) ===
+.agents
+.agents\skills
+.agents\skills\context7-mcp
+.agents\skills\context7-mcp\SKILL.md
+.gitignore
+.maestri
+.maestri\roles
+.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045
+.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045\AGENTS.md
+.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045\CLAUDE.md
+.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045\role.json
+.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23
+.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23\AGENTS.md
+.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23\CLAUDE.md
+.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23\role.json
+.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83
+.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83\AGENTS.md
+.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83\CLAUDE.md
+.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83\role.json
+.playwright-mcp
+.playwright-mcp\page-2026-08-20T17-54-55-397Z.yml
+.playwright-mcp\page-2026-08-20T17-59-59-590Z.yml
+.slim
+.slim\codemap.json
+AGENTS.md
+codemap.md
+docs
+docs\codebase
+docs\codebase\.codebase-scan.txt
+docs\codebase\ARCHITECTURE.md
+docs\codebase\CONCERNS.md
+docs\codebase\CONVENTIONS.md
+docs\codebase\INTEGRATIONS.md
+docs\codebase\STACK.md
+docs\codebase\STRUCTURE.md
+docs\codebase\TESTING.md
+docs\figma-export
+docs\figma-export\manifest.json
+docs\figma-export\README.md
+docs\figma-export\screens
+docs\figma-export\screens\receita-authenticated.png
+docs\figma-export\tokens.md
+docs\frontend-components.md
+docs\frontend-figma.md
+docs\frontend-screens.md
+docs\superpowers
+docs\superpowers\plans
+docs\superpowers\plans\2026-08-20-tailwind-css-dashboard-plan.md
+docs\superpowers\plans\2026-08-21-phosphor-recipes.md
+docs\superpowers\specs
+docs\superpowers\specs\2026-08-20-tailwind-css-dashboard-design.md
+graphify-out
+graphify-out\.codebase-scan.txt
+opencode.json
+package-lock.json
+package.json
+portal-preview.stderr.log
+portal-preview.stdout.log
+preview-server.js
+public
+public\codemap.md
+public\css
+public\css\codemap.md
+public\css\style.css
+public\css\tailwind.css
+public\icons
+public\icons\arrow.png
+public\icons\atencao.png
+public\icons\cadeado.png
+public\icons\check.png
+public\icons\config.png
+public\icons\email.png
+public\icons\iodo.png
+public\icons\localizacao-apagada.png
+public\icons\localizacao.png
+public\icons\log.png
+public\icons\lote.png
+public\icons\mais.png
+public\icons\mash_icon.png
+public\icons\olho.png
+public\icons\painel.png
+public\icons\porta.png
+public\icons\receita.png
+public\icons\sair.png
+public\icons\telefone.png
+public\icons\usuario.png
+public\img
+public\img\foto-perfil.png
+public\img\mash.png
+public\js
+public\js\codemap.md
+public\js\script.js
+public\uploads
+public\uploads\aaa.drawio.png
+public\uploads\ChatGPT Image 27 de mai. de 2026, 15_28_25.png
+public\uploads\lockheed-martin-f-35a-da_holanda_free_big.jpg
+public\uploads\mockup.png
+public\uploads\Tela Receita (2).png
+public\uploads\WhatsApp Image 2026-04-28 at 09.50.38.jpeg
+README.md
+views
+views\adicionarIodo.ejs
+views\adicionarTemperatura.ejs
+views\cadastro.ejs
+views\codemap.md
+views\editarIodo.ejs
+views\editarTemperatura.ejs
+views\index.ejs
+views\login.ejs
+views\partials
+views\partials\codemap.md
+views\partials\footer.ejs
+views\partials\header.ejs
+views\partials\sidebar.ejs
+views\partials\topBar.ejs
+views\receita.ejs
+views\usuario.ejs
+
+=== STACK DETECTION (manifest files) ===
+
+--- package-lock.json ---
+{
+  "name": "mash",
+  "version": "1.0.0",
+  "lockfileVersion": 3,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "mash",
+      "version": "1.0.0",
+      "license": "ISC",
+      "dependencies": {
+        "@phosphor-icons/web": "^2.1.2",
+        "ejs": "^5.0.2",
+        "express": "^5.2.1",
+        "nodemon": "^3.1.14"
+      },
+      "devDependencies": {
+        "@tailwindcss/cli": "^4.3.3",
+        "tailwindcss": "^4.3.3"
+      }
+    },
+    "node_modules/@jridgewell/gen-mapping": {
+      "version": "0.3.13",
+      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz",
+      "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "@jridgewell/sourcemap-codec": "^1.5.0",
+        "@jridgewell/trace-mapping": "^0.3.24"
+      }
+    },
+    "node_modules/@jridgewell/remapping": {
+      "version": "2.3.5",
+      "resolved": "https://registry.npmjs.org/@jridgewell/remapping/-/remapping-2.3.5.tgz",
+      "integrity": "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "@jridgewell/gen-mapping": "^0.3.5",
+        "@jridgewell/trace-mapping": "^0.3.24"
+      }
+    },
+    "node_modules/@jridgewell/resolve-uri": {
+      "version": "3.1.2",
+      "resolved": "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz",
+      "integrity": "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==",
+      "dev": true,
+      "license": "MIT",
+      "engines": {
+        "node": ">=6.0.0"
+      }
+    },
+    "node_modules/@jridgewell/sourcemap-codec": {
+      "version": "1.5.5",
+      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz",
+      "integrity": "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==",
+      "dev": true,
+      "license": "MIT"
+    },
+    "node_modules/@jridgewell/trace-mapping": {
+      "version": "0.3.31",
+      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz",
+      "integrity": "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==",
+      "dev": true,
+      "license": "MIT",
+      "dependencies": {
+        "@jridgewell/resolve-uri": "^3.1.0",
+        "@jridgewell/sourcemap-codec": "^1.4.14"
+      }
+    },
+    "node_modules/@parcel/watcher": {
+      "version": "2.5.1",
+      "resolved": "https://registry.npmjs.org/@parcel/watcher/-/watcher-2.5.1.tgz",
+      "integrity": "sha512-dfUnCxiN9H4ap84DvD2ubjw+3vUNpstxa0TneY/Paat8a3R4uQZDLSvWjmznAY/DoahqTHl9V46HF/Zs3F29pg==",
+      "dev": true,
+      "hasInstallScript": true,
+      "license": "MIT",
+      "dependencies": {
+        "detect-libc": "^1.0.3",
+
+[TRUNCATED] Showing first 80 of 2262 lines.
+--- package.json ---
+{
+  "name": "mash",
+  "version": "1.0.0",
+  "description": "Preview EJS mockado do Sistema MASH",
+  "license": "ISC",
+  "author": "",
+  "main": "preview-server.js",
+  "scripts": {
+    "test": "node --check preview-server.js",
+    "start": "npx nodemon preview-server.js",
+    "build:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css",
+    "watch:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css --watch"
+  },
+  "dependencies": {
+    "@phosphor-icons/web": "^2.1.2",
+    "ejs": "^5.0.2",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
+
+
+=== ENTRY POINTS ===
+No common entry points found. Check 'main' or 'scripts.start' in manifest files above.
+
+=== LINTING AND FORMATTING CONFIG ===
+No linting or formatting config files found in project root.
+
+=== ENVIRONMENT VARIABLE TEMPLATES ===
+No .env.example or .env.template found. Identify required environment variables by searching the code and config for environment variable reads.
+
+=== TODO / FIXME / HACK (production code only, test dirs excluded) ===
+None found.
+
+=== GIT RECENT COMMITS (last 20) ===
+No commits found.
+
+=== HIGH-CHURN FILES (last 90 days, top 20) ===
+None found.
+
+=== MONOREPO SIGNALS ===
+No monorepo signals detected.
+
+=== CODE METRICS ===
+Total files scanned: 90
+Total lines of code: 2586
+
+Files by language:
+  Other: 88
+  JavaScript: 2
+
+Top 10 largest files:
+public\uploads\ChatGPT Image 27 de mai. de 2026, 15_28_25.png: 1445.7KB
+public\uploads\mockup.png: 418.9KB
+public\img\mash.png: 190.7KB
+public\uploads\aaa.drawio.png: 139.8KB
+public\uploads\Tela Receita (2).png: 76.8KB
+package-lock.json: 74.2KB
+docs\figma-export\screens\receita-authenticated.png: 67.2KB
+public\uploads\lockheed-martin-f-35a-da_holanda_free_big.jpg: 43.4KB
+public\uploads\WhatsApp Image 2026-04-28 at 09.50.38.jpeg: 39.2KB
+public\css\style.css: 30.0KB
+
+=== CI/CD PIPELINES ===
+No CI/CD pipelines detected.
+
+=== CONTAINERS & ORCHESTRATION ===
+No containerization configs detected.
+
+=== SECURITY & COMPLIANCE ===
+No security configs detected.
+
+=== PERFORMANCE & TESTING ===
+No performance testing configs detected.
+
+=== SCAN COMPLETE ===
