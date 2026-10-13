@@ -40,13 +40,17 @@ app.get("/receitas/temperatura/editar/:id", tela("editarTemperatura"));
 app.get("/receitas/iodo/cadastrar/:id", tela("adicionarIodo"));
 app.get("/receitas/iodo/editar/:id", tela("editarIodo"));
 
-// Inicia o servidor
+// Inicia o servidor.
+// Sem callback no listen: o Express 5 liga o callback ao evento 'error'
+// (lib/application.js), o que faria o log de sucesso disparar num bind falho.
 const port = Number(process.env.PORT) || 4000;
-const server = app.listen(port, () => {
+const server = app.listen(port);
+
+server.on("listening", () => {
   console.log(`Servidor iniciado com sucesso em http://localhost:${port}`);
 });
 
-// Falha de bind (porta ocupada, permissão) chega como evento 'error'
 server.on("error", (erro) => {
   console.error("Ocorreu um erro ao iniciar o servidor:", erro.message);
+  process.exitCode = 1;
 });
