@@ -1,72 +1,62 @@
-# Integrations
+# External Integrations
 
-## 1. Banco de dados
+## 1) Integration Inventory
 
-- Banco: MySQL via `mysql2` e Sequelize.
-- Conexão definida em `config/sequelize-config.js`.
-- Banco configurado: `cervejaria`.
-- `config/data-base.js` autentica a conexão e executa criação do banco caso não exista.
-- `index.js` sincroniza os modelos com `force: false`.
-- Migrações versionadas: [TODO] não foi encontrada configuração de migrations.
+| System | Type (API/DB/Queue/etc) | Purpose | Auth model | Criticality | Evidence |
+|--------|---------------------------|---------|------------|-------------|----------|
+| Back-End MASH (`conloq/Back-End`, porta 8080) | REST API | Login, cadastro, perfil, foto, receitas e temperatura | JWT em `Authorization: Bearer`, guardado em `localStorage` (`mash-token`) | Alta — sem ela nenhuma tela mostra dados | `public/js/app.js`, `index.js` |
+| `@phosphor-icons/web` (pacote local) | Assets estáticos | Ícones servidos em `/vendor/phosphor` | Nenhuma | Média | `index.js`, `views/partials/header.ejs` |
+| `localStorage` (navegador) | Armazenamento local | Token (`mash-token`) e mensagem de flash (`mash-flash`) | Nenhuma (legível por JavaScript) | Alta | `public/js/app.js` |
 
-## 2. Sessões e autenticação
+## 2) Data Stores
 
-- `express-session` fornece a sessão HTTP.
-- `connect-session-sequelize` persiste sessões usando Sequelize.
-- `config/session.js` configura `resave: false`, `saveUninitialized: false`, cookie HTTP-only e duração de sete dias.
-- `middleware/guestMiddleware.js` implementa `isGuest` e `isLogado`.
-- `middleware/globalInfoUserMiddleware.js` coloca `req.session` em `res.locals.usuario`.
-- O login grava `userId`, `userEmail`, `nome` e `url_imagem` na sessão.
-- Secret de sessão: hardcoded em `config/session.js`; fonte externa de segredo: [TODO].
+| Store | Role | Access layer | Key risk | Evidence |
+|-------|------|--------------|----------|----------|
+| `localStorage` | Guarda o JWT entre páginas e a mensagem que sobrevive a redirecionamento | `public/js/app.js` | Qualquer XSS lê o token e assume a sessão; `localStorage` é por origem, não por aba | `public/js/app.js` (`TOKEN_KEY`, `FLASH_KEY`) |
+| Banco MySQL (Back-End) | Persistência real | Não acessada daqui | Nenhum acesso direto deste repositório | `conloq/Back-End` |
 
-## 3. API externa
+## 3) Secrets and Credentials Handling
 
-`controller/loginController.js` chama:
+- Credential sources: nenhuma credencial neste repositório. As únicas variáveis são `API_URL` e `PORT` (`.env.example`).
+- Hardcoding checks: nenhum segredo, chave ou token no código. O histórico registra uma chave removida em `cf2dc27` (`chore(security): remover chave de API versionada do opencode.json`).
+- Rotation or lifecycle notes: o JWT expira em 1 dia na API (a API não revoga tokens). O logout apenas apaga o token local — não há chamada de revogação. `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
 
-```text
-http://ip-api.com/json/{ip}
-```
+## 4) Reliability and Failure Behavior
 
-A resposta é usada para preencher `LogConexao.localidade`. A falha dessa integração é capturada em bloco separado e o login pode prosseguir.
+- Retry/backoff behavior: NONE — nenhuma tentativa repetida.
+- Timeout policy: NONE — `fetch` sem `AbortController`; uma API pendurada deixa a tela sem dados e sem mensagem.
+- Circuit-breaker or fallback behavior: parcial. Falha de rede vira `{ status: 503 }` com "Não foi possível falar com a API" em `#mensagens`. Não há fallback de dados nem cache offline.
+- CORS: obrigatório. O Back-End responde `Access-Control-Allow-Origin` a partir de `FRONTEND_URL` (padrão `http://localhost:4000`). `FRONTEND_URL` não está definida no `.env` do Back-End; em deploy a origem cai no default e o navegador bloqueia a chamada.
 
-## 4. Uploads e arquivos estáticos
+## 5) Observability for Integrations
 
-- `config/multer.js` usa armazenamento em disco em `public/uploads`.
-- Extensões permitidas no backend: JPEG, JPG e PNG.
-- Limite configurado: 20 MB.
-- O nome salvo usa o nome original do arquivo.
-- `index.js` serve `public/` como conteúdo estático.
-- Phosphor é exposto em `/vendor/phosphor`.
+- Logging around external calls: NONE no cliente — erros aparecem só na interface.
+- Metrics/tracing coverage: NONE.
+- Missing visibility gaps: nenhum log de requisição ou de erro de API; nenhum log de acesso no servidor; a única saída do `index.js` é a linha de sucesso do `listen` e a de falha de bind.
 
-## 5. Observabilidade e mensageria
+## 6) Endpoint Catalog (consumido pelo navegador)
 
-- Logging observado: `console.log`/`console.error`.
-- APM, métricas, tracing, filas e event bus: [TODO] não foram encontrados no scan.
-- Gateway, service mesh ou proxy: [TODO] não configurado no repositório.
+| Método | Rota | Corpo / resposta usados |
+|---|---|---|
+| POST | `/login` | `{ email, password }` → 200 `{ token, user }`; 400 em `message`; 401 em `error` |
+| POST | `/user` | `{ name, email, password }` → 201 |
+| GET | `/user` | → 200 `{ user }` (`id`, `name`, `email`, `fone`, `url_image`, `createdAt`) |
+| PUT | `/user` | `{ name, email, fone, password? }` → 200 |
+| PUT | `/user/upload` | `FormData` com `imageUser` → 200 `{ url }` |
+| DELETE | `/user` | → 204 |
+| GET | `/receitas` | → 200 `{ recipe: [...] }` |
+| POST | `/receitas` | `{ name }` → 201 |
+| DELETE | `/receitas/:recipeId` | → 204 |
+| GET | `/receitas/temperatura/:id` | → 200 `{ temperatures: [...] }` |
+| POST | `/receitas/temperatura/:id` | rampas, limites, `timer`, `initialization`, `ideal_time` → 201 |
 
-## 6. Credenciais e configuração
+Sem rota na API (telas só de layout): iodo (`/receitas/iodo/...`) e edição de temperatura.
 
-- Não foram encontrados `.env.example`, `.env.template` ou equivalente no scan.
-- Credenciais MySQL e segredo de sessão estão no código de configuração atual.
-- [ASK USER] Definir se a configuração deve permanecer local/hardcoded ou migrar para variáveis de ambiente é uma decisão de intenção operacional.
+## 7) Evidence
 
-## 7. Evidências existentes
-
-- `config/sequelize-config.js`
-- `config/data-base.js`
-- `config/session.js`
-- `config/multer.js`
-- `controller/loginController.js`
 - `index.js`
-- `package.json`
-- `docs/codebase/.codebase-scan.txt` (scan preservado)
-
-## Evidências
-
-- `config/sequelize-config.js`
-- `config/data-base.js`
-- `config/session.js`
-- `config/multer.js`
-- `controller/loginController.js`
-- `index.js`
-- `package.json`
+- `public/js/app.js`
+- `views/partials/footer.ejs`
+- `.env.example`, `.gitignore`
+- `conloq/Back-End` (`app.js` com CORS, `routes/*.js`)
+- `docs/codebase/.codebase-scan.txt`

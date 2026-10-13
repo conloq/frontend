@@ -1,65 +1,52 @@
-# Conventions
+# Coding Conventions
 
-## 1. Arquivos e módulos
+## 1) Naming Rules
 
-- Projeto usa ES modules (`"type": "module"`).
-- Imports são relativos e incluem `.js`.
-- Controllers, routers e middleware usam nomes camelCase em arquivo, por exemplo `receitaController.js` e `usuarioRoutes.js`.
-- Modelos normalmente usam PascalCase (`Usuario.js`, `Receita.js`), com `log.js` como exceção existente.
-- Templates usam extensão `.ejs`; partials ficam em `views/partials/`.
+| Item | Rule | Example | Evidence |
+|------|------|---------|----------|
+| Files (templates) | camelCase + `.ejs` | `adicionarTemperatura.ejs`, `topBar.ejs` | `views/`, `views/partials/` |
+| Files (JS) | camelCase | `index.js`, `app.js`, `script.js` | raiz, `public/js/` |
+| Files (CSS) | kebab-case | `tailwind.css`, `style.css` | `public/css/` |
+| Functions | camelCase, verbo + alvo; helpers de DOM de uma letra | `carregarUsuario`, `carregarReceitas`, `mostrarMensagem`, `irPara`, `sair`, `escapar`, `q`, `qa` | `public/js/app.js` |
+| Constants/env vars | `UPPER_SNAKE` para constantes de módulo; `PORT`/`API_URL` do ambiente | `TOKEN_KEY`, `FLASH_KEY`, `ESTILOS` | `public/js/app.js`, `index.js` |
+| Rotas | pt-BR, minúsculas, plural nas coleções | `/receitas`, `/receitas/temperatura/cadastrar/:id`, `/logout` | `index.js` |
+| Campos de formulário | inglês, snake_case nos que vão para a API; ids em pt-BR/camelCase | `name="min_temperature_ramp"` com `id="senha"` | `views/adicionarTemperatura.ejs`, `views/login.ejs` |
+| Atributos de ligação | `data-*` em kebab-case, valor em camelCase | `data-user="url_image"`, `data-excluir` | `views/partials/topBar.ejs`, `public/js/app.js` |
+| Tokens de tema | prefixo `mash-` | `--color-mash-brown`, `--color-mash-orange`, `--color-mash-cream` | `public/css/tailwind.css` |
 
-## 2. Funções e variáveis
+## 2) Formatting and Linting
 
-- Funções de controller seguem verbos em camelCase: `getReceita`, `postReceita`, `updateTemperatura`, `defineTemperatura`.
-- Variáveis de request e domínio também usam camelCase: `receitaId`, `temperaturaId`, `tempoIdeal`.
-- Colunas persistidas usam snake_case: `usuario_id`, `receita_id`, `temp_maxima_limite`.
-- Nomes de campos de formulários fazem parte do contrato entre EJS e controller. O caso verificado é `limiteMaximoTemperatura` em `views/editarTemperatura.ejs` e `updateTemperatura`.
+- Formatter: nenhum configurado (sem Prettier/EditorConfig).
+- Linter: nenhum configurado (sem ESLint/Stylelint).
+- Estilo observado: indentação de 2 espaços em `index.js`, EJS e CSS; 4 espaços em `public/js/app.js` e `script.js`; aspas simples no JS do cliente, aspas duplas em `index.js`.
+- Most relevant enforced rules: `node --check` para sintaxe; o build Tailwind falha se `@source`/`@import` estiver inválido.
+- Run commands: `npm test`, `node --check <arquivo>.js`, `npm run build:css`.
+- Revisão de PR: `.coderabbit.yaml` (pt-BR, perfil `chill`, sem exigir testes automatizados; foco em segurança, tratamento de erros e contrato da issue).
 
-## 3. Rotas e respostas
+## 3) Import and Module Conventions
 
-- Rotas são declaradas com `express.Router()` e montadas por `index.js`.
-- Controllers usam `res.render()` para páginas e `res.redirect()` após operações de formulário.
-- Não foi encontrado padrão uniforme de status HTTP ou resposta JSON.
-- Formulários usam POST para criação/edição; logout e exclusão usam GET conforme as rotas atuais.
+- Import grouping/order: `node:` primeiro, depois pacotes (`express`).
+- Alias vs relative import policy: apenas caminhos relativos/`node:`; sem aliases.
+- Public exports/barrel policy: `index.js` não exporta nada (executa e faz `listen`). `public/js/app.js` e `public/js/script.js` são scripts clássicos (IIFE no caso do `app.js`), não módulos — não usam `import`/`export`.
+- Ordem de carregamento: `footer.ejs` carrega `script.js?v=4` e depois `app.js`; `app.js` depende de `window.API_URL`, definido no mesmo arquivo antes dos scripts.
 
-## 4. Erros e logging
+## 4) Error and Logging Conventions
 
-- Controllers usam `try/catch` local.
-- Erros são registrados principalmente por `console.log` ou `console.error`.
-- Em vários caminhos, após capturar erro, não há resposta HTTP explícita; comportamento de erro pode ficar inconsistente.
-- Não foi encontrada biblioteca de logging estruturado.
+- Error strategy by layer: no cliente, `api()` captura falha de rede e devolve `503` com mensagem pt-BR; erros de negócio viram texto em `#mensagens` (nunca `alert`). No servidor, `index.js` não tem `try/catch` por rota e usa o 404 padrão do Express; falha de bind é tratada no evento `error` do servidor.
+- Logging style and required context fields: no servidor, apenas duas linhas — sucesso do `listen` (`console.log`) e falha de bind (`console.error`). Nenhum `console.*` em `public/js/`.
+- Sensitive-data redaction rules: nenhum segredo no código; o token fica em `localStorage` e não é logado. `.env` fora do versionamento.
 
-## 5. Frontend
+## 5) Testing Conventions
 
-- Comportamento do navegador fica em `public/js/script.js`.
-- O script usa seletores defensivos com `?.` para funcionar em páginas que não possuem determinado elemento.
-- CSS fonte: `public/css/tailwind.css`.
-- CSS gerado: `public/css/style.css`; não deve ser editado manualmente.
-- Ícones usam Phosphor servido por `/vendor/phosphor`.
+- Test file naming/location rule: NONE — não existem arquivos de teste.
+- Mocking strategy norm: NONE.
+- Coverage expectation: NONE. O CodeRabbit sinaliza cobertura de docstring (62,5% no diff), não cobertura de teste.
 
-## 6. Ferramentas de qualidade
+## 6) Evidence
 
-- Linter e formatter: [TODO] não há configuração identificada.
-- TypeScript: não utilizado; opções de strictness não se aplicam.
-- Testes automatizados: [TODO] não implementados.
-
-## 7. Evidências existentes
-
-- `package.json`
 - `index.js`
-- `controller/receitaController.js`
-- `routes/*.js`
-- `views/editarTemperatura.ejs`
+- `public/js/app.js`
 - `public/js/script.js`
+- `views/partials/footer.ejs`
 - `public/css/tailwind.css`
-- `AGENTS.md`
-
-## Evidências
-
-- `package.json`
-- `index.js`
-- `controller/receitaController.js`
-- `routes/receitaRoutes.js`
-- `views/editarTemperatura.ejs`
-- `public/js/script.js`
-- `public/css/tailwind.css`
+- `.coderabbit.yaml`

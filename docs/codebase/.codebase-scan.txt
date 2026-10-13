@@ -1,29 +1,12 @@
 
 === DIRECTORY TREE (max depth 3, source files only) ===
-.agents
-.agents\skills
-.agents\skills\context7-mcp
-.agents\skills\context7-mcp\SKILL.md
+.coderabbit.yaml
+.env
+.env.example
 .gitignore
-.maestri
-.maestri\roles
-.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045
-.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045\AGENTS.md
-.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045\CLAUDE.md
-.maestri\roles\040103ea-23df-4f5c-92ae-2737fe197045\role.json
-.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23
-.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23\AGENTS.md
-.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23\CLAUDE.md
-.maestri\roles\be2b67ef-62f8-4291-968f-5e90ba854e23\role.json
-.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83
-.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83\AGENTS.md
-.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83\CLAUDE.md
-.maestri\roles\ec7ed16c-6064-45a9-8ae7-116139c93d83\role.json
-.playwright-mcp
-.playwright-mcp\page-2026-08-20T17-54-55-397Z.yml
-.playwright-mcp\page-2026-08-20T17-59-59-590Z.yml
-.slim
-.slim\codemap.json
+.omp
+.omp\state
+.omp\state\continuity.md
 AGENTS.md
 codemap.md
 docs
@@ -45,20 +28,19 @@ docs\figma-export\tokens.md
 docs\frontend-components.md
 docs\frontend-figma.md
 docs\frontend-screens.md
+docs\plans
+docs\plans\visual-polish.md
+docs\specs
+docs\specs\visual-flows.md
 docs\superpowers
 docs\superpowers\plans
 docs\superpowers\plans\2026-08-20-tailwind-css-dashboard-plan.md
 docs\superpowers\plans\2026-08-21-phosphor-recipes.md
 docs\superpowers\specs
 docs\superpowers\specs\2026-08-20-tailwind-css-dashboard-design.md
-graphify-out
-graphify-out\.codebase-scan.txt
-opencode.json
+index.js
 package-lock.json
 package.json
-portal-preview.stderr.log
-portal-preview.stdout.log
-preview-server.js
 public
 public\codemap.md
 public\css
@@ -90,15 +72,9 @@ public\img
 public\img\foto-perfil.png
 public\img\mash.png
 public\js
+public\js\app.js
 public\js\codemap.md
 public\js\script.js
-public\uploads
-public\uploads\aaa.drawio.png
-public\uploads\ChatGPT Image 27 de mai. de 2026, 15_28_25.png
-public\uploads\lockheed-martin-f-35a-da_holanda_free_big.jpg
-public\uploads\mockup.png
-public\uploads\Tela Receita (2).png
-public\uploads\WhatsApp Image 2026-04-28 at 09.50.38.jpeg
 README.md
 views
 views\adicionarIodo.ejs
@@ -113,6 +89,7 @@ views\partials
 views\partials\codemap.md
 views\partials\footer.ejs
 views\partials\header.ejs
+views\partials\mensagens.ejs
 views\partials\sidebar.ejs
 views\partials\topBar.ejs
 views\receita.ejs
@@ -134,7 +111,7 @@ views\usuario.ejs
       "dependencies": {
         "@phosphor-icons/web": "^2.1.2",
         "ejs": "^5.0.2",
-        "express": "^5.2.1",
+        "express": "^5.3.0",
         "nodemon": "^3.1.14"
       },
       "devDependencies": {
@@ -202,25 +179,25 @@ views\usuario.ejs
       "dependencies": {
         "detect-libc": "^1.0.3",
 
-[TRUNCATED] Showing first 80 of 2262 lines.
+[TRUNCATED] Showing first 80 of 2258 lines.
 --- package.json ---
 {
   "name": "mash",
   "version": "1.0.0",
-  "description": "Preview EJS mockado do Sistema MASH",
+  "description": "Frontend EJS do Sistema MASH",
   "license": "ISC",
   "author": "",
-  "main": "preview-server.js",
+  "main": "index.js",
   "scripts": {
-    "test": "node --check preview-server.js",
-    "start": "npx nodemon preview-server.js",
+    "test": "node --check index.js",
+    "start": "npx nodemon index.js",
     "build:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css",
     "watch:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css --watch"
   },
   "dependencies": {
     "@phosphor-icons/web": "^2.1.2",
     "ejs": "^5.0.2",
-    "express": "^5.2.1",
+    "express": "^5.3.0",
     "nodemon": "^3.1.14"
   },
   "type": "module",
@@ -232,45 +209,79 @@ views\usuario.ejs
 
 
 === ENTRY POINTS ===
-No common entry points found. Check 'main' or 'scripts.start' in manifest files above.
+Found: index.js
 
 === LINTING AND FORMATTING CONFIG ===
 No linting or formatting config files found in project root.
 
 === ENVIRONMENT VARIABLE TEMPLATES ===
-No .env.example or .env.template found. Identify required environment variables by searching the code and config for environment variable reads.
+--- .env.example ---
+PORT=4000
+API_URL=http://localhost:8080
+
 
 === TODO / FIXME / HACK (production code only, test dirs excluded) ===
 None found.
 
 === GIT RECENT COMMITS (last 20) ===
-No commits found.
+6bf8d97 fix: tratar achados da revisão do CodeRabbit (#6)
+abda92b docs: atualizar codemaps para o consumo direto da API (#6)
+8711adb feat: login e consumo da API do backend pelo navegador (#6)
+cdd1beb feat: index.js na porta 4000 no lugar do preview-server (#6)
+0200fbd chore: ignorar .env e adicionar .env.example (#6)
+d6bbb83 Merge pull request #3 from conloq/chore/35-revisao-automatica
+e687fef chore: adicionar configuração do CodeRabbit (#35)
+eec19b9 Merge pull request #2 from conloq/docs/porta-4000-e-preview-temporario
+41dcd59 docs: porta 4000 e aviso de que o preview e temporario
+5fc33e0 Merge pull request #1 from conloq/fix/54-remover-chave-exposta
+cf2dc27 chore(security): remover chave de API versionada do opencode.json
+726005e chore: adiciona arquivos de configuracao e documentacao
+e930094 refactor: simplifica preview frontend com EJS estatico
 
 === HIGH-CHURN FILES (last 90 days, top 20) ===
-None found.
+   3 views/cadastro.ejs
+   2 index.js
+   2 public/js/app.js
+   2 codemap.md
+   2 public/codemap.md
+   2 public/js/codemap.md
+   2 views/codemap.md
+   2 views/partials/codemap.md
+   2 public/css/style.css
+   2 views/adicionarIodo.ejs
+   2 views/adicionarTemperatura.ejs
+   2 views/editarIodo.ejs
+   2 views/editarTemperatura.ejs
+   2 views/login.ejs
+   2 views/partials/footer.ejs
+   2 views/partials/sidebar.ejs
+   2 views/partials/topBar.ejs
+   2 views/receita.ejs
+   2 views/usuario.ejs
+   2 package-lock.json
 
 === MONOREPO SIGNALS ===
 No monorepo signals detected.
 
 === CODE METRICS ===
-Total files scanned: 90
-Total lines of code: 2586
+Total files scanned: 74
+Total lines of code: 2828
 
 Files by language:
-  Other: 88
-  JavaScript: 2
+  Other: 71
+  JavaScript: 3
 
 Top 10 largest files:
-public\uploads\ChatGPT Image 27 de mai. de 2026, 15_28_25.png: 1445.7KB
-public\uploads\mockup.png: 418.9KB
 public\img\mash.png: 190.7KB
-public\uploads\aaa.drawio.png: 139.8KB
-public\uploads\Tela Receita (2).png: 76.8KB
-package-lock.json: 74.2KB
+package-lock.json: 74.0KB
 docs\figma-export\screens\receita-authenticated.png: 67.2KB
-public\uploads\lockheed-martin-f-35a-da_holanda_free_big.jpg: 43.4KB
-public\uploads\WhatsApp Image 2026-04-28 at 09.50.38.jpeg: 39.2KB
-public\css\style.css: 30.0KB
+public\css\style.css: 30.5KB
+public\img\foto-perfil.png: 26.7KB
+docs\superpowers\plans\2026-08-20-tailwind-css-dashboard-plan.md: 20.4KB
+public\js\app.js: 12.7KB
+public\icons\mash_icon.png: 10.0KB
+docs\codebase\CONCERNS.md: 8.8KB
+views\usuario.ejs: 8.1KB
 
 === CI/CD PIPELINES ===
 No CI/CD pipelines detected.
