@@ -42,7 +42,11 @@ app.get("/receitas/iodo/editar/:id", tela("editarIodo"));
 
 // Inicia o servidor
 const port = Number(process.env.PORT) || 4000;
-app.listen(port, (erro) => {
-  if (erro) return console.log("Ocorreu um erro ao iniciar o servidor");
+const server = app.listen(port, () => {
   console.log(`Servidor iniciado com sucesso em http://localhost:${port}`);
+});
+
+// Falha de bind (porta ocupada, permissão) chega como evento 'error'
+server.on("error", (erro) => {
+  console.error("Ocorreu um erro ao iniciar o servidor:", erro.message);
 });

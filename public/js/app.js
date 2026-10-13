@@ -92,10 +92,11 @@
 
     const formData = (form) => Object.fromEntries(new FormData(form));
 
+    // Protege texto para HTML e para atributos (href, data-*)
     function escapar(texto) {
         const div = document.createElement('div');
         div.textContent = texto ?? '';
-        return div.innerHTML;
+        return div.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     // ------------------------------------------------------------ guarda de rota
@@ -122,13 +123,21 @@
             return mostrarMensagem('danger', mensagemDaApi(data, 'Não foi possível entrar'));
         }
 
+        if (!data.token) {
+            return mostrarMensagem('danger', mensagemDaApi(data, 'Não foi possível entrar'));
+        }
+
         guardar.set(TOKEN_KEY, data.token);
         location.href = '/receitas';
     });
 
     q('#formCadastro')?.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const { name, email, password } = formData(event.target);
+        const { name, email, password, confirmarSenha } = formData(event.target);
+
+        if (password !== confirmarSenha) {
+            return mostrarMensagem('danger', 'As senhas não conferem');
+        }
 
         const { status, data } = await api('POST', '/user', { name, email, password });
         if (status !== 201) {
@@ -297,6 +306,9 @@
         event.preventDefault();
         const campos = formData(event.target);
         const receitaId = location.pathname.split('/').pop();
+        if (!/^\d+$/.test(receitaId ?? '')) {
+            return mostrarMensagem('danger', 'Receita inválida');
+        }
 
         const { status, data } = await api('POST', `/receitas/temperatura/${receitaId}`, {
             min_temperature_ramp: Number(campos.min_temperature_ramp),
