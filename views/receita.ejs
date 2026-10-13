@@ -4,6 +4,7 @@
   <div class="app-shell-content min-w-0 flex-1">
     <%- include('partials/topBar.ejs')%>
     <main class="mx-auto max-w-7xl p-4 sm:p-6">
+      <%- include('partials/mensagens.ejs') %>
       <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold text-mash-brown">Receitas</h1>
         <button
@@ -25,66 +26,7 @@
             ><span>Temperatura mín.</span><span>Temperatura máx.</span
             ><span>Ações</span>
           </div>
-          <div
-            class="grid grid-cols-[1.5fr_1fr_1fr_1fr_150px] items-center gap-4 border-b border-stone-50 p-5 text-sm"
-          >
-            <span class="font-semibold text-mash-brown">Receita Pilsen</span>
-            <span>08:00:00</span><span>64°C</span><span>66°C</span
-            ><span class="flex items-center gap-2"
-              ><a
-                href="/receita/temperatura/criar/1"
-                class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-sky-600 p-2 font-bold text-white transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-                title="Adicionar temperatura"
-                aria-label="Adicionar temperatura"
-                ><i class="ph ph-plus" aria-hidden="true"></i></a
-              ><a
-                href="/receita/temperatura/editar/1"
-                class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-amber-500 p-2 font-bold text-white transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-                aria-label="Editar temperatura"
-                title="Editar temperatura"
-                ><i class="ph ph-pencil-simple" aria-hidden="true"></i
-              ></a>
-              <form onsubmit="return false;" onsubmit="return false;">
-                <input type="hidden" name="receitaId" value="1" /><button
-                  title="Excluir receita"
-                  aria-label="Excluir receita"
-                  class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-red-600 p-2 font-bold text-white transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
-                >
-                  <i class="ph ph-trash" aria-hidden="true"></i>
-                </button>
-              </form>
-            </span>
-          </div>
-          <div
-            class="grid grid-cols-[1.5fr_1fr_1fr_1fr_150px] items-center gap-4 border-b border-stone-50 p-5 text-sm"
-          >
-            <span class="font-semibold text-mash-brown">Receita IPA</span>
-            <span>-</span><span>-</span><span>-</span
-            ><span class="flex items-center gap-2"
-              ><a
-                href="/receita/temperatura/criar/2"
-                class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-sky-600 p-2 font-bold text-white transition hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
-                title="Adicionar temperatura"
-                aria-label="Adicionar temperatura"
-                ><i class="ph ph-plus" aria-hidden="true"></i></a
-              ><a
-                href="/receita/temperatura/editar/2"
-                class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-amber-500 p-2 font-bold text-white transition hover:bg-amber-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
-                aria-label="Editar temperatura"
-                title="Editar temperatura"
-                ><i class="ph ph-pencil-simple" aria-hidden="true"></i
-              ></a>
-              <form onsubmit="return false;" onsubmit="return false;">
-                <input type="hidden" name="receitaId" value="2" /><button
-                  title="Excluir receita"
-                  aria-label="Excluir receita"
-                  class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg bg-red-600 p-2 font-bold text-white transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
-                >
-                  <i class="ph ph-trash" aria-hidden="true"></i>
-                </button>
-              </form>
-            </span>
-          </div>
+          <div id="listaReceitas"></div>
         </div>
       </section>
     </main>
@@ -118,13 +60,13 @@
           <i class="ph ph-x" aria-hidden="true"></i>
         </button>
       </div>
-      <form onsubmit="return false;" class="mt-5">
+      <form id="formReceita" class="mt-5">
         <label for="processoNome" class="block text-sm font-semibold"
           >Nome da receita</label
         ><input
           type="text"
           id="processoNome"
-          name="nome"
+          name="name"
           placeholder="Digite o nome do processo"
           required
           class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
