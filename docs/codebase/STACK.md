@@ -1,76 +1,59 @@
 # Technology Stack
 
-## 1. Runtime Summary
+## 1) Runtime Summary
 
-| Área | Valor | Evidência |
-|---|---|---|
-| Linguagem principal | JavaScript | `package.json`, `index.js`, `controller/*.js` |
-| Runtime | Node.js; versão exata não declarada | `package.json` não contém `.nvmrc`/campo de versão registrado no scan |
-| Gerenciador de pacotes | npm | `package.json`, `package-lock.json` |
-| Módulos/build | ES modules (`"type": "module"`); Tailwind CSS v4 via CLI | `package.json`, `public/css/tailwind.css`, scripts do manifesto |
+| Area | Value | Evidence |
+|------|-------|----------|
+| Primary language | JavaScript (ES modules, `"type": "module"`) | `package.json` |
+| Runtime + version | Node.js; versão não declarada (sem `engines`, sem `.nvmrc`) | `package.json` |
+| Package manager | npm | `package-lock.json` |
+| Module/build system | ES modules; Tailwind CSS v4 via CLI (`@tailwindcss/cli`) | `package.json`, `public/css/tailwind.css` |
+| Tipo de aplicação | Servidor EJS que entrega páginas; o navegador consome a API | `index.js`, `public/js/app.js` |
 
-## 2. Frameworks e dependências de produção
+## 2) Production Frameworks and Dependencies
 
-| Dependência | Versão | Papel | Evidência |
-|---|---|---|---|
-| Express | 5.x conforme manifesto/scan | Servidor HTTP e roteamento | `package.json`, `index.js` |
-| EJS | Declarada no manifesto | Renderização server-side | `package.json`, `index.js`, `views/` |
-| Sequelize | 6.x conforme manifesto/scan | ORM, conexão e sincronização MySQL | `package.json`, `config/sequelize-config.js`, `models/` |
-| mysql2 | Declarada no manifesto | Driver MySQL | `package.json` |
-| express-session | Declarada no manifesto | Sessões HTTP | `package.json`, `config/session.js` |
-| connect-session-sequelize | Declarada no manifesto | Persistência de sessões no Sequelize | `package.json`, `config/session.js` |
-| bcrypt | Declarada no manifesto | Hash/comparação de senhas | `package.json`, `services/bcrypt.js` |
-| Multer | Declarada no manifesto | Upload de imagens | `package.json`, `config/multer.js` |
-| Phosphor Icons | `@phosphor-icons/web` declarada | Ícones servidos estaticamente | `package.json`, `index.js`, `views/partials/header.ejs` |
+| Dependency | Version | Role in system | Evidence |
+|------------|---------|----------------|----------|
+| `express` | `^5.3.0` | Servidor HTTP, estáticos, roteamento das 10 rotas GET | `package.json`, `index.js` |
+| `ejs` | `^5.0.2` | View engine dos templates em `views/` | `package.json`, `index.js` |
+| `@phosphor-icons/web` | `^2.1.2` | Fonte de ícones servida em `/vendor/phosphor` | `package.json`, `index.js`, `views/partials/header.ejs` |
+| `nodemon` | `^3.1.14` | Execução de desenvolvimento (`npm start`); declarado em `dependencies` | `package.json` |
 
-## 3. Ferramentas de desenvolvimento
+O cliente HTTP é o `fetch` nativo do navegador — não há axios, ky ou similar. Não há dependência de banco, ORM, sessão, autenticação, upload, cookie ou framework de UI neste repositório.
 
-| Ferramenta | Finalidade | Evidência |
-|---|---|---|
-| Nodemon | Execução de desenvolvimento | Script `start` em `package.json` |
-| Tailwind CSS CLI | Compilação e watch do CSS | Scripts `build:css`/`watch:css` em `package.json` |
-| `node --check` | Verificação sintática pontual | `AGENTS.md`; executado nos arquivos JS alterados |
-| EJS instalado | Compilação/verificação de templates | `package.json`, `AGENTS.md` |
-| Linter/formatter | Não configurado | Scan sem configuração de lint/format |
+## 3) Development Toolchain
 
-## 4. Comandos principais
+| Tool | Purpose | Evidence |
+|------|---------|----------|
+| `tailwindcss` + `@tailwindcss/cli` (`^4.3.3`) | BUILD — compilação/watch do CSS | `package.json`, `public/css/tailwind.css` |
+| `node --check` | CHECK — verificação sintática; é todo o `npm test` | `package.json` |
+| CodeRabbit (`.coderabbit.yaml`) | REVIEW — revisão automática de PRs para `main`, perfil `chill`, pt-BR | `.coderabbit.yaml` |
+| Linter / formatter / typechecker | Nenhum configurado | scan sem configuração de lint/format |
+| CI/CD, containers, coverage | Nenhum detectado | scan: "No CI/CD pipelines detected" |
+
+## 4) Key Commands
 
 ```bash
 npm install
-npm start
-npm run build:css
+npm run build:css          # npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css
 npm run watch:css
-npm test
+npm start                  # npx nodemon index.js  (porta 4000)
+npm test                   # node --check index.js  (sai com 0; não é suíte de testes)
+node --check public/js/app.js
 ```
 
-`npm test` é um placeholder que termina com erro intencionalmente. Não há suíte de testes implementada.
+## 5) Environment and Config
 
-## 5. Ambiente e configuração
+- Config sources: `package.json`, `index.js`, `public/css/tailwind.css`, `.env`, `.coderabbit.yaml`.
+- Required env vars: `API_URL` (opcional; padrão `http://localhost:8080`) e `PORT` (opcional; padrão `4000`). `.env` é opcional — `index.js` chama `process.loadEnvFile()` dentro de `try/catch`.
+- `.env.example` versionado com `PORT` e `API_URL`; `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
+- Deployment/runtime constraints: **a API precisa estar rodando** em `API_URL`, senão todas as telas carregam mas o cliente devolve 503. O Back-End precisa liberar CORS para a origem do frontend (`FRONTEND_URL`, padrão `http://localhost:4000`). Não há deploy, container ou pipeline configurado.
 
-- Configuração principal: `config/sequelize-config.js`, `config/data-base.js`, `config/session.js`, `config/multer.js`.
-- Variáveis de ambiente documentadas: [TODO] nenhuma fonte `.env.example`/`.env.template` foi encontrada pelo scan.
-- Banco esperado: MySQL local, banco `cervejaria`.
-- Servidor HTTP: porta `8080` em `index.js`.
-- Deploy/container/CI: [TODO] o scan não encontrou configuração de CI/CD, container ou orquestração.
-- Credenciais e segredo de sessão estão hardcoded nos arquivos de configuração atuais.
-
-## 6. Evidências existentes
+## 6) Evidence
 
 - `package.json`
 - `package-lock.json`
 - `index.js`
-- `config/sequelize-config.js`
-- `config/session.js`
-- `config/multer.js`
+- `.env.example`, `.gitignore`
 - `public/css/tailwind.css`
-- `AGENTS.md`
-- `docs/codebase/.codebase-scan.txt` (scan preservado)
-
-## Evidências
-
-- `package.json`
-- `index.js`
-- `config/sequelize-config.js`
-- `config/session.js`
-- `config/multer.js`
-- `public/css/tailwind.css`
+- `docs/codebase/.codebase-scan.txt`

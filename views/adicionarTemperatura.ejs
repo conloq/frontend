@@ -4,18 +4,18 @@
   <div class="app-shell-content min-w-0 flex-1">
     <%- include('partials/topBar.ejs')%>
     <main class="space-y-6 p-4 sm:p-6">
+      <%- include('partials/mensagens.ejs') %>
       <div class="grid gap-3 sm:grid-cols-2">
         <a
           class="rounded-2xl border-2 border-mash-orange bg-white p-5 text-center text-lg font-bold text-mash-orange"
           >Temperatura</a
         ><a
-          href="/receita/iodo/editar/1"
+          href="/receitas/iodo/editar/<%= receitaId %>"
           class="rounded-2xl bg-white p-5 text-center text-lg font-bold shadow-sm"
           >Iodo</a
         >
       </div>
-      <form id="formTemperatura" onsubmit="return false;">
-        <input type="hidden" name="receitaId" value="1" />
+      <form id="formTemperatura">
         <div class="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
           <div class="space-y-6">
             <section>
@@ -28,7 +28,7 @@
                   >Temperatura mn.<input
                     required
                     type="number"
-                    name="temperaturaMinima"
+                    name="min_temperature_ramp"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg font-semibold outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
                 /></label>
                 <label
@@ -36,7 +36,7 @@
                   >Temperatura mx.<input
                     required
                     type="number"
-                    name="temperaturaMaxima"
+                    name="max_temperature_ramp"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg font-semibold outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
                 /></label>
                 <label
@@ -44,7 +44,7 @@
                   >Temporizador<input
                     required
                     type="time"
-                    name="temporizador"
+                    name="timer"
                     step="1"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg font-semibold outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
                 /></label>
@@ -53,7 +53,7 @@
                   >Inicialização<input
                     required
                     type="time"
-                    name="inicializacao"
+                    name="initialization"
                     step="1"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg font-semibold outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
                 /></label>
@@ -77,14 +77,16 @@
                 <label
                   class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
                   >Temperatura mín.<input
+                    required
                     type="number"
-                    name="limiteMinimoTemperatura"
+                    name="min_temperature_limit"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg" /></label
                 ><label
                   class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
                   >Temperatura máx.<input
+                    required
                     type="number"
-                    name="limiteMaximoTemperatura"
+                    name="max_temperature_limit"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg"
                 /></label>
               </div>
@@ -94,8 +96,9 @@
                 Tempo ideal
               </h3>
               <input
+                required
                 type="time"
-                name="tempoIdeal"
+                name="ideal_time"
                 step="1"
                 class="h-14 rounded-xl border border-stone-200 px-4 text-center text-2xl font-bold"
               />

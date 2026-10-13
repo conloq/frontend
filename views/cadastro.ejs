@@ -3,7 +3,7 @@
   <section
     class="order-2 flex items-center justify-center bg-mash-cream px-6 py-10 sm:px-10 lg:order-1"
   >
-    <form class="w-full max-w-md" action="/cadastrar" method="post">
+    <form id="formCadastro" class="w-full max-w-md">
       <div class="mb-8 text-center">
         <p
           class="text-sm font-semibold uppercase tracking-widest text-mash-orange"
@@ -15,6 +15,7 @@
         </h1>
         <p class="mt-2 text-stone-600">Inicie a sua jornada conosco</p>
       </div>
+      <%- include('partials/mensagens.ejs') %>
       <div class="space-y-4">
         <div>
           <label class="mb-2 block text-sm font-semibold" for="nome"
@@ -22,7 +23,7 @@
           ><input
             id="nome"
             type="text"
-            name="nome"
+            name="name"
             class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
             required
           />
@@ -44,7 +45,7 @@
           ><input
             id="senha"
             type="password"
-            name="senha"
+            name="password"
             class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
             required
           />
@@ -55,7 +56,9 @@
           ><input
             id="confirmarSenha"
             type="password"
+            name="confirmarSenha"
             class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
+            required
           />
         </div>
       </div>

@@ -1,50 +1,72 @@
-# Repository Atlas: Sistema-MASH
+# Repository Atlas: frontend (Sistema MASH)
 
 ## Project Responsibility
 
-Aplicação web Node.js/Express para cadastro e acompanhamento de receitas de produção de cerveja, incluindo parâmetros de temperatura e testes de iodo, com autenticação por sessão e persistência MySQL via Sequelize.
+Frontend do Sistema MASH (Projeto Integrador III, DSM3, FATEC Registro, org `conloq`): templates EJS, Tailwind CSS v4 e JavaScript vanilla do navegador, entregues por um `index.js` na porta 4000.
+
+Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-End`, API REST na porta 8080) tem regra de negócio, banco e JWT. O `index.js` **só entrega as páginas** (`res.render`) e não repete nenhuma rota da API. Quem consome a API é o navegador, em `public/js/app.js`, com `fetch` direto nas rotas do próprio Back-End (`/login`, `/user`, `/receitas`...). O Back-End libera CORS para `http://localhost:4000`. O token JWT fica no `localStorage` (`mash-token`) e vai como Bearer.
 
 ## System Entry Points
 
-- `index.js`: cria a aplicação Express, configura EJS e arquivos estáticos, inicializa banco/modelos, instala sessão e monta os routers na raiz.
-- `package.json`: define o runtime ES module, dependências e scripts `start`, `build:css` e `watch:css`.
-- `routes/route.js`: entrada HTTP para login e cadastro.
-- `routes/usuarioRoutes.js`: entrada HTTP para perfil e sessão do usuário.
-- `routes/receitaRoutes.js`: entrada HTTP para receitas, temperaturas e iodo.
+- `index.js`: aplicação Express — view engine EJS, `public/` e `/vendor/phosphor` estáticos e uma rota `GET` por tela. Escuta em `PORT` (padrão 4000). Lê `API_URL` (padrão `http://localhost:8080`), expõe em `app.locals.apiUrl` e carrega `.env` com `process.loadEnvFile()`.
+- `public/js/app.js`: consumo da API — guarda de rota, login, cadastro, perfil, foto, receitas, temperatura e mensagens. Lê `window.API_URL`, definido em `views/partials/footer.ejs`.
+- `package.json`: runtime ESM; scripts `start` (`nodemon index.js`), `build:css`, `watch:css` e `test` (`node --check index.js`).
+- `.env.example`: `PORT=4000` e `API_URL=http://localhost:8080`.
+- `public/css/tailwind.css`: entrada do Tailwind v4 e fonte das classes usadas nos templates e no JS.
+- `views/partials/header.ejs`: `<head>` compartilhado que carrega `/vendor/phosphor/src/regular/style.css` e `/css/style.css`.
+
+### Telas (`index.js`)
+
+| Rota GET | Template | Chamadas da API feitas por `app.js` |
+|---|---|---|
+| `/` | — | redireciona para `/receitas` |
+| `/login` | `login.ejs` | `POST /login` |
+| `/cadastro` | `cadastro.ejs` | `POST /user` |
+| `/logout` | — | redireciona para `/login`; o `app.js` apaga o token |
+| `/usuario` | `usuario.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` |
+| `/receitas` | `receita.ejs` | `GET /user`, `GET /receitas`, `GET /receitas/temperatura/:id` (uma por receita), `POST /receitas`, `DELETE /receitas/:id` |
+| `/receitas/temperatura/cadastrar/:id` | `adicionarTemperatura.ejs` | `GET /user`, `POST /receitas/temperatura/:id` |
+| `/receitas/temperatura/editar/:id` | `editarTemperatura.ejs` | `GET /user` (só layout, API sem `PUT`) |
+| `/receitas/iodo/cadastrar/:id`, `/receitas/iodo/editar/:id` | `adicionarIodo.ejs`, `editarIodo.ejs` | `GET /user` (só layout, API sem iodo) |
+
+Sem tela ou integração ainda: `/recuperar-senha`, editar receita (`PUT /receitas/:id`), editar temperatura, iodo e histórico de logins (a API não tem os três últimos).
 
 ## Repository Directory Map
 
 | Directory | Responsibility Summary | Detailed Map |
 |---|---|---|
-| `config/` | Conexão MySQL/Sequelize, sessão, upload e associações entre models. | [config/codemap.md](config/codemap.md) |
-| `controller/` | Handlers HTTP de autenticação, cadastro, usuário, receitas, temperaturas e iodo. | [controller/codemap.md](controller/codemap.md) |
-| `middleware/` | Guards de sessão e exposição de dados da sessão aos templates. | [middleware/codemap.md](middleware/codemap.md) |
-| `models/` | Definições Sequelize de usuário, receita, temperatura, iodo e histórico de login. | [models/codemap.md](models/codemap.md) |
-| `routes/` | Routers Express e associação entre endpoints, middleware e controllers. | [routes/codemap.md](routes/codemap.md) |
-| `services/` | Hash e comparação de senhas com bcrypt. | [services/codemap.md](services/codemap.md) |
-| `views/` | Templates EJS das telas públicas e autenticadas. | [views/codemap.md](views/codemap.md) |
-| `views/partials/` | Shell compartilhado: header, footer, sidebar e top bar. | [views/partials/codemap.md](views/partials/codemap.md) |
-| `public/` | Recursos estáticos do navegador, excluindo uploads deste mapa. | [public/codemap.md](public/codemap.md) |
-| `public/css/` | Fonte Tailwind e CSS compilado servido pela aplicação. | [public/css/codemap.md](public/css/codemap.md) |
-| `public/js/` | Interações vanilla JS da sidebar, modais, formulários e preview de imagem. | [public/js/codemap.md](public/js/codemap.md) |
+| `views/` | Templates EJS das telas. O HTML sai sem dados; o `app.js` preenche. | [views/codemap.md](views/codemap.md) |
+| `views/partials/` | Shell compartilhado: header, footer, sidebar, top bar e área de mensagens. | [views/partials/codemap.md](views/partials/codemap.md) |
+| `public/` | Recursos estáticos do navegador: CSS, JavaScript, imagens e ícones. | [public/codemap.md](public/codemap.md) |
+| `public/css/` | Fonte Tailwind v4 e CSS compilado servido pela aplicação. | [public/css/codemap.md](public/css/codemap.md) |
+| `public/js/` | `script.js` (sidebar, modais, formulários) e `app.js` (consumo da API). | [public/js/codemap.md](public/js/codemap.md) |
+| `docs/` | Documentação de frontend, planos, specs, export do Figma e docs de codebase. | `docs/frontend-screens.md`, `docs/frontend-components.md`, `docs/frontend-figma.md` |
+
+Arquivos na raiz: `index.js`, `package.json`, `.env.example`, `README.md`, `AGENTS.md`, `.coderabbit.yaml`, este `codemap.md`.
 
 ## Runtime Flow
 
-1. `index.js` configura Express, EJS, `express.static('public')`, sessão e parsers de formulário/JSON.
-2. Os três routers são montados em `/`.
-3. Middleware de sessão decide acesso quando aplicado.
-4. Controllers leem requisição/sessão, acessam models Sequelize e renderizam views ou redirecionam.
-5. Views EJS incluem partials, carregam o CSS compilado e o JavaScript do navegador.
-6. Models compartilham a conexão de `config/sequelize-config.js`; associações são registradas em `config/associations.js`.
+1. `npm start` executa `nodemon index.js` na porta 4000. A API (`conloq/Back-End`) precisa estar de pé em `API_URL`.
+2. Toda página carrega `window.API_URL` (footer), `/js/script.js` e `/js/app.js`.
+3. Guarda de rota: sem `mash-token`, qualquer tela que não seja `/login` ou `/cadastro` volta para `/login`; com token, `/login` e `/cadastro` vão para `/receitas`.
+4. Login: `#formLogin` faz `POST {API_URL}/login`; com 200 grava `data.token` no `localStorage` e vai para `/receitas`.
+5. Chamadas protegidas: `api()` envia `Authorization: Bearer <token>`. Um 401 apaga o token e volta ao `/login` com aviso.
+6. Mensagens: a mensagem da API (`error` ou `message`, em pt-BR) aparece como veio em `#mensagens`, em Tailwind: `danger`, `warning` e `success`. Após um redirecionamento, a mensagem passa por `localStorage` (`mash-flash`). Com a API fora do ar, `api()` devolve 503 com "Não foi possível falar com a API".
+7. Logout e exclusão de conta apagam o token. A API não revoga tokens; eles expiram em um dia.
+8. Todo template inclui `partials/header.ejs` e `partials/footer.ejs`; as telas autenticadas incluem também `partials/sidebar.ejs` e `partials/topBar.ejs`, que o `app.js` preenche com `data-user`.
+9. `npm run build:css` compila `public/css/tailwind.css` em `public/css/style.css`.
 
 ## Cross-Module Integration
 
-- **Autenticação:** `routes/route.js` → `loginController.js`/`cadastroController.js` → `services/bcrypt.js` → `Usuario` → sessão Sequelize.
-- **Perfil:** `usuarioRoutes.js` → `UsuarioController.js` → `Usuario`/`LogConexao` → `views/usuario.ejs`.
-- **Receitas:** `receitaRoutes.js` → `receitaController.js` → `Receita`, `Temperatura` e `Iodo` → views específicas.
-- **Frontend:** `views/partials/header.ejs` carrega `public/css/style.css`; templates e `public/js/script.js` são fontes para a compilação Tailwind.
-- **Uploads:** formulário de `views/usuario.ejs` → Multer em `config/multer.js` → `public/uploads`.
+- **Back-End:** só `public/js/app.js` fala com a API, nas rotas do próprio Back-End. O `app.js` do Back-End libera CORS para `FRONTEND_URL` (padrão `http://localhost:4000`). Contrato de autenticação na issue `conloq/mash#38`; rotas em `Back-End/routes/` (`userRoutes.js`, `recipeRoutes.js`, `temperatureRoutes.js`).
+- **Nomes de campo:** os `name` dos formulários são os da API (`name`, `email`, `password`, `fone`, `min_temperature_ramp`, `timer`, `ideal_time` etc.); o `app.js` monta o JSON a partir do `FormData`.
+- **Shell:** `header.ejs` + `footer.ejs` envolvem todas as páginas; `topBar.ejs` e `usuario.ejs` são preenchidos pelo `app.js` via `data-user`; `partials/mensagens.ejs` é a área `#mensagens`.
+- **JavaScript ↔ templates:** `public/js/script.js` depende de IDs, classes e `data-*` das views (`#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `#senha`, `#btnAlterar`, `#btnSalvar`, `#inputFoto`, `#previewFoto`, `#formPerfil`, `.js-modal`, `[data-modal-open]`, `[data-modal-close]`). `public/js/app.js` depende de `#formLogin`, `#formCadastro`, `#formPerfil`, `#formFoto`, `#btnExcluir`, `#formReceita`, `#listaReceitas`, `#formTemperatura`, `#mensagens` e `[data-user]`.
+- **Tailwind:** `public/css/tailwind.css` coleta classes de `views/` e `public/js/` via `@source` e define o tema (`--color-mash-brown`, `--color-mash-orange`, `--color-mash-cream`).
+- **Coordenação:** `haimonvieira/conloq-pi-coordenacao` (local `D:/Fatec/PI/team-lead`) guarda o estado do projeto.
 
 ## Scope Exclusions
 
-Este atlas documenta somente código e configuração verificáveis. Foram excluídos `node_modules/`, `docs/`, `public/uploads/`, CSS compilado e demais artefatos gerados como fontes de arquitetura.
+Este atlas documenta o código verificável deste repositório. Ficam fora: `node_modules/`, `public/css/style.css` (saída gerada), `.git/` e `docs/**` como fonte de arquitetura.
+
+O Back-End **não faz parte deste repositório**: aqui não existem `config/`, `routes/` de API, `controllers/`, `middlewares/`, `models/` nem `services/`, nem MySQL, Sequelize, bcrypt, JWT ou sessão de servidor. Regra de negócio e banco vivem em `conloq/Back-End`.

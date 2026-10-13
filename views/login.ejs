@@ -27,7 +27,7 @@
   <section
     class="flex items-center justify-center bg-mash-cream px-6 py-10 sm:px-10"
   >
-    <form class="w-full max-w-md" action="/login" method="post">
+    <form id="formLogin" class="w-full max-w-md">
       <div class="mb-10">
         <p
           class="text-sm font-semibold uppercase tracking-widest text-mash-orange"
@@ -36,6 +36,7 @@
         </p>
         <h1 class="mt-2 text-4xl font-bold text-mash-brown">Login</h1>
       </div>
+      <%- include('partials/mensagens.ejs') %>
       <div class="space-y-5">
         <div>
           <label class="mb-2 block text-sm font-semibold" for="email"
@@ -56,7 +57,7 @@
             <input
               id="senha"
               type="password"
-              name="senha"
+              name="password"
               class="w-full rounded-xl border border-stone-300 bg-white px-4 py-3 pr-12 outline-none transition focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
               required
             /><button
