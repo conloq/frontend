@@ -3,8 +3,8 @@
 ## 1) Architectural Style
 
 - Primary style: servidor de páginas + cliente SPA-lite (navegação por documento, dados por `fetch`).
-- Why this classification: `index.js` só renderiza telas e serve estáticos — nenhuma rota sua chama a API; todo o estado de dados (token, listas, mensagens) vive em `public/js/app.js`, que fala direto com o Back-End.
-- Primary constraints: (a) o Back-End precisa liberar CORS para a origem do frontend; (b) o token fica em `localStorage`, portanto legível por JavaScript; (c) o `index.js` não tem sessão, cookie ou estado — cada tela é um documento novo.
+- Why this classification: `index.js` só renderiza telas e serve estáticos: nenhuma rota sua chama a API; todo o estado de dados (token, listas, mensagens) vive em `public/js/app.js`, que fala direto com o Back-End.
+- Primary constraints: (a) o Back-End precisa liberar CORS para a origem do frontend; (b) o token fica em `localStorage`, portanto legível por JavaScript; (c) o `index.js` não tem sessão, cookie ou estado: cada tela é um documento novo.
 
 ## 2) System Flow
 
@@ -21,7 +21,7 @@ Navegador → GET /receitas
 
 1. `npm start` executa `index.js`, que resolve `views/` e `public/` a partir de `import.meta.url`.
 2. `express.static` publica `public/` e `/vendor/phosphor`.
-3. Cada rota GET chama `res.render(view, { receitaId: req.params.id })` — o único dado passado é o `:id` da URL.
+3. Cada rota GET chama `res.render(view, { receitaId: req.params.id })`: o único dado passado é o `:id` da URL.
 4. `footer.ejs` injeta `window.API_URL` e carrega `script.js` (shell) e `app.js` (dados), nessa ordem.
 5. `app.js` roda a guarda de rota e então dispara as chamadas conforme a tela.
 6. Erros e mensagens da API aparecem em `#mensagens`; `401` com token presente descarta o token e volta para `/login`.

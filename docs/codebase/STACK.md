@@ -19,15 +19,15 @@
 | `@phosphor-icons/web` | `^2.1.2` | Fonte de ícones servida em `/vendor/phosphor` | `package.json`, `index.js`, `views/partials/header.ejs` |
 | `nodemon` | `^3.1.14` | Execução de desenvolvimento (`npm start`); declarado em `dependencies` | `package.json` |
 
-O cliente HTTP é o `fetch` nativo do navegador — não há axios, ky ou similar. Não há dependência de banco, ORM, sessão, autenticação, upload, cookie ou framework de UI neste repositório.
+O cliente HTTP é o `fetch` nativo do navegador: não há axios, ky ou similar. Não há dependência de banco, ORM, sessão, autenticação, upload, cookie ou framework de UI neste repositório.
 
 ## 3) Development Toolchain
 
 | Tool | Purpose | Evidence |
 |------|---------|----------|
-| `tailwindcss` + `@tailwindcss/cli` (`^4.3.3`) | BUILD — compilação/watch do CSS | `package.json`, `public/css/tailwind.css` |
-| `node --check` | CHECK — verificação sintática; é todo o `npm test` | `package.json` |
-| CodeRabbit (`.coderabbit.yaml`) | REVIEW — revisão automática de PRs para `main`, perfil `chill`, pt-BR | `.coderabbit.yaml` |
+| `tailwindcss` + `@tailwindcss/cli` (`^4.3.3`) | BUILD: compilação/watch do CSS | `package.json`, `public/css/tailwind.css` |
+| `node --check` | CHECK: verificação sintática; é todo o `npm test` | `package.json` |
+| CodeRabbit (`.coderabbit.yaml`) | REVIEW: revisão automática de PRs para `main`, perfil `chill`, pt-BR | `.coderabbit.yaml` |
 | Linter / formatter / typechecker | Nenhum configurado | scan sem configuração de lint/format |
 | CI/CD, containers, coverage | Nenhum detectado | scan: "No CI/CD pipelines detected" |
 
@@ -45,7 +45,7 @@ node --check public/js/app.js
 ## 5) Environment and Config
 
 - Config sources: `package.json`, `index.js`, `public/css/tailwind.css`, `.env`, `.coderabbit.yaml`.
-- Required env vars: `API_URL` (opcional; padrão `http://localhost:8080`) e `PORT` (opcional; padrão `4000`). `.env` é opcional — `index.js` chama `process.loadEnvFile()` dentro de `try/catch`.
+- Required env vars: `API_URL` (opcional; padrão `http://localhost:8080`) e `PORT` (opcional; padrão `4000`). `.env` é opcional: `index.js` chama `process.loadEnvFile()` dentro de `try/catch`.
 - `.env.example` versionado com `PORT` e `API_URL`; `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
 - Deployment/runtime constraints: **a API precisa estar rodando** em `API_URL`, senão todas as telas carregam mas o cliente devolve 503. O Back-End precisa liberar CORS para a origem do frontend (`FRONTEND_URL`, padrão `http://localhost:4000`). Não há deploy, container ou pipeline configurado.
 

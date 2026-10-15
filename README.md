@@ -12,7 +12,7 @@ npm run build:css
 npm start
 ```
 
-O frontend sobe na **4000** e a API na **8080** — portas diferentes, nunca as mesmas. As duas precisam estar de pé:
+O frontend sobe na **4000** e a API na **8080**, portas diferentes, nunca as mesmas. As duas precisam estar de pé:
 
 ```bash
 # na API
@@ -63,7 +63,7 @@ Iodo e edição de temperatura ainda não têm rota na API: essas telas são só
 
 ## Documentação
 
-- `codemap.md` — atlas do repositório e mapas por diretório.
-- `AGENTS.md` — regras de trabalho no repositório.
-- `docs/codebase/` — stack, estrutura, arquitetura, convenções, integrações, testes e riscos.
-- `docs/frontend-screens.md` e `docs/frontend-components.md` — inventário de telas e componentes.
+- `codemap.md`: atlas do repositório e mapas por diretório.
+- `AGENTS.md`: regras de trabalho no repositório.
+- `docs/codebase/`: stack, estrutura, arquitetura, convenções, integrações, testes e riscos.
+- `docs/frontend-screens.md` e `docs/frontend-components.md`: inventário de telas e componentes.
