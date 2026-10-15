@@ -30,7 +30,7 @@
 
 | Risk | OWASP category (if applicable) | Evidence | Current mitigation | Gap |
 |------|--------------------------------|----------|--------------------|-----|
-| Token legível por JavaScript | A07 Identification and Authentication Failures | `public/js/app.js` (`localStorage`) | Nenhuma | Cookie `HttpOnly` foi o requisito da #6 e não foi adotado |
+| Token legível por JavaScript | A07 Identification and Authentication Failures | `public/js/app.js` (`localStorage`) | Nenhuma | Risco aceito em 12/10/2026, quando o time trocou o cookie `HttpOnly` pelo `localStorage` (#6) |
 | Injeção de atributo na lista de receitas | A03 Injection | `public/js/app.js` (`escapar`, `data-excluir`, `href`) | `escapar()` neutraliza `<`, `>`, `&`, `"` e `'` (corrigido no PR #4) | Nenhum gap conhecido após a correção; evitar regressão |
 | Credenciais na URL se o JS falhar | A04 Insecure Design | `views/login.ejs:30`, `views/cadastro.ejs:6` | Nenhuma | Formulários sem `method`/`action` |
 | Sem CSP nem cabeçalhos de segurança | A05 Security Misconfiguration | `index.js`, `views/partials/header.ejs` | Nenhuma | Revisar antes de qualquer deploy |
@@ -56,13 +56,13 @@
 | `public/css/tailwind.css` | Contém o shell inteiro em `@layer components`, com media query de 1024px | Fonte do CSS servido | Rebuild obrigatório; conferir sidebar expandida/recolhida |
 | `docs/` | Prosa histórica que descrevia o monólito antigo | `docs/superpowers/**` e `docs/frontend-*.md` | Tratar como histórico, não como estado atual |
 
-## 6) `[ASK USER]` Questions
+## 6) Perguntas ao time (todas respondidas em 15/10/2026)
 
-1. [ASK USER] O token continua em `localStorage` (com o risco de XSS) ou o time volta ao cookie `HttpOnly` descrito na #6?
-2. [ASK USER] Os formulários de login e cadastro devem ganhar `method="post"` para não vazar credenciais na URL se o JS falhar?
-3. [ASK USER] O PR de CORS do Back-End (`feat/cors-frontend`) entra em `main` antes do merge deste PR? Quem define `FRONTEND_URL` em deploy?
-4. [ASK USER] Os PNGs órfãos de `public/icons/` e `views/index.ejs` podem ser removidos?
-5. [ASK USER] Deve existir algum pipeline (GitHub Actions) rodando `npm test` + `build:css` em PR, ou a revisão continua apenas com o CodeRabbit?
+1. Resolvido em 12/10/2026 (decisão do Haimon, registrada na conloq/mash#66 e na #6): o token fica em `localStorage`; o risco de XSS foi aceito.
+2. Decidido em 15/10/2026: sim, entra na conloq/mash#73. Pergunta original: os formulários de login e cadastro devem ganhar `method="post"` para não vazar credenciais na URL se o JS falhar?
+3. Resolvido: o CORS entrou na `main` do Back-End em 13/10/2026 (conloq/Back-End#8); `FRONTEND_URL` é definida no deploy da API (conloq/mash#68).
+4. Decidido em 15/10/2026: sim, a remoção dos PNGs órfãos de `public/icons/` e do `views/index.ejs` entra na conloq/mash#73.
+5. Decidido em 15/10/2026: ainda não; fica na conloq/mash#94, como Could, para depois do depósito. Pergunta original: deve existir algum pipeline (GitHub Actions) rodando `npm test` + `build:css` em PR, ou a revisão continua apenas com o CodeRabbit?
 
 ## 7) Evidence
 

@@ -59,6 +59,8 @@ Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://l
 
 Iodo e edição de temperatura ainda não têm rota na API: essas telas são só layout (`conloq/mash#73`).
 
+> **Mudança prevista:** com a conloq/mash#71 e a conloq/mash#32, a API passa a usar `/recipes` e `/recipes/:id/temperatures`, e os campos passam a camelCase (`minTemperatureRamp`, `idealTime`, `phone`, `urlImage`; decisão de 13/10/2026). A troca no `public/js/app.js` e nos formulários é a conloq/mash#86, que atualiza esta tabela no mesmo Pull Request. Alterar e excluir receita via API são a conloq/mash#93.
+
 ## Documentação
 
 - `codemap.md` — atlas do repositório e mapas por diretório.
