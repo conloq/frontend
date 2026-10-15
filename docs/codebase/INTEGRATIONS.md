@@ -52,6 +52,8 @@
 
 Sem rota na API (telas só de layout): iodo (`/receitas/iodo/...`) e edição de temperatura.
 
+> **Mudança prevista:** com a conloq/mash#71 e a conloq/mash#32, a API passa a usar `/recipes` e `/recipes/:id/temperatures`, e os campos passam a camelCase (`minTemperatureRamp`, `idealTime`, `phone`, `urlImage`; decisão de 13/10/2026). A troca no `public/js/app.js` e nos formulários é a conloq/mash#86, que atualiza esta tabela no mesmo Pull Request. Alterar e excluir receita via API são a conloq/mash#93.
+
 ## 7) Evidence
 
 - `index.js`

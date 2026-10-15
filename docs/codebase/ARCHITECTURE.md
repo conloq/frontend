@@ -51,9 +51,9 @@ Navegador → GET /receitas
 
 ## 5) Known Architectural Risks
 
-- Token em `localStorage`: qualquer XSS no domínio lê o JWT e assume a sessão. O cookie `HttpOnly` descrito na `conloq/mash#6` não foi adotado — impacto alto, decisão pendente do time.
+- Token em `localStorage`: qualquer XSS no domínio lê o JWT e assume a sessão. Risco aceito pelo time em 12/10/2026, quando o cookie `HttpOnly` foi trocado pelo `localStorage` (`conloq/mash#6`).
 - Formulários sem `action`/`method`: `#formLogin` e `#formCadastro` dependem do JS. Sem `app.js`, o submit nativo vira `GET` para a própria URL e coloca e-mail e senha na query string. Impacto alto, mitigação inexistente.
-- Dependência de CORS não versionada aqui: o PR do Back-End (`feat/cors-frontend`) precisa entrar em `main`, senão o frontend quebra em produção. Impacto alto.
+- Dependência de CORS não versionada aqui: o Back-End libera `FRONTEND_URL` desde 13/10/2026 (conloq/Back-End#8); no deploy, a variável precisa ter a URL publicada deste frontend (conloq/mash#68), senão o navegador bloqueia as chamadas.
 - Sem sessão de servidor: a guarda de rota é apenas cosmética; a autorização real é da API. Impacto baixo (aceitável), desde que não se confie nela.
 - Contrato HTML↔JS por seletor, sem teste: renomear um `id` quebra silenciosamente. Impacto médio.
 

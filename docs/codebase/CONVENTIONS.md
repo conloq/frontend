@@ -10,7 +10,7 @@
 | Functions | camelCase, verbo + alvo; helpers de DOM de uma letra | `carregarUsuario`, `carregarReceitas`, `mostrarMensagem`, `irPara`, `sair`, `escapar`, `q`, `qa` | `public/js/app.js` |
 | Constants/env vars | `UPPER_SNAKE` para constantes de módulo; `PORT`/`API_URL` do ambiente | `TOKEN_KEY`, `FLASH_KEY`, `ESTILOS` | `public/js/app.js`, `index.js` |
 | Rotas | pt-BR, minúsculas, plural nas coleções | `/receitas`, `/receitas/temperatura/cadastrar/:id`, `/logout` | `index.js` |
-| Campos de formulário | inglês, snake_case nos que vão para a API; ids em pt-BR/camelCase | `name="min_temperature_ramp"` com `id="senha"` | `views/adicionarTemperatura.ejs`, `views/login.ejs` |
+| Campos de formulário | inglês; os que vão para a API seguem o nome da API — hoje snake_case, camelCase depois da conloq/mash#86 (decisão de 13/10/2026); ids em pt-BR/camelCase | `name="min_temperature_ramp"` com `id="senha"` | `views/adicionarTemperatura.ejs`, `views/login.ejs` |
 | Atributos de ligação | `data-*` em kebab-case, valor em camelCase | `data-user="url_image"`, `data-excluir` | `views/partials/topBar.ejs`, `public/js/app.js` |
 | Tokens de tema | prefixo `mash-` | `--color-mash-brown`, `--color-mash-orange`, `--color-mash-cream` | `public/css/tailwind.css` |
 
