@@ -4,7 +4,7 @@
 
 | System | Type (API/DB/Queue/etc) | Purpose | Auth model | Criticality | Evidence |
 |--------|---------------------------|---------|------------|-------------|----------|
-| Back-End MASH (`conloq/Back-End`, porta 8080) | REST API | Login, cadastro, perfil, foto, receitas e temperatura | JWT em `Authorization: Bearer`, guardado em `localStorage` (`mash-token`) | Alta — sem ela nenhuma tela mostra dados | `public/js/app.js`, `index.js` |
+| Back-End MASH (`conloq/Back-End`, porta 8080) | REST API | Login, cadastro, perfil, foto, receitas e temperatura | JWT em `Authorization: Bearer`, guardado em `localStorage` (`mash-token`) | Alta: sem ela nenhuma tela mostra dados | `public/js/app.js`, `index.js` |
 | `@phosphor-icons/web` (pacote local) | Assets estáticos | Ícones servidos em `/vendor/phosphor` | Nenhuma | Média | `index.js`, `views/partials/header.ejs` |
 | `localStorage` (navegador) | Armazenamento local | Token (`mash-token`) e mensagem de flash (`mash-flash`) | Nenhuma (legível por JavaScript) | Alta | `public/js/app.js` |
 
@@ -19,18 +19,18 @@
 
 - Credential sources: nenhuma credencial neste repositório. As únicas variáveis são `API_URL` e `PORT` (`.env.example`).
 - Hardcoding checks: nenhum segredo, chave ou token no código. O histórico registra uma chave removida em `cf2dc27` (`chore(security): remover chave de API versionada do opencode.json`).
-- Rotation or lifecycle notes: o JWT expira em 1 dia na API (a API não revoga tokens). O logout apenas apaga o token local — não há chamada de revogação. `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
+- Rotation or lifecycle notes: o JWT expira em 1 dia na API (a API não revoga tokens). O logout apenas apaga o token local: não há chamada de revogação. `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
 
 ## 4) Reliability and Failure Behavior
 
-- Retry/backoff behavior: NONE — nenhuma tentativa repetida.
-- Timeout policy: NONE — `fetch` sem `AbortController`; uma API pendurada deixa a tela sem dados e sem mensagem.
+- Retry/backoff behavior: NONE; nenhuma tentativa repetida.
+- Timeout policy: NONE; `fetch` sem `AbortController`; uma API pendurada deixa a tela sem dados e sem mensagem.
 - Circuit-breaker or fallback behavior: parcial. Falha de rede vira `{ status: 503 }` com "Não foi possível falar com a API" em `#mensagens`. Não há fallback de dados nem cache offline.
 - CORS: obrigatório. O Back-End responde `Access-Control-Allow-Origin` a partir de `FRONTEND_URL` (padrão `http://localhost:4000`). `FRONTEND_URL` não está definida no `.env` do Back-End; em deploy a origem cai no default e o navegador bloqueia a chamada.
 
 ## 5) Observability for Integrations
 
-- Logging around external calls: NONE no cliente — erros aparecem só na interface.
+- Logging around external calls: NONE no cliente: erros aparecem só na interface.
 - Metrics/tracing coverage: NONE.
 - Missing visibility gaps: nenhum log de requisição ou de erro de API; nenhum log de acesso no servidor; a única saída do `index.js` é a linha de sucesso do `listen` e a de falha de bind.
 

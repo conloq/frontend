@@ -8,8 +8,8 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 
 ## System Entry Points
 
-- `index.js`: aplicação Express — view engine EJS, `public/` e `/vendor/phosphor` estáticos e uma rota `GET` por tela. Escuta em `PORT` (padrão 4000). Lê `API_URL` (padrão `http://localhost:8080`), expõe em `app.locals.apiUrl` e carrega `.env` com `process.loadEnvFile()`.
-- `public/js/app.js`: consumo da API — guarda de rota, login, cadastro, perfil, foto, receitas, temperatura e mensagens. Lê `window.API_URL`, definido em `views/partials/footer.ejs`.
+- `index.js`: aplicação Express: view engine EJS, `public/` e `/vendor/phosphor` estáticos e uma rota `GET` por tela. Escuta em `PORT` (padrão 4000). Lê `API_URL` (padrão `http://localhost:8080`), expõe em `app.locals.apiUrl` e carrega `.env` com `process.loadEnvFile()`.
+- `public/js/app.js`: consumo da API: guarda de rota, login, cadastro, perfil, foto, receitas, temperatura e mensagens. Lê `window.API_URL`, definido em `views/partials/footer.ejs`.
 - `package.json`: runtime ESM; scripts `start` (`nodemon index.js`), `build:css`, `watch:css` e `test` (`node --check index.js`).
 - `.env.example`: `PORT=4000` e `API_URL=http://localhost:8080`.
 - `public/css/tailwind.css`: entrada do Tailwind v4 e fonte das classes usadas nos templates e no JS.
@@ -19,10 +19,10 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 
 | Rota GET | Template | Chamadas da API feitas por `app.js` |
 |---|---|---|
-| `/` | — | redireciona para `/receitas` |
+| `/` | - | redireciona para `/receitas` |
 | `/login` | `login.ejs` | `POST /login` |
 | `/cadastro` | `cadastro.ejs` | `POST /user` |
-| `/logout` | — | redireciona para `/login`; o `app.js` apaga o token |
+| `/logout` | - | redireciona para `/login`; o `app.js` apaga o token |
 | `/usuario` | `usuario.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` |
 | `/receitas` | `receita.ejs` | `GET /user`, `GET /receitas`, `GET /receitas/temperatura/:id` (uma por receita), `POST /receitas`, `DELETE /receitas/:id` |
 | `/receitas/temperatura/cadastrar/:id` | `adicionarTemperatura.ejs` | `GET /user`, `POST /receitas/temperatura/:id` |
