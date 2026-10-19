@@ -203,7 +203,7 @@
         if (!arquivo) return mostrarMensagem('danger', 'Nenhuma imagem foi enviada');
 
         const corpo = new FormData();
-        corpo.append('imageUser', arquivo);
+        corpo.append('image', arquivo);
 
         const { status, data } = await api('PUT', '/user/upload', corpo);
         if (status !== 200) {
