@@ -163,8 +163,8 @@
         const user = data.user;
         qa('[data-user="name"]').forEach((el) => { el.textContent = user.name ?? ''; });
         qa('[data-user="email"]').forEach((el) => { el.textContent = user.email ?? ''; });
-        qa('[data-user="url_image"]').forEach((el) => {
-            if (user.url_image) el.src = user.url_image;
+        qa('[data-user="urlImage"]').forEach((el) => {
+            if (user.urlImage) el.src = user.urlImage;
         });
         qa('[data-user="createdAt"]').forEach((el) => {
             if (user.createdAt) el.textContent = new Date(user.createdAt).toLocaleDateString('pt-BR');
@@ -174,7 +174,7 @@
         if (perfil) {
             perfil.elements.name.value = user.name ?? '';
             perfil.elements.email.value = user.email ?? '';
-            perfil.elements.fone.value = user.fone ?? '';
+            perfil.elements.phone.value = user.phone ?? '';
         }
     }
 
@@ -182,12 +182,12 @@
 
     q('#formPerfil')?.addEventListener('submit', async (event) => {
         event.preventDefault();
-        const { name, email, fone, password } = formData(event.target);
+        const { name, email, phone, password } = formData(event.target);
 
         const { status, data } = await api('PUT', '/user', {
             name,
             email,
-            fone,
+            phone,
             ...(password && { password }),
         });
         if (status !== 200) {

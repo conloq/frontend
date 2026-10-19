@@ -7,9 +7,22 @@ reviews:
   high_level_summary: true
   poem: false
   auto_review:
-    enabled: true
+    enabled: false
     drafts: false
     base_branches:
       - "main"
+  finishing_touches:
+    autofix:
+      enabled: false
+    fix_ci:
+      enabled: false
+    resolve_merge_conflict:
+      enabled: false
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+    simplify:
+      enabled: false
 chat:
   auto_reply: true
