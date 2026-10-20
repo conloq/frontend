@@ -26,7 +26,7 @@
 - Retry/backoff behavior: NONE; nenhuma tentativa repetida.
 - Timeout policy: NONE; `fetch` sem `AbortController`; uma API pendurada deixa a tela sem dados e sem mensagem.
 - Circuit-breaker or fallback behavior: parcial. Falha de rede vira `{ status: 503 }` com "Não foi possível falar com a API" em `#mensagens`. Não há fallback de dados nem cache offline.
-- CORS: obrigatório. O Back-End responde `Access-Control-Allow-Origin` a partir de `FRONTEND_URL` (padrão `http://localhost:4000`). `FRONTEND_URL` não está definida no `.env` do Back-End; em deploy a origem cai no default e o navegador bloqueia a chamada.
+- CORS: obrigatório. O Back-End responde `Access-Control-Allow-Origin` a partir de `FRONTEND_URL` (padrão `http://localhost:4000`). No deploy, configurar `FRONTEND_URL` com a origem pública do frontend; o padrão localhost não atende a origem publicada.
 
 ## 5) Observability for Integrations
 
@@ -38,21 +38,22 @@
 
 | Método | Rota | Corpo / resposta usados |
 |---|---|---|
-| POST | `/login` | `{ email, password }` → 200 `{ token, user }`; 400 em `message`; 401 em `error` |
+| POST | `/login` | `{ email, password }` → 200 `{ token, user }`; 400 em `error`; 401 em `error` |
 | POST | `/user` | `{ name, email, password }` → 201 |
-| GET | `/user` | → 200 `{ user }` (`id`, `name`, `email`, `fone`, `url_image`, `createdAt`) |
-| PUT | `/user` | `{ name, email, fone, password? }` → 200 |
-| PUT | `/user/upload` | `FormData` com `imageUser` → 200 `{ url }` |
+| GET | `/user` | → 200 `{ user }` (`id`, `name`, `email`, `phone`, `urlImage`, `createdAt`) |
+| PUT | `/user` | `{ name, email, phone, password? }` → 200 |
+| PUT | `/user/upload` | `FormData` com `image` → 200 `{ url }` |
 | DELETE | `/user` | → 204 |
-| GET | `/receitas` | → 200 `{ recipe: [...] }` |
-| POST | `/receitas` | `{ name }` → 201 |
-| DELETE | `/receitas/:recipeId` | → 204 |
-| GET | `/receitas/temperatura/:id` | → 200 `{ temperatures: [...] }` |
-| POST | `/receitas/temperatura/:id` | rampas, limites, `timer`, `initialization`, `ideal_time` → 201 |
+| GET | `/recipes` | → 200 `{ recipes: [...] }` |
+| POST | `/recipes` | `{ name }` → 201 |
+| GET | `/recipes/:id` | → 200 `{ recipe }` |
+| PUT | `/recipes/:id` | `{ name }` → 200; operação existente, regras de lotes permanecem na #93 |
+| DELETE | `/recipes/:id` | → 204 |
+| GET | `/recipes/:id/temperatures` | → 200 `{ temperatures: [...] }` |
+| POST | `/recipes/:id/temperatures` | rampas, limites, `timer`, `initialization`, `idealTime` → 201 |
 
-Sem rota na API (telas só de layout): iodo (`/receitas/iodo/...`) e edição de temperatura.
+Sem integração nesta entrega: telas de iodo e edição de temperatura (#97).
 
-> **Mudança prevista:** com a conloq/mash#71 e a conloq/mash#32, a API passa a usar `/recipes` e `/recipes/:id/temperatures`, e os campos passam a camelCase (`minTemperatureRamp`, `idealTime`, `phone`, `urlImage`; decisão de 08/10/2026). A troca no `public/js/app.js` e nos formulários é a conloq/mash#86, que atualiza esta tabela no mesmo Pull Request. Alterar e excluir receita via API são a conloq/mash#93.
 
 ## 7) Evidence
 
@@ -62,3 +63,11 @@ Sem rota na API (telas só de layout): iodo (`/receitas/iodo/...`) e edição de
 - `.env.example`, `.gitignore`
 - `conloq/Back-End` (`app.js` com CORS, `routes/*.js`)
 - `docs/codebase/.codebase-scan.txt`
+
+## Receitas e rampas: integração da #86
+
+O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista em `recipes`, detalhe em `recipe` e rampas em `temperatures`. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
+
+Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` (`newTemperature.ejs`), `/recipes/:id/iodine/new` (`newIodine.ejs`) e `/recipes/:id/iodine/edit` (`editIodine.ejs`). As duas telas de iodo continuam apenas layout, fora do fluxo desta entrega. Edição e exclusão de rampas permanecem na #97.
+
+Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.

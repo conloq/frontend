@@ -10,12 +10,15 @@
           class="rounded-2xl border-2 border-mash-orange bg-white p-5 text-center text-lg font-bold text-mash-orange"
           >Temperatura</a
         ><a
-          href="/receitas/iodo/editar/<%= receitaId %>"
+          href="/recipes/<%= receitaId %>/iodine/edit"
           class="rounded-2xl bg-white p-5 text-center text-lg font-bold shadow-sm"
           >Iodo</a
         >
       </div>
       <form id="formTemperatura">
+        <label class="block text-sm font-semibold">Ordem da rampa (opcional)
+          <input type="number" step="1" name="orderRamp" class="mt-2 rounded-xl border border-stone-200 px-4 py-3" />
+        </label>
         <div class="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
           <div class="space-y-6">
             <section>
@@ -25,18 +28,18 @@
               <div class="grid gap-3 sm:grid-cols-2">
                 <label
                   class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
-                  >Temperatura mn.<input
+                  >Temperatura mín.<input
                     required
-                    type="number"
-                    name="min_temperature_ramp"
+                    type="number" min="0" max="100" step="1"
+                    name="minTemperatureRamp"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg font-semibold outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
                 /></label>
                 <label
                   class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
-                  >Temperatura mx.<input
+                  >Temperatura máx.<input
                     required
-                    type="number"
-                    name="max_temperature_ramp"
+                    type="number" min="0" max="100" step="1"
+                    name="maxTemperatureRamp"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg font-semibold outline-none focus:border-mash-orange focus:ring-2 focus:ring-orange-200"
                 /></label>
                 <label
@@ -78,15 +81,15 @@
                   class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
                   >Temperatura mín.<input
                     required
-                    type="number"
-                    name="min_temperature_limit"
+                    type="number" min="0" max="100" step="1"
+                    name="minTemperatureLimit"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg" /></label
                 ><label
                   class="rounded-2xl bg-white p-4 text-center text-sm font-bold shadow-sm"
                   >Temperatura máx.<input
                     required
-                    type="number"
-                    name="max_temperature_limit"
+                    type="number" min="0" max="100" step="1"
+                    name="maxTemperatureLimit"
                     class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-3 text-center text-lg"
                 /></label>
               </div>
@@ -98,7 +101,7 @@
               <input
                 required
                 type="time"
-                name="ideal_time"
+                name="idealTime"
                 step="1"
                 class="h-14 rounded-xl border border-stone-200 px-4 text-center text-2xl font-bold"
               />

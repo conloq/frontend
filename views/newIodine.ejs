@@ -6,21 +6,16 @@
     <main class="space-y-6 p-4 sm:p-6">
       <div class="grid gap-3 sm:grid-cols-2">
         <a
-          href="/receitas/temperatura/editar/1"
+          href="/recipes/temperatura/editar/1"
           class="rounded-2xl bg-white p-5 text-center text-lg font-bold shadow-sm"
           >Temperatura</a
         ><a
-          href="/receitas/iodo/editar/1"
           class="rounded-2xl border-2 border-mash-orange bg-white p-5 text-center text-lg font-bold text-mash-orange"
           >Iodo</a
         >
       </div>
-      <form action="/receitas/iodo/editar/" method="POST">
-        <input type="hidden" name="receitaId" value="1" /><input
-          type="hidden"
-          name="iodoId"
-          value="1"
-        />
+      <form onsubmit="return false;">
+        <input type="hidden" name="receitaId" value="1" />
         <div class="grid gap-5 md:grid-cols-3">
           <label class="text-lg font-bold text-mash-brown"
             >Tempo da primeira coleta<span
@@ -29,16 +24,17 @@
                 type="time"
                 name="primeiraColeta"
                 step="1"
-                value="00:10:00"
-                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base" /></span></label
+                value="0"
+                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base outline-none focus:border-mash-orange" /></span></label
           ><label class="text-lg font-bold text-mash-brown"
-            >Quantidade de testes mxima<span
+            >Quantidade de testes máxima<span
               class="mt-4 block rounded-2xl bg-white p-5 text-sm font-semibold shadow-sm"
-              >Quantidade mxima.<input
+              >Quantidade máxima.<input
                 type="number"
                 name="quantidadeMaxima"
-                value="5"
-                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base" /></span></label
+                step="1"
+                value="0"
+                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base outline-none focus:border-mash-orange" /></span></label
           ><label class="text-lg font-bold text-mash-brown"
             >Intervalo entre testes<span
               class="mt-4 block rounded-2xl bg-white p-5 text-sm font-semibold shadow-sm"
@@ -46,8 +42,8 @@
                 type="time"
                 name="intervalo"
                 step="1"
-                value="00:05:00"
-                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base" /></span
+                value="0"
+                class="mt-2 h-14 w-full rounded-xl border border-stone-200 px-4 text-base outline-none focus:border-mash-orange" /></span
           ></label>
         </div>
         <div class="flex justify-end">
