@@ -1,0 +1,8 @@
+<%# Abre o shell das telas logadas. Recebe titulo e trilha; feche com shellFim.ejs. %>
+<%- include('header.ejs', { titulo }) %>
+<div class="app-shell min-h-screen lg:flex">
+  <%- include('sidebar.ejs') %>
+  <div class="app-shell-content flex min-h-screen min-w-0 flex-1 flex-col">
+    <%- include('topBar.ejs', { trilha }) %>
+    <main class="flex flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+      <%- include('mensagens.ejs') %>

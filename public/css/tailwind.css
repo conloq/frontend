@@ -2,21 +2,163 @@
 @source "../../views";
 @source "../js";
 
+/* Tokens do design system v2 (docs/design/mash.pen, prancha "Design System · 1 Fundamentos") */
 @theme {
-  --color-mash-brown: #3f2a20;
-  --color-mash-orange: #d97706;
-  --color-mash-cream: #f7f3ee;
+  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  --color-mash-brown: #4e342e;
+  --color-mash-brown-dark: #2a1c18;
+  --color-mash-orange: #e87600;
+  --color-foco: #f57c00;
+
+  --color-acao: #b35900;
+  --color-acao-hover: #9a4d00;
+  --color-acao-pressionado: #7f3f00;
+  --color-acao-suave: #fdf0e3;
+
+  --color-fundo: #f6f3f0;
+  --color-superficie: #ffffff;
+  --color-linha: #e6dfd9;
+  --color-texto: #1f1a17;
+  --color-texto-2: #6b5f57;
+  --color-header-texto-2: #d9cbc4;
+  --color-desativado: #ede8e3;
+  --color-texto-desativado: #a1968e;
+  --color-hover-neutro: #f3eeea;
+
+  --color-sucesso: #1e7a45;
+  --color-sucesso-suave: #e3f4ea;
+  --color-aviso: #8a5300;
+  --color-aviso-suave: #fdf3d8;
+  --color-perigo: #b42318;
+  --color-perigo-suave: #fdecea;
+  --color-info: #1d5d8c;
+  --color-info-suave: #e5f0f8;
 }
 
 @layer base {
   body {
-    background: var(--color-mash-cream);
-    color: #292524;
-    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    background: var(--color-fundo);
+    color: var(--color-texto);
+    font-family: var(--font-sans);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+  }
+
+  ::selection {
+    background: var(--color-acao-suave);
+    color: var(--color-texto);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-foco);
+    outline-offset: 2px;
   }
 }
 
+/* Bases reutilizadas pelos componentes (precisam ser @utility para o @apply) */
+@utility btn {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] px-5 text-base font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed;
+}
+
+@utility selo {
+  @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current;
+}
+
 @layer components {
+  /* Botões: primário, secundário, perigo, fantasma e ícone */
+  .btn-primario {
+    @apply btn bg-acao text-white hover:bg-acao-hover active:bg-acao-pressionado disabled:bg-desativado disabled:text-texto-desativado;
+  }
+  .btn-secundario {
+    @apply btn border border-linha bg-superficie text-texto hover:bg-hover-neutro active:bg-linha disabled:text-texto-desativado;
+  }
+  .btn-perigo {
+    @apply btn bg-perigo text-white hover:bg-[#962015] active:bg-[#7a1a12] disabled:bg-desativado disabled:text-texto-desativado;
+  }
+  .btn-fantasma {
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-[10px] px-2 font-semibold text-acao transition-colors hover:bg-acao-suave disabled:text-texto-desativado;
+  }
+  .btn-icone {
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-xl text-texto-2 transition-colors hover:bg-hover-neutro active:bg-linha disabled:text-texto-desativado;
+  }
+
+  /* Campos */
+  .campo {
+    @apply flex flex-col gap-1.5;
+  }
+  .campo-rotulo {
+    @apply text-sm font-semibold text-texto;
+  }
+  .campo-caixa {
+    @apply flex min-h-12 items-center gap-2.5 rounded-[10px] border border-linha bg-superficie px-3.5 transition-colors focus-within:border-foco focus-within:ring-2 focus-within:ring-foco/30;
+  }
+  .campo-caixa > input,
+  .campo-caixa > select {
+    @apply min-w-0 flex-1 self-stretch bg-transparent text-[15px] text-texto outline-none placeholder:text-texto-2 disabled:text-texto-desativado;
+  }
+  .campo-caixa > select {
+    @apply cursor-pointer appearance-none pr-7;
+  }
+  .campo-erro #areaImagem {
+    @apply border-2 border-solid border-perigo bg-perigo-suave;
+  }
+  .campo-caixa > i {
+    @apply text-xl text-texto-2;
+  }
+  .campo-unidade {
+    @apply text-[15px] font-medium text-texto-2;
+  }
+  .campo-ajuda {
+    @apply text-[13px] text-texto-2;
+  }
+  .campo-erro .campo-caixa {
+    @apply border-2 border-perigo;
+  }
+  .campo-erro .campo-ajuda {
+    @apply font-medium text-perigo;
+  }
+
+  /* Cards e tabelas */
+  .card {
+    @apply rounded-xl border border-linha bg-superficie;
+  }
+  .tabela-cabecalho {
+    @apply border-b border-linha bg-[#faf8f6] text-[13px] font-semibold text-texto-2;
+  }
+  .tabela-linha {
+    @apply border-b border-linha last:border-b-0;
+  }
+
+  /* Selos */
+  .selo-sucesso {
+    @apply selo bg-sucesso-suave text-sucesso;
+  }
+  .selo-aviso {
+    @apply selo bg-aviso-suave text-aviso;
+  }
+  .selo-perigo {
+    @apply selo bg-perigo-suave text-perigo;
+  }
+  .selo-info {
+    @apply selo bg-info-suave text-info;
+  }
+
+  /* Esqueleto de carregamento */
+  .esqueleto {
+    @apply animate-pulse rounded-md bg-desativado motion-reduce:animate-none;
+  }
+
+  /* Shell: sidebar recolhível no desktop (18rem/5rem), gaveta de 18rem no mobile */
+  #appSidebar {
+    width: 18rem;
+  }
+
   @media (min-width: 1024px) {
     .app-shell-content {
       margin-left: 18rem;
@@ -35,6 +177,7 @@
     #appSidebar[data-sidebar-state="collapsed"] {
       width: 5rem;
       min-width: 5rem;
+      overflow-x: hidden;
     }
 
     #appSidebar[data-sidebar-state="collapsed"] .sidebar-label {
@@ -43,33 +186,24 @@
 
     #appSidebar[data-sidebar-state="collapsed"] .menu-link {
       justify-content: center;
-      padding-inline: 0.75rem;
+      padding-inline: 0;
     }
 
-    #appSidebar[data-sidebar-state="collapsed"] .menu-link i {
-      margin-inline: auto;
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-marca {
+      height: auto;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding-block: 1rem 0.75rem;
     }
+  }
 
-    #appSidebar[data-sidebar-state="collapsed"] > div:first-child {
-      justify-content: center;
-    }
+  .menu-link-active {
+    background: var(--color-acao-suave);
+    color: var(--color-acao);
+    font-weight: 600;
+  }
 
-    .menu-link-active i {
-      color: var(--color-mash-orange);
-    }
-
-    #appSidebar[data-sidebar-state="collapsed"] > div:first-child > a {
-      justify-content: center;
-    }
-
-    #appSidebar .sidebar-collapse {
-      position: absolute;
-      right: -0.875rem;
-      top: 50%;
-      transform: translateY(-50%);
-      border: 1px solid rgb(231 229 228);
-      background: #ffffff;
-      color: #171717;
-    }
+  .menu-link-active i {
+    color: var(--color-foco);
   }
 }

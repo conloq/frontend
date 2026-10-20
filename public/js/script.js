@@ -8,26 +8,25 @@ const closeButton = $('.sidebar-close');
 const collapseButton = $('.sidebar-collapse');
 const sidebarStorageKey = 'mash-sidebar-collapsed';
 
+const lerStorage = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
+const gravarStorage = (key, value) => { try { localStorage.setItem(key, value); } catch { /* sem storage */ } };
+
 function setDesktopSidebarState(collapsed, persist = true) {
     if (!sidebar || !collapseButton) return;
 
-    const width = collapsed ? '5rem' : '18rem';
     sidebar.dataset.sidebarState = collapsed ? 'collapsed' : 'expanded';
-    if (persist) localStorage.setItem(sidebarStorageKey, String(collapsed));
-    sidebar.classList.toggle('is-collapsed', collapsed);
+    if (persist) gravarStorage(sidebarStorageKey, String(collapsed));
     document.body.classList.toggle('sidebar-collapsed', collapsed);
-    sidebar.style.width = width;
-    sidebar.style.minWidth = width;
     collapseButton.setAttribute('aria-expanded', String(!collapsed));
     collapseButton.setAttribute('aria-label', collapsed ? 'Expandir menu' : 'Recolher menu');
 
     const icon = collapseButton.querySelector('i');
-    icon?.classList.remove('ph-caret-left', 'ph-caret-right');
-    icon?.classList.add(collapsed ? 'ph-caret-right' : 'ph-caret-left');
+    icon?.classList.remove('ph-caret-double-left', 'ph-caret-double-right');
+    icon?.classList.add(collapsed ? 'ph-caret-double-right' : 'ph-caret-double-left');
 }
 
 if (sidebar && collapseButton) {
-    const savedState = localStorage.getItem(sidebarStorageKey);
+    const savedState = lerStorage(sidebarStorageKey);
     if (savedState === 'true' || savedState === 'false') setDesktopSidebarState(savedState === 'true', false);
 }
 
@@ -56,26 +55,26 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-$$('.menu-link').forEach((link) => {
-    if (link.getAttribute('href') === window.location.pathname) {
-        link.classList.add('menu-link-active', 'bg-orange-50', 'text-mash-orange', 'font-semibold');
-    }
+// Item ativo: a seção do link (data-secao) é prefixo do caminho atual; o ícone fica preenchido
+$$('.menu-link[data-secao]').forEach((link) => {
+    const ativo = link.dataset.secao.split(' ').some((secao) => window.location.pathname.startsWith(secao));
+    if (!ativo) return;
+    link.classList.add('menu-link-active');
+    link.setAttribute('aria-current', 'page');
+    const icon = link.querySelector('i');
+    icon?.classList.replace('ph', 'ph-fill');
 });
 
-const senha = $('#senha');
-const toggleSenha = senha?.parentElement.querySelector('button[type="button"]');
-toggleSenha?.addEventListener('click', () => {
-    const visible = senha.type === 'text';
-    senha.type = visible ? 'password' : 'text';
-    toggleSenha.setAttribute('aria-label', visible ? 'Mostrar senha' : 'Ocultar senha');
-});
-
-const btnAlterar = $('#btnAlterar');
-const btnSalvar = $('#btnSalvar');
-btnAlterar?.addEventListener('click', () => {
-    $$('#formPerfil input').forEach((input) => { input.disabled = false; });
-    btnAlterar.disabled = true;
-    btnSalvar.disabled = false;
+// Mostrar/ocultar senha: botão com data-toggle-senha="<id do input>"
+$$('[data-toggle-senha]').forEach((botao) => {
+    const campo = document.getElementById(botao.dataset.toggleSenha);
+    if (!campo) return;
+    botao.addEventListener('click', () => {
+        const visivel = campo.type === 'text';
+        campo.type = visivel ? 'password' : 'text';
+        botao.setAttribute('aria-label', visivel ? 'Mostrar senha' : 'Ocultar senha');
+        botao.querySelector('i')?.classList.replace(visivel ? 'ph-eye-slash' : 'ph-eye', visivel ? 'ph-eye' : 'ph-eye-slash');
+    });
 });
 
 const inputFoto = $('#inputFoto');
@@ -93,7 +92,7 @@ function openModal(modal) {
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('overflow-hidden');
-    modal.querySelector('input, button, [data-modal-close]')?.focus();
+    modal.querySelector('input, select, button:not([data-modal-close])')?.focus();
 }
 
 function closeModal(modal) {

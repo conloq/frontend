@@ -1,24 +1,67 @@
-<%- include('partials/header.ejs') %>
-<div class="app-shell min-h-screen bg-stone-100 lg:flex">
-  <%- include('partials/sidebar.ejs') %>
-  <div class="app-shell-content min-w-0 flex-1">
-    <%- include('partials/topBar.ejs') %>
-    <main class="space-y-6 p-4 sm:p-6">
-      <%- include('partials/mensagens.ejs') %>
-      <a href="/recipes" class="inline-flex min-h-11 items-center font-semibold">Voltar às receitas</a>
-      <h1 id="recipeName" class="text-3xl font-bold text-mash-brown">Receita</h1>
-      <form id="formEditarReceita" class="space-y-4 rounded-2xl bg-white p-6">
-        <label class="block font-semibold">Nome da receita
-          <input name="name" required maxlength="255" class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3" />
-        </label>
-        <button type="submit" class="min-h-11 rounded-xl bg-mash-orange px-4 font-bold text-white">Salvar nome</button>
-      </form>
-      <section class="space-y-4 rounded-2xl bg-white p-6">
-        <h2 class="text-xl font-bold">Rampas de temperatura</h2>
-        <p id="detalheRampas"></p>
-        <a id="newTemperatureLink" class="inline-flex min-h-11 items-center font-semibold">Adicionar rampa</a>
-      </section>
-    </main>
+<%- include('partials/shellInicio.ejs', { titulo: 'Receita', trilha: ['Receitas', 'Receita'] }) %>
+<div class="flex flex-col gap-2">
+  <a href="/recipes" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todas as receitas</a>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div class="flex min-w-0 flex-col gap-1.5">
+      <h1 id="recipeName" class="truncate text-[30px] font-semibold">Receita</h1>
+      <p id="recipeResumo" class="text-texto-2">Carregando…</p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <button type="button" id="btnExcluirReceita" class="btn-fantasma text-perigo hover:bg-perigo-suave"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
+      <button type="button" class="btn-secundario" data-modal-open="modalRenomear"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Renomear</button>
+      <a id="newTemperatureLink" href="#" class="btn-primario"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
+    </div>
   </div>
 </div>
-<%- include('partials/footer.ejs') %>
+
+<section class="card overflow-hidden" aria-labelledby="tituloRampas">
+  <div class="flex flex-col gap-0.5 border-b border-linha px-6 py-5">
+    <h2 id="tituloRampas" class="text-lg font-semibold">Rampas de temperatura</h2>
+    <p class="text-sm text-texto-2">Na ordem em que acontecem na mosturação.</p>
+  </div>
+  <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]" aria-hidden="true">
+    <span>Ordem</span><span>Faixa da rampa</span><span>Limites</span><span>Temporizador</span><span>Início do timer</span><span>Tempo ideal</span><span class="text-right">Ações</span>
+  </div>
+  <div id="detalheRampas" aria-live="polite"></div>
+</section>
+
+<%# Linha da rampa; app.js clona e preenche os data-slot %>
+<template id="tplLinhaRampa">
+  <div class="tabela-linha grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-1 px-6 py-4 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:py-0">
+    <span class="grid size-8 place-items-center rounded-full bg-fundo font-display text-sm font-semibold" data-slot="ordem"></span>
+    <span class="font-semibold" data-slot="faixa"></span>
+    <span class="text-texto-2 max-lg:col-start-2 max-lg:text-sm"><span class="lg:hidden">Limites </span><span data-slot="limites"></span></span>
+    <span class="max-lg:col-start-2 max-lg:text-sm"><span class="text-texto-2 lg:hidden">Temporizador </span><span data-slot="timer"></span></span>
+    <span class="max-lg:col-start-2 max-lg:text-sm"><span class="text-texto-2 lg:hidden">Início do timer </span><span data-slot="inicio"></span></span>
+    <span class="max-lg:col-start-2 max-lg:text-sm"><span class="text-texto-2 lg:hidden">Tempo ideal </span><span data-slot="ideal"></span></span>
+    <span class="flex gap-1 max-lg:col-start-2 max-lg:-ml-3 lg:justify-end">
+      <a class="btn-icone" data-slot="editar"><i class="ph ph-pencil-simple" aria-hidden="true"></i></a>
+      <button type="button" class="btn-icone text-perigo hover:bg-perigo-suave" data-slot="excluir" data-sem-api="conloq/mash#97"><i class="ph ph-trash" aria-hidden="true"></i></button>
+    </span>
+  </div>
+</template>
+
+<div id="modalRenomear" class="js-modal fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true">
+  <div class="flex min-h-full items-center justify-center">
+    <div class="w-full max-w-[520px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="dialog" aria-modal="true" aria-labelledby="modalRenomearTitulo">
+      <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
+        <h2 id="modalRenomearTitulo" class="flex-1 text-[22px] font-semibold">Renomear receita</h2>
+        <button type="button" class="btn-icone" data-modal-close aria-label="Fechar"><i class="ph ph-x" aria-hidden="true"></i></button>
+      </div>
+      <form id="formEditarReceita" novalidate>
+        <div class="flex flex-col gap-4 p-6">
+          <div class="campo" data-campo="name">
+            <label class="campo-rotulo" for="receitaNomeEditar">Nome da receita</label>
+            <span class="campo-caixa"><input id="receitaNomeEditar" name="name" maxlength="255" required></span>
+            <span class="campo-ajuda" data-erro>Até 255 caracteres. Não pode repetir o nome de outra receita sua.</span>
+          </div>
+        </div>
+        <div class="flex justify-end gap-3 border-t border-linha bg-[#faf8f6] px-6 py-4">
+          <button type="button" class="btn-secundario" data-modal-close>Cancelar</button>
+          <button type="submit" class="btn-primario">Salvar nome</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<%- include('partials/shellFim.ejs') %>

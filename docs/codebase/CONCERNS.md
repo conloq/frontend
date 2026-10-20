@@ -7,7 +7,7 @@
 | high | Formulários de login e cadastro não têm `action` nem `method`; dependem inteiramente de `app.js` | `views/login.ejs:30`, `views/cadastro.ejs:6` | Se o JS falhar, for bloqueado ou não inicializar, o submit nativo vira `GET` para a própria URL e coloca e-mail e senha na query string (histórico, logs de acesso) | Definir `method="post"` e um destino que não exponha credenciais, ou desabilitar o botão até o cliente estar pronto |
 | high | Token JWT em `localStorage` em vez do cookie `HttpOnly` descrito na `conloq/mash#6` | `public/js/app.js` (`TOKEN_KEY`), issue #6 | Qualquer XSS no domínio lê o token e assume a sessão (perfil, exclusão de conta, receitas) | Decisão do time: adotar cookie `HttpOnly` no servidor EJS, ou aceitar e documentar o risco |
 | high | O frontend depende de CORS que ainda não está em `main` no Back-End | `conloq/Back-End` branch `feat/cors-frontend` (`8b8518a`) | Mergeado o PR #4 sem o CORS, todas as chamadas falham no navegador | Mergear o PR de CORS antes ou junto; definir `FRONTEND_URL` no `.env` do Back-End (hoje ausente) |
-| medium | Iodo e edição de temperatura não têm rota na API, mas as telas têm formulários e botões que não fazem nada | `views/adicionarIodo.ejs`, `views/editarIodo.ejs`, `views/editarTemperatura.ejs` | Botão que não funciona: exatamente a crítica da banca que originou a `conloq/mash#73` | Estado "indisponível" explícito nas telas (escopo da #73) |
+| medium | Lotes e teste de iodo ainda não têm rota na API; as telas mostram dados de exemplo | `views/lots.ejs`, `views/lot.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs` | Dados de exemplo podem ser confundidos com dados reais | Aviso `avisoSemApi.ejs` em cada tela e ações `data-sem-api` que avisam em vez de salvar; ligar à API quando #31/#33/#1/#3 entrarem |
 | medium | `#listaReceitas` busca a temperatura de cada receita em paralelo, uma requisição por receita | `public/js/app.js` (`carregarReceitas`) | N+1: com muitas receitas, N requisições ao abrir a tela; a API não tem rota que traga as temperaturas junto | Aceitável no volume atual; revisar se a API ganhar `include` das temperaturas |
 | medium | Sem `AbortController`/timeout no `fetch` | `public/js/app.js` (`api`) | API pendurada deixa a tela sem dados e sem mensagem, indefinidamente | Adicionar timeout com `AbortSignal.timeout(...)` |
 | low | `.omp/state/continuity.md` é artefato de agente, não versionado hoje | `git status` | Ruído no PR se for adicionado por engano | Manter fora do versionamento |
@@ -21,7 +21,7 @@
 | Logout só limpa o cliente | A API não revoga token | `public/js/app.js` (`sair`), `index.js` (`/logout`) | O token continua válido até expirar (1 dia) se for copiado antes do logout | Documentar; considerar endpoint de revogação no Back-End |
 | Nenhum teste | Sem runner no projeto | repositório inteiro | Regressão de renderização ou de contrato HTML↔JS só aparece em uso manual | Smoke de compilação EJS + status das 10 rotas |
 | Contrato HTML↔JS por string de seletor | Um script para todas as telas | `public/js/app.js` ↔ `views/**/*.ejs` | Renomear um `id` quebra o comportamento sem erro (`?.` engole a falha) | Comentar o contrato no topo do script ou testar presença de seletores |
-| `escapar()` depende de `textContent` + `innerHTML` + `replace` de aspas | Aproveitou o escape nativo do DOM e cobriu atributos por cima | `public/js/app.js` | Funciona, mas é sutil: trocar por `createElement`/`textContent` puro reabre o XSS de atributo | Se tocar na função, construir os nós por propriedades em vez de interpolar HTML |
+| Linhas e mensagens vêm de `<template>` nas views | `clonar()` preenche `[data-slot]` com `textContent`/`setAttribute`, sem montar HTML com dados da API | `public/js/app.js`, `views/*.ejs` | Reintroduzir `innerHTML` com dados da API reabriria XSS | Manter dados só via `textContent`/`setAttribute` |
 | Cache-busting manual | Forçar recarga do shell | `views/partials/footer.ejs` (`?v=4`) | Esquecer de incrementar faz o navegador servir JS antigo | Incrementar a cada mudança em `script.js` |
 | `views/index.ejs` órfão | Sobra de teste (`<h1>Teste</h1>`) | `views/index.ejs` | Confunde quem procura a home (a home é `login.ejs`) | Remover |
 | 20 PNGs em `public/icons/` sem referência | Ícones anteriores à adoção do Phosphor | `public/icons/` | Peso morto no repositório | Remover ou documentar quem usa |
@@ -31,7 +31,7 @@
 | Risk | OWASP category (if applicable) | Evidence | Current mitigation | Gap |
 |------|--------------------------------|----------|--------------------|-----|
 | Token legível por JavaScript | A07 Identification and Authentication Failures | `public/js/app.js` (`localStorage`) | Nenhuma | Risco aceito em 12/10/2026, quando o time trocou o cookie `HttpOnly` pelo `localStorage` (#6) |
-| Injeção de atributo na lista de receitas | A03 Injection | `public/js/app.js` (`escapar`, `data-excluir`, `href`) | `escapar()` neutraliza `<`, `>`, `&`, `"` e `'` (corrigido no PR #4) | Nenhum gap conhecido após a correção; evitar regressão |
+| Injeção de atributo na lista de receitas | A03 Injection | `public/js/app.js` (`clonar`, `href`, `aria-label`) | Dados entram só por `textContent` e `setAttribute`; nenhum HTML é montado com dados da API | Evitar regressão para `innerHTML` |
 | Credenciais na URL se o JS falhar | A04 Insecure Design | `views/login.ejs:30`, `views/cadastro.ejs:6` | Nenhuma | Formulários sem `method`/`action` |
 | Sem CSP nem cabeçalhos de segurança | A05 Security Misconfiguration | `index.js`, `views/partials/header.ejs` | Nenhuma | Revisar antes de qualquer deploy |
 | `FRONTEND_URL` ausente no `.env` do Back-End | A05 Security Misconfiguration | `conloq/Back-End/.env` | Código tem default `http://localhost:4000` | Em deploy, definir a origem real (senão o CORS bloqueia ou fica amplo demais) |
@@ -69,7 +69,7 @@
 - `docs/codebase/.codebase-scan.txt` (CODE METRICS, HIGH-CHURN FILES, CI/CD)
 - `public/js/app.js`
 - `views/login.ejs`, `views/cadastro.ejs`
-- `views/adicionarIodo.ejs`, `views/editarIodo.ejs`, `views/editarTemperatura.ejs`
+- `views/lots.ejs`, `views/lot.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs`
 - `views/partials/footer.ejs`
 - `index.js`, `.env.example`, `.gitignore`
 - `conloq/mash#6`, `conloq/mash#73`

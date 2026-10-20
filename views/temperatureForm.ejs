@@ -1,0 +1,88 @@
+<% const tituloTela = editando ? 'Editar rampa' : 'Nova rampa' %>
+<%- include('partials/shellInicio.ejs', { titulo: tituloTela, trilha: ['Receitas', tituloTela] }) %>
+<% const temperatura = (nome, rotulo) => { %>
+  <div class="campo" data-campo="<%= nome %>">
+    <label class="campo-rotulo" for="<%= nome %>"><%= rotulo %></label>
+    <span class="campo-caixa">
+      <input id="<%= nome %>" name="<%= nome %>" type="number" inputmode="numeric" min="0" max="100" step="1" required>
+      <span class="campo-unidade">ºC</span>
+    </span>
+    <span class="campo-ajuda" data-erro></span>
+  </div>
+<% } %>
+<% const horario = (nome, rotulo, ajuda) => { %>
+  <div class="campo" data-campo="<%= nome %>">
+    <label class="campo-rotulo" for="<%= nome %>"><%= rotulo %></label>
+    <span class="campo-caixa"><input id="<%= nome %>" name="<%= nome %>" type="time" step="1" required></span>
+    <span class="campo-ajuda" data-erro><%= ajuda %></span>
+  </div>
+<% } %>
+<form id="formTemperatura" class="flex flex-1 flex-col gap-6"<% if (editando) { %> data-sem-api="conloq/mash#97"<% } %> novalidate>
+  <div class="flex flex-col gap-1">
+    <a id="voltarReceita" href="/recipes" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i><span>Voltar para a receita</span></a>
+    <h1 class="text-[30px] font-semibold"><%= tituloTela %></h1>
+  </div>
+  <% if (editando) { %>
+    <%- include('partials/avisoSemApi.ejs', { issue: 'conloq/mash#97', titulo: 'Edição ainda sem API.' }) %>
+  <% } %>
+
+  <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
+    <div class="card flex flex-col gap-5 p-6">
+      <fieldset class="flex flex-col gap-4">
+        <legend class="mb-4">
+          <span class="block font-display text-lg font-semibold">Faixa da rampa</span>
+          <span class="text-sm text-texto-2">Temperatura que o mosto precisa manter nesta rampa.</span>
+        </legend>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <% temperatura('minTemperatureRamp', 'Temperatura mínima') %>
+          <% temperatura('maxTemperatureRamp', 'Temperatura máxima') %>
+        </div>
+      </fieldset>
+      <hr class="border-linha">
+      <fieldset class="flex flex-col gap-4">
+        <legend class="mb-4">
+          <span class="block font-display text-lg font-semibold">Tempo</span>
+          <span class="text-sm text-texto-2">Horários com hora, minuto e segundo.</span>
+        </legend>
+        <div class="grid gap-5 md:grid-cols-3">
+          <% horario('timer', 'Temporizador', 'Quanto a rampa dura.') %>
+          <% horario('initialization', 'Início do timer', 'Desde o começo da mosturação.') %>
+          <% horario('idealTime', 'Tempo ideal', 'Tempo esperado nesta rampa.') %>
+        </div>
+      </fieldset>
+      <hr class="border-linha">
+      <fieldset class="flex flex-col gap-4">
+        <legend class="mb-4">
+          <span class="block font-display text-lg font-semibold">Limites aceitáveis</span>
+          <span class="text-sm text-texto-2">Faixa tolerada antes de corrigir o aquecimento.</span>
+        </legend>
+        <div class="grid gap-5 sm:grid-cols-2">
+          <% temperatura('minTemperatureLimit', 'Limite mínimo') %>
+          <% temperatura('maxTemperatureLimit', 'Limite máximo') %>
+        </div>
+      </fieldset>
+      <div class="campo sm:max-w-80" data-campo="orderRamp">
+        <label class="campo-rotulo" for="orderRamp">Ordem da rampa (opcional)</label>
+        <span class="campo-caixa"><input id="orderRamp" name="orderRamp" type="number" inputmode="numeric" step="1"></span>
+        <span class="campo-ajuda" data-erro>Posição desta rampa na receita.</span>
+      </div>
+    </div>
+
+    <aside class="card flex flex-col gap-3.5 self-start p-6" aria-labelledby="tituloComoPreencher">
+      <h2 id="tituloComoPreencher" class="flex items-center gap-2.5 text-lg font-semibold"><i class="ph ph-info text-[22px] text-info" aria-hidden="true"></i>Como preencher</h2>
+      <ul class="flex flex-col gap-3 text-sm leading-relaxed">
+        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>Temperaturas em números inteiros, de 0 a 100 ºC.</li>
+        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>A mínima nunca passa da máxima, na faixa e nos limites.</li>
+        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>Horários sempre com hora, minuto e segundo: 00:40:00.</li>
+        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>Todos os campos são obrigatórios, menos a ordem.</li>
+      </ul>
+    </aside>
+  </div>
+
+  <div class="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+    <span class="flex-1"></span>
+    <a id="cancelarRampa" href="/recipes" class="btn-secundario">Cancelar</a>
+    <button type="submit" class="btn-primario"><%= editando ? 'Salvar alterações' : 'Salvar rampa' %></button>
+  </div>
+</form>
+<%- include('partials/shellFim.ejs') %>

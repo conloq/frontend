@@ -1,220 +1,80 @@
-<%- include ('partials/header.ejs') %>
-<div class="app-shell min-h-screen bg-stone-100 lg:flex">
-  <%- include ('partials/sidebar.ejs') %>
-  <div class="app-shell-content min-w-0 flex-1">
-    <%- include ('partials/topBar.ejs') %>
-    <main class="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
-      <%- include('partials/mensagens.ejs') %>
-      <div class="flex justify-end">
-        <a
-          href="/logout"
-          class="inline-flex min-h-11 items-center gap-2 rounded-full border border-red-200 px-4 py-2 font-semibold text-red-600 hover:bg-red-50"
-          ><i class="ph ph-sign-out text-lg" aria-hidden="true"></i>Sair</a
-        >
-      </div>
-      <section class="rounded-3xl bg-white p-5 shadow-sm sm:p-7">
-        <div class="flex flex-wrap items-center gap-5">
-          <button
-            type="button"
-            data-modal-open="modalFoto"
-            class="relative shrink-0 rounded-full focus:outline-none focus:ring-4 focus:ring-orange-200"
-            aria-label="Alterar foto"
-          >
-            <img
-              data-user="urlImage"
-              src="/img/foto-perfil.png"
-              class="size-24 rounded-full object-cover sm:size-28"
-              alt="Foto do perfil"
-            /><span
-              class="absolute bottom-0 right-0 grid size-8 place-items-center rounded-full bg-white shadow"
-              >⌕</span
-            >
-          </button>
-          <div>
-            <h1 class="text-2xl font-bold text-mash-brown sm:text-3xl">
-              <span data-user="name"></span>
-            </h1>
-            <p class="text-stone-500" data-user="email"></p>
-          </div>
-        </div>
-        <div class="mt-6 border-t border-stone-100 pt-4 text-sm">
-          <span class="font-semibold uppercase tracking-wide text-stone-400"
-            >Conta criada em:</span
-          >
-          <span class="ml-2 font-semibold"
-            ><span data-user="createdAt">-</span></span
-          >
-        </div>
-      </section>
-      <section class="grid gap-6 lg:grid-cols-2">
-        <div class="rounded-3xl bg-white p-5 shadow-sm sm:p-7">
-          <h2 class="mb-6 text-xl font-bold text-mash-brown">
-            Informações do usuário
-          </h2>
-          <form id="formPerfil" class="space-y-4">
-            <label class="block text-sm font-semibold"
-              >Nome completo<input
-                type="text"
-                id="nome"
-                name="name"
-                value=""
-                disabled
-                class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3 disabled:bg-stone-50" /></label
-            ><label class="block text-sm font-semibold"
-              >E-mail<input
-                type="email"
-                id="email"
-                name="email"
-                value=""
-                disabled
-                class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3 disabled:bg-stone-50" /></label
-            ><label class="block text-sm font-semibold"
-              >Telefone<input
-                type="tel"
-                id="telefone"
-                name="phone"
-                value=""
-                placeholder="Não informado"
-                disabled
-                class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3 disabled:bg-stone-50" /></label
-            ><label class="block text-sm font-semibold"
-              >Senha<input
-                type="password"
-                id="senha"
-                name="password"
-                placeholder="********"
-                disabled
-                class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3 disabled:bg-stone-50"
-            /></label>
-            <div class="flex flex-wrap gap-3 pt-2">
-              <button
-                type="button"
-                id="btnAlterar"
-                class="min-h-11 rounded-xl bg-mash-brown px-4 py-2 font-semibold text-white"
-              >
-                Alterar dados</button
-              ><button
-                type="submit"
-                id="btnSalvar"
-                disabled
-                class="min-h-11 rounded-xl bg-mash-orange px-4 py-2 font-semibold text-white disabled:opacity-50"
-              >
-                Salvar alterações</button
-              ><button
-                type="button"
-                id="btnExcluir"
-                class="inline-flex min-h-11 items-center rounded-xl border border-red-200 px-4 py-2 font-semibold text-red-600"
-                >Excluir usuário</button
-              >
-            </div>
-          </form>
-        </div>
-        <div class="rounded-3xl bg-white p-5 shadow-sm sm:p-7">
-          <h2 class="mb-6 text-xl font-bold text-mash-brown">
-            ÚÚltimos logins
-          </h2>
-          <div class="overflow-x-auto">
-            <div class="min-w-[600px]">
-              <div
-                class="grid grid-cols-4 gap-3 border-b border-stone-100 pb-3 text-xs font-bold uppercase tracking-wide text-stone-400"
-              >
-                <span>Data & Hora</span><span>Endereço IP</span
-                ><span>Localidade</span><span>Status</span>
-              </div>
-              <div class="max-h-80 overflow-y-auto pt-3">
-                <div
-                  class="grid grid-cols-4 gap-3 border-b border-stone-50 py-3 text-sm"
-                >
-                  <span
-                    ><strong>25/08/2026</strong
-                    ><small class="block text-stone-400">09:30</small></span
-                  ><span>127.0.0.1</span><span>Localhost</span
-                  ><span class="font-semibold text-green-600"
-                    >Login seguro</span
-                  >
-                </div>
-                <div
-                  class="grid grid-cols-4 gap-3 border-b border-stone-50 py-3 text-sm"
-                >
-                  <span
-                    ><strong>24/08/2026</strong
-                    ><small class="block text-stone-400">18:12</small></span
-                  ><span>192.168.0.20</span><span>São Paulo, Brasil</span
-                  ><span class="font-semibold text-amber-600"
-                    >Novo dispositivo</span
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+<%- include('partials/shellInicio.ejs', { titulo: 'Perfil', trilha: ['Conta', 'Perfil'] }) %>
+<div class="flex flex-col gap-1.5">
+  <h1 class="text-[30px] font-semibold">Perfil</h1>
+  <p class="text-texto-2">Seus dados de acesso ao MASH. Conta criada em <span data-user="createdAt">—</span>.</p>
 </div>
-<div
-  id="modalFoto"
-  class="js-modal fixed inset-0 z-50 hidden overflow-y-auto bg-stone-950/60 p-4"
-  aria-hidden="true"
->
-  <div class="mx-auto flex min-h-full max-w-md items-center">
-    <div
-      class="w-full rounded-3xl bg-white p-6 shadow-xl"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modalFotoLabel"
-    >
-      <div class="flex items-center justify-between">
-        <h2 id="modalFotoLabel" class="text-xl font-bold text-mash-brown">
-          Alterar foto de perfil
-        </h2>
-        <button
-          type="button"
-          data-modal-close
-          class="rounded-lg p-2 text-2xl text-stone-500"
-          aria-label="Fechar"
-        >
-          ×
-        </button>
+
+<div class="grid gap-6 xl:grid-cols-[400px_minmax(0,1fr)]">
+  <div class="flex flex-col gap-6">
+    <section class="card flex flex-col items-center gap-5 p-6" aria-labelledby="tituloFoto">
+      <div class="flex w-full flex-col gap-0.5">
+        <h2 id="tituloFoto" class="text-lg font-semibold">Foto do perfil</h2>
+        <p class="text-sm text-texto-2">JPEG ou PNG. Aparece no topo das telas.</p>
       </div>
-      <form
-        onsubmit="return false;"
-        enctype="multipart/form-data"
-        id="formFoto"
-        class="mt-5"
-      >
-        <img
-          id="previewFoto"
-          src="/img/foto-perfil.png"
-          class="mx-auto mb-5 size-32 rounded-full object-cover ring-4 ring-stone-100"
-          alt="Prévia da foto"
-        /><label for="inputFoto" class="block text-sm font-bold"
-          >Escolher imagem</label
-        ><input
-          type="file"
-          id="inputFoto"
-          name="foto"
-          accept="image/png, image/jpeg"
-          class="mt-2 w-full rounded-xl border border-stone-200 p-3"
-        /><small class="mt-2 block text-sm text-stone-500"
-          >JPG, PNG ou JPEG. Tamanho máximo: 20 MB.</small
-        >
-        <div class="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            data-modal-close
-            class="min-h-11 rounded-xl border border-stone-200 px-4 font-semibold"
-          >
-            Cancelar</button
-          ><button
-            type="submit"
-            class="min-h-11 rounded-xl bg-mash-orange px-5 font-bold text-white"
-          >
-            Salvar
-          </button>
-        </div>
+      <form id="formFoto" class="flex w-full flex-col items-center gap-4" novalidate>
+        <img id="previewFoto" data-user="urlImage" src="/img/foto-perfil.png" alt="Sua foto de perfil" class="size-32 rounded-full border-4 border-linha object-cover">
+        <label class="btn-secundario w-full cursor-pointer focus-within:outline-3 focus-within:outline-foco">
+          <i class="ph ph-image" aria-hidden="true"></i>Escolher foto
+          <input id="inputFoto" name="image" type="file" accept="image/jpeg,image/png" class="sr-only">
+        </label>
+        <button type="submit" class="btn-primario w-full"><i class="ph ph-upload-simple" aria-hidden="true"></i>Enviar foto</button>
       </form>
-    </div>
+    </section>
+
+    <section class="card flex flex-col gap-5 border-[#f2c9c4] p-6" aria-labelledby="tituloExcluirConta">
+      <div class="flex flex-col gap-0.5">
+        <h2 id="tituloExcluirConta" class="text-lg font-semibold">Excluir conta</h2>
+        <p class="text-sm text-texto-2">Apaga sua conta e sai do MASH. Não dá para desfazer.</p>
+      </div>
+      <button type="button" id="btnExcluir" class="btn-perigo w-full"><i class="ph ph-trash" aria-hidden="true"></i>Excluir minha conta</button>
+    </section>
   </div>
+
+  <form id="formPerfil" class="card flex flex-col gap-5 self-start p-6" novalidate>
+    <h2 class="text-lg font-semibold">Dados da conta</h2>
+    <div class="grid gap-5 md:grid-cols-2">
+      <div class="campo" data-campo="name">
+        <label class="campo-rotulo" for="nome">Nome completo</label>
+        <span class="campo-caixa"><input id="nome" name="name" autocomplete="name" required></span>
+        <span class="campo-ajuda" data-erro></span>
+      </div>
+      <div class="campo" data-campo="phone">
+        <label class="campo-rotulo" for="telefone">Telefone (opcional)</label>
+        <span class="campo-caixa"><input id="telefone" name="phone" type="tel" autocomplete="tel" placeholder="(13) 99999-0000"></span>
+      </div>
+    </div>
+    <div class="campo" data-campo="email">
+      <label class="campo-rotulo" for="email">E-mail</label>
+      <span class="campo-caixa"><input id="email" name="email" type="email" autocomplete="email" required></span>
+      <span class="campo-ajuda" data-erro></span>
+    </div>
+    <hr class="border-linha">
+    <div class="flex flex-col gap-0.5">
+      <h2 class="text-lg font-semibold">Trocar senha</h2>
+      <p class="text-sm text-texto-2">Deixe em branco para manter a senha atual.</p>
+    </div>
+    <div class="grid gap-5 md:grid-cols-2">
+      <div class="campo" data-campo="password">
+        <label class="campo-rotulo" for="senha">Nova senha</label>
+        <span class="campo-caixa">
+          <input id="senha" name="password" type="password" autocomplete="new-password">
+          <button type="button" class="btn-icone -mr-2" data-toggle-senha="senha" aria-label="Mostrar senha"><i class="ph ph-eye" aria-hidden="true"></i></button>
+        </span>
+        <span class="campo-ajuda" data-erro>Sem espaços.</span>
+      </div>
+      <div class="campo" data-campo="confirmarSenha">
+        <label class="campo-rotulo" for="confirmarSenha">Confirmar nova senha</label>
+        <span class="campo-caixa">
+          <input id="confirmarSenha" name="confirmarSenha" type="password" autocomplete="new-password">
+          <button type="button" class="btn-icone -mr-2" data-toggle-senha="confirmarSenha" aria-label="Mostrar senha"><i class="ph ph-eye" aria-hidden="true"></i></button>
+        </span>
+        <span class="campo-ajuda" data-erro></span>
+      </div>
+    </div>
+    <div class="flex flex-wrap justify-end gap-3 pt-2">
+      <button type="button" id="btnDescartar" class="btn-secundario">Descartar</button>
+      <button type="submit" id="btnSalvar" class="btn-primario">Salvar alterações</button>
+    </div>
+  </form>
 </div>
-<%- include ('partials/footer.ejs') %>
+<%- include('partials/shellFim.ejs') %>
