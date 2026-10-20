@@ -29,16 +29,18 @@ app.use(
 const tela = (view) => (req, res) =>
   res.render(view, { receitaId: req.params.id });
 
-app.get("/", (req, res) => res.redirect("/receitas"));
+app.get("/", (req, res) => res.redirect("/recipes"));
 app.get("/login", tela("login"));
 app.get("/cadastro", tela("cadastro"));
 app.get("/logout", (req, res) => res.redirect("/login")); // o app.js limpa o token
 app.get("/usuario", tela("usuario"));
-app.get("/receitas", tela("receita"));
-app.get("/receitas/temperatura/cadastrar/:id", tela("adicionarTemperatura"));
+app.get("/recipes", tela("recipes"));
+app.get("/recipes/:id", tela("recipe"));
+app.get("/recipes/:id/edit", tela("recipe"));
+app.get("/recipes/:id/temperatures/new", tela("newTemperature"));
 app.get("/receitas/temperatura/editar/:id", tela("editarTemperatura"));
-app.get("/receitas/iodo/cadastrar/:id", tela("adicionarIodo"));
-app.get("/receitas/iodo/editar/:id", tela("editarIodo"));
+app.get("/recipes/:id/iodine/new", tela("newIodine"));
+app.get("/recipes/:id/iodine/edit", tela("editIodine"));
 
 // Inicia o servidor.
 // Sem callback no listen: o Express 5 liga o callback ao evento 'error'

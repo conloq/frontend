@@ -1,0 +1,24 @@
+<%- include('partials/header.ejs') %>
+<div class="app-shell min-h-screen bg-stone-100 lg:flex">
+  <%- include('partials/sidebar.ejs') %>
+  <div class="app-shell-content min-w-0 flex-1">
+    <%- include('partials/topBar.ejs') %>
+    <main class="space-y-6 p-4 sm:p-6">
+      <%- include('partials/mensagens.ejs') %>
+      <a href="/recipes" class="inline-flex min-h-11 items-center font-semibold">Voltar às receitas</a>
+      <h1 id="recipeName" class="text-3xl font-bold text-mash-brown">Receita</h1>
+      <form id="formEditarReceita" class="space-y-4 rounded-2xl bg-white p-6">
+        <label class="block font-semibold">Nome da receita
+          <input name="name" required maxlength="255" class="mt-2 w-full rounded-xl border border-stone-200 px-4 py-3" />
+        </label>
+        <button type="submit" class="min-h-11 rounded-xl bg-mash-orange px-4 font-bold text-white">Salvar nome</button>
+      </form>
+      <section class="space-y-4 rounded-2xl bg-white p-6">
+        <h2 class="text-xl font-bold">Rampas de temperatura</h2>
+        <p id="detalheRampas"></p>
+        <a id="newTemperatureLink" class="inline-flex min-h-11 items-center font-semibold">Adicionar rampa</a>
+      </section>
+    </main>
+  </div>
+</div>
+<%- include('partials/footer.ejs') %>

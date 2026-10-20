@@ -36,16 +36,17 @@ Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://l
 
 | Rota GET | Tela |
 |---|---|
-| `/` | redireciona para `/receitas` |
+| `/` | redireciona para `/recipes` |
 | `/login` | `views/login.ejs` |
 | `/cadastro` | `views/cadastro.ejs` |
 | `/logout` | redireciona para `/login` (o cliente limpa o token) |
 | `/usuario` | `views/usuario.ejs` |
-| `/receitas` | `views/receita.ejs` |
-| `/receitas/temperatura/cadastrar/:id` | `views/adicionarTemperatura.ejs` |
+| `/recipes` | `views/recipes.ejs` |
+| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
+| `/recipes/:id/temperatures/new` | `views/newTemperature.ejs` |
 | `/receitas/temperatura/editar/:id` | `views/editarTemperatura.ejs` |
-| `/receitas/iodo/cadastrar/:id` | `views/adicionarIodo.ejs` |
-| `/receitas/iodo/editar/:id` | `views/editarIodo.ejs` |
+| `/recipes/:id/iodine/new` | `views/newIodine.ejs` |
+| `/recipes/:id/iodine/edit` | `views/editIodine.ejs` |
 
 ## Rotas da API usadas pelo navegador
 
@@ -54,12 +55,11 @@ Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://l
 | Login | `POST /login` |
 | Cadastro | `POST /user` |
 | Perfil | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` |
-| Receitas | `GET /receitas`, `POST /receitas`, `DELETE /receitas/:recipeId` |
-| Temperatura | `GET /receitas/temperatura/:id`, `POST /receitas/temperatura/:id` |
+| Receitas | `GET/POST /recipes`, `GET/PUT/DELETE /recipes/:id` |
+| Temperatura | `GET /recipes/:id/temperatures`, `POST /recipes/:id/temperatures` |
 
 Iodo e edição de temperatura ainda não têm rota na API: essas telas são só layout (`conloq/mash#73`).
 
-> **Mudança prevista:** com a conloq/mash#71 e a conloq/mash#32, a API passa a usar `/recipes` e `/recipes/:id/temperatures`, e os campos passam a camelCase (`minTemperatureRamp`, `idealTime`, `phone`, `urlImage`; decisão de 08/10/2026). A troca no `public/js/app.js` e nos formulários é a conloq/mash#86, que atualiza esta tabela no mesmo Pull Request. Alterar e excluir receita via API são a conloq/mash#93.
 
 ## Documentação
 
@@ -67,3 +67,11 @@ Iodo e edição de temperatura ainda não têm rota na API: essas telas são só
 - `AGENTS.md`: regras de trabalho no repositório.
 - `docs/codebase/`: stack, estrutura, arquitetura, convenções, integrações, testes e riscos.
 - `docs/frontend-screens.md` e `docs/frontend-components.md`: inventário de telas e componentes.
+
+## Receitas e rampas: integração da #86
+
+O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista em `recipes`, detalhe em `recipe` e rampas em `temperatures`. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
+
+Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` (`newTemperature.ejs`), `/recipes/:id/iodine/new` (`newIodine.ejs`) e `/recipes/:id/iodine/edit` (`editIodine.ejs`). As duas telas de iodo continuam apenas layout, fora do fluxo desta entrega. Edição e exclusão de rampas permanecem na #97.
+
+Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.
