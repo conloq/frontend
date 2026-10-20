@@ -25,10 +25,11 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 | `/logout` | - | redireciona para `/login`; o `app.js` apaga o token |
 | `/usuario` | `usuario.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` |
 | `/recipes` | `recipes.ejs` | `GET /user`, `GET /recipes`, `GET /recipes/:id/temperatures` (uma por receita), `POST /recipes`, `DELETE /recipes/:id` |
-| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id` |
-| `/recipes/:id/temperatures/new` | `newTemperature.ejs` | `GET /user`, `POST /recipes/:id/temperatures` |
-| `/receitas/temperatura/editar/:id` | `editarTemperatura.ejs` | `GET /user` (só layout, API sem `PUT`) |
-| `/recipes/:id/iodine/new`, `/recipes/:id/iodine/edit` | `newIodine.ejs`, `editIodine.ejs` | `GET /user` (só layout, API sem iodo) |
+| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela; cada rampa tem editar e excluir com aviso `data-sem-api`, #97) |
+| `/recipes/:id/temperatures/new` | `temperatureForm.ejs` | `GET /user`, `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
+| `/recipes/:id/temperatures/:temperatureId/edit` | `temperatureForm.ejs` (`editando`) | `GET /user`, `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar é `data-sem-api` (#97) |
+| `/lots`, `/lots/:id` | `lots.ejs`, `lot.ejs` | `GET /user` (dados de exemplo no HTML; API de lotes na #31/#92) |
+| `/analyses/new`, `/analyses/:id` | `iodineDemo.ejs`, `analysis.ejs` | `GET /user` (demonstração da leitura automática com dados falsos; OpenCV na #34, consulta na #1/#3) |
 
 Fora desta entrega: `/recuperar-senha` (sem endpoint no depósito; o link sai ou mostra aviso, conloq/mash#73), editar temperatura, iodo e histórico de logins (a API não tem os três últimos).
 
@@ -76,6 +77,6 @@ O Back-End **não faz parte deste repositório**: aqui não existem `config/`, `
 
 O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista em `recipes`, detalhe em `recipe` e rampas em `temperatures`. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
 
-Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` (`newTemperature.ejs`), `/recipes/:id/iodine/new` (`newIodine.ejs`) e `/recipes/:id/iodine/edit` (`editIodine.ejs`). As duas telas de iodo continuam apenas layout, fora do fluxo desta entrega. Edição e exclusão de rampas permanecem na #97.
+Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`) e `/recipes/:id/temperatures/new` e `/recipes/:id/temperatures/:temperatureId/edit` (`temperatureForm.ejs`). Lotes e teste de iodo têm telas com dados de exemplo até a API entregar as rotas. Edição e exclusão de rampas permanecem na #97. O visual segue o redesign v2 de `docs/design/mash.pen`.
 
 Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.

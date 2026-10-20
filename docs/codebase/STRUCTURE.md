@@ -25,16 +25,16 @@ Rotas registradas em `index.js` (somente GET):
 
 | Rota | Template / destino |
 |---|---|
-| `/` | redirect para `/receitas` |
+| `/` | redirect para `/recipes` |
 | `/login` | `views/login.ejs` |
 | `/cadastro` | `views/cadastro.ejs` |
 | `/logout` | redirect para `/login` |
 | `/usuario` | `views/usuario.ejs` |
-| `/receitas` | `views/receita.ejs` |
-| `/receitas/temperatura/cadastrar/:id` | `views/adicionarTemperatura.ejs` |
-| `/receitas/temperatura/editar/:id` | `views/editarTemperatura.ejs` |
-| `/receitas/iodo/cadastrar/:id` | `views/adicionarIodo.ejs` |
-| `/receitas/iodo/editar/:id` | `views/editarIodo.ejs` |
+| `/recipes` | `views/recipes.ejs` |
+| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
+| `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` |
+| `/lots`, `/lots/:id` | `views/lots.ejs`, `views/lot.ejs` (dados de exemplo) |
+| `/analyses/new`, `/analyses/:id` | `views/iodineDemo.ejs` (demonstração), `views/analysis.ejs` (dados de exemplo) |
 
 ## 3) Module Boundaries
 

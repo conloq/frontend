@@ -3,8 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Roboto:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/vendor/phosphor/src/regular/style.css">
+  <link rel="stylesheet" href="/vendor/phosphor/src/fill/style.css">
   <link rel="stylesheet" href="/css/style.css">
-  <title>Projeto Cervejaria</title>
+  <link rel="icon" type="image/png" href="/img/logo-mash.png">
+  <title><%= typeof titulo !== 'undefined' ? `${titulo} · MASH` : 'MASH' %></title>
 </head>
-<body class="min-h-screen bg-mash-cream text-stone-800 antialiased">
+<body class="min-h-screen bg-fundo text-texto antialiased">

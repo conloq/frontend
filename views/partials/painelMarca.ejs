@@ -1,0 +1,18 @@
+<%# Painel marrom das telas de acesso. Recebe chamada (título). %>
+<section class="relative hidden overflow-hidden bg-mash-brown lg:flex lg:flex-1 lg:flex-col lg:justify-between lg:p-16" aria-label="Sobre o MASH">
+  <img src="/img/mash-emblema.png" alt="" class="pointer-events-none absolute left-1/2 top-16 w-[min(600px,70%)] -translate-x-1/2 opacity-85">
+  <div class="pointer-events-none absolute inset-0 bg-linear-to-b from-mash-brown-dark/0 from-35% to-mash-brown-dark/95 to-70%"></div>
+  <div class="relative flex items-center gap-3">
+    <img src="/img/logo-mash.png" alt="" class="size-12 rounded-full">
+    <span class="font-display text-2xl font-bold tracking-[0.15em] text-white">MASH</span>
+  </div>
+  <div class="relative flex max-w-3xl flex-col gap-5">
+    <p class="font-display text-5xl font-bold tracking-tight text-white"><%= chamada %></p>
+    <p class="text-lg leading-relaxed text-header-texto-2">Rampas de temperatura, lotes e o registro de cada teste de iodo, com foto, hora e temperatura. Você decide quando seguir para a fervura.</p>
+    <ul class="flex flex-wrap gap-x-7 gap-y-2 pt-2 text-[15px] font-medium text-white">
+      <li class="flex items-center gap-2"><i class="ph ph-thermometer-simple text-xl text-foco" aria-hidden="true"></i>Rampas sob controle</li>
+      <li class="flex items-center gap-2"><i class="ph ph-camera text-xl text-foco" aria-hidden="true"></i>Fotos do iodo por lote</li>
+      <li class="flex items-center gap-2"><i class="ph ph-clock-counter-clockwise text-xl text-foco" aria-hidden="true"></i>Histórico de cada lote</li>
+    </ul>
+  </div>
+</section>
