@@ -12,24 +12,23 @@ Cervejeiro artesanal que produz cerveja por hobby, em pequena escala. Durante a 
 
 ## Product Purpose
 
-O MASH monitora a etapa de mosturação e, como objetivo do projeto, automatiza a leitura do teste de iodo com visão computacional (Python e OpenCV; a classificação entra no próximo semestre). Tira do olho humano a interpretação da cor da reação, que muda com a iluminação, os reflexos e as gradações intermediárias, e registra cada leitura com data, hora, temperatura e tempo de mosturação. Sucesso é o cervejeiro saber, com confiança, se o mosto pode seguir para a fervura, e poder revisar depois a decisão de cada lote.
+O MASH apoia o acompanhamento da mosturação com receitas e rampas de temperatura. A leitura automatizada do teste de iodo é uma visão futura do produto: OpenCV e todo o fluxo real de imagem, análise e histórico ficam no backlog para o próximo semestre. Neste semestre, o teste de iodo aparece somente como simulação no frontend; a cena correspondente é obrigatória no pitch e deve ser apresentada sem etiqueta de simulação.
 
 ## Positioning
 
-Controladores de rampa térmica garantem a temperatura, mas não dizem se ainda há amido residual. O MASH liga o controle de temperatura e tempo à confirmação da conversão pelo teste de iodo e guarda a evidência por lote. Não se apresenta como substituto de análise laboratorial quantitativa.
+Controladores de rampa térmica garantem a temperatura, mas não dizem se ainda há amido residual. Como visão futura, o MASH relaciona o acompanhamento de temperatura e tempo ao teste de iodo e à rastreabilidade por lote. A entrega deste semestre não classifica amostras nem registra análises reais e não se apresenta como substituto de análise laboratorial quantitativa.
 
 ## Operating Context
 
-- Fluxo do depósito (03/11/2026): cadastrar receitas; adicionar rampas de temperatura a cada receita (faixa mínima/máxima, limites aceitáveis, temporizador, início do timer, tempo ideal e ordem); criar lotes a partir das receitas (nome, receita, início da mosturação, status `active`/`completed`); enviar a foto de cada coleta do teste de iodo para o lote, com data e hora da coleta e temperatura digitada pelo operador; consultar a análise e o histórico do lote.
-- No depósito, toda análise fica em `processing` com `result: null`. A classificação por visão computacional (OpenCV, conloq/mash#34), a leitura automática de temperatura por dispositivo e os alertas (conloq/mash#36, #45–#48) são do próximo semestre.
-- O resultado do iodo, quando existir, tem `status` `processing`, `completed`, `inconclusive` ou `failed` e `result` `STARCH_PRESENT` (amido presente), `PARTIAL_CONVERSION` (conversão parcial) ou `NO_DETECTABLE_STARCH` (sem amido detectável).
-- A API não devolve a imagem enviada (`imageKey` é interno): as telas não mostram a foto depois do envio.
+- Escopo observado no código do depósito: conta, receitas e criação/listagem de rampas. Lotes permanecem planejados. A tela do teste de iodo é uma simulação de frontend, sem envio de imagem, análise real ou persistência.
+- Backlog para o próximo semestre, sem Sprint: OpenCV e o fluxo real de imagem, armazenamento, análise, consulta e histórico (#34 e issues relacionadas). Leitura automática de temperatura e alertas também são futuros.
+- A cena do teste de iodo é obrigatória no pitch (#25, #28), usando a simulação frontend e sem etiqueta de simulação na cena.
 
 ## Capabilities and Constraints
 
-- Frontend EJS + Tailwind CSS v4 + JavaScript vanilla; a API REST (`conloq/Back-End`) tem as regras, o banco e o JWT. Rotas da API em inglês: `/login`, `/user`, `/recipes`, `/recipes/:id/temperatures`, `/temperatures/:id`, `/lots`, `/lots/:id/analyses`, `/analyses/upload`, `/analyses/:id`.
-- Já na API: login, usuário (criar, ver, editar, foto, excluir), receitas (CRUD) e criar/listar rampas. Planejado para o depósito: editar/excluir rampa (#97), lotes (#31, #92), upload, consulta e histórico de análises (#33, #1, #3).
-- Validações da API que as telas repetem: temperaturas inteiras de 0 a 100 ºC, mínima nunca maior que a máxima, horários `HH:MM:SS`, imagem JPEG ou PNG até 10 MB, nome de receita único por usuário (409 "Receita já existe"), lote com análises não pode ser excluído (409).
+- Frontend EJS + Tailwind CSS v4 + JavaScript vanilla; a API REST (`conloq/Back-End`) tem as regras, o banco e o JWT. Rotas atualmente observadas: `/login`, `/user`, `/user/upload`, `/recipes`, `/recipes/:id` e `/recipes/:id/temperatures`. Lotes e análises reais não têm rotas implementadas neste escopo.
+- Já no código da API: login, operações de usuário, CRUD de receitas e criação/listagem de rampas. A edição/exclusão de rampas (#97) ainda não está concluída; lotes e análises reais permanecem planejados para outro semestre, sem Sprint, conforme o recorte vigente (#31, #92, #33, #1, #3 e #34).
+- Restrições planejadas para o fluxo futuro: imagens JPEG ou PNG até 10 MB e lote com análises não pode ser excluído (409). Para o código atual, temperaturas são inteiras de 0 a 100 ºC, mínima nunca maior que a máxima, e horários `HH:MM:SS`.
 - Sem rota e sem issue: recuperação de senha e painel (dashboard). Telas dessas áreas são só layout e precisam dizer isso.
 - Termos do domínio em pt-BR: receita, processo, lote, mosturação, rampa de temperatura, teste de iodo, coleta, fervura.
 
