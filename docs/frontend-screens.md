@@ -63,6 +63,8 @@
 - `views/partials/header.ejs`
 - `views/partials/footer.ejs`
 - `views/partials/shellInicio.ejs`
+- `views/partials/shellFim.ejs`
 - `views/partials/sidebar.ejs`
 - `views/partials/topBar.ejs`
 - `public/js/script.js`
+- `public/js/app.js`
