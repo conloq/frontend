@@ -45,7 +45,7 @@
 - `recipes.ejs` e `recipe.ejs` usam listagem, ações icon-only e modais; as linhas vêm de `<template>`.
 - `usuario.ejs` usa formulário, diálogo de confirmação e preview de imagem.
 - `temperatureForm.ejs` usa cards de formulário com erro por campo.
-- Lotes e análise usam `avisoSemApi.ejs` e os moldes de estado do `footer.ejs`.
+- `lots.ejs`, `lot.ejs` e `analysis.ejs` usam um `card` estático de indisponibilidade (`#tituloIndisponivel`), sem chamada à API; `avisoSemApi.ejs` aparece só na edição de rampa.
 
 ## Evidências
 
