@@ -1,3 +1,4 @@
+/* global prenderFoco, closeModal */
 // Consumo da API do Back-End direto do navegador (CORS liberado no Back-End).
 // O token JWT fica no localStorage e vai como Bearer em cada chamada.
 // O HTML de linhas, toasts, alertas e estados fica em <template> nas views;

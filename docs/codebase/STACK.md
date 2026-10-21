@@ -53,7 +53,7 @@ node --check public/js/app.js
 - Config sources: `package.json`, `index.js`, `public/css/tailwind.css`, `.env`, `.coderabbit.yaml`, `.prettierrc.json`, `.github/`.
 - Required env vars: `API_URL` (opcional; padrão `http://localhost:8080`) e `PORT` (opcional; padrão `4000`). `.env` é opcional: `index.js` chama `process.loadEnvFile()` dentro de `try/catch`.
 - `.env.example` versionado com `PORT` e `API_URL`; `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
-- Deployment/runtime constraints: **a API precisa estar rodando** em `API_URL`, senão todas as telas carregam mas o cliente devolve 503. O Back-End precisa liberar CORS para a origem do frontend (`FRONTEND_URL`, padrão `http://localhost:4000`). Não há deploy nem container configurado; o CI só verifica (Super-Linter e CodeQL).
+- Deployment/runtime constraints: **a API precisa estar rodando** em `API_URL`, senão todas as telas carregam mas o cliente devolve 503. O Back-End precisa liberar CORS para a origem do frontend (`FRONTEND_URL`, padrão `http://localhost:4000`). Não há deploy nem container configurado; o CI verifica com Super-Linter e CodeQL. O Super-Linter usa `statuses: write` para os resultados e `pull-requests: write` para comentar o resumo no PR.
 
 ## 6) Evidence
 

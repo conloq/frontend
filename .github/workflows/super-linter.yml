@@ -14,6 +14,8 @@ permissions:
   packages: read
   # Publica o resultado de cada linter como status do commit
   statuses: write
+  # Publica o resumo da execução no PR
+  pull-requests: write
 
 jobs:
   lint:
