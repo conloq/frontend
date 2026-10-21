@@ -15,7 +15,10 @@
 - Start: `npm start` (`npx nodemon index.js`) on port 4000 (default; override with `PORT`). The API must be running at `API_URL` (default `http://localhost:8080`).
 - Build CSS: `npm run build:css` (`npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css`)
 - Watch CSS: `npm run watch:css`
-- Check syntax: `npm test`: only `node --check index.js`. There is no test, lint, formatter or typecheck suite.
+- Check syntax: `npm test`: only `node --check index.js`. There is no test or typecheck suite.
+- Format: `npm run format` (Prettier on `**/*.{js,mjs,css,json,html}`); `npm run format:check` only checks. Config in `.prettierrc.json` (4 spaces, single quotes; JSON and CSS 2 spaces, double quotes) and `.prettierignore` (generated CSS, `package-lock.json`, `docs/`).
+- Pre-commit: `npm install` installs a husky hook (`prepare`). On `git commit`, lint-staged runs `prettier --write` on the staged JS, CSS, JSON and HTML files and adds the result to the commit. `.ejs` and Markdown are not formatted. Use `git commit --no-verify` only to keep a commit free of unrelated formatting.
+- CI: the Super-Linter (`.github/workflows/super-linter.yml`) checks ESLint, Prettier and HTMLHint on changed files in PRs and on `main`; it never commits. CodeQL runs through GitHub default setup.
 - Focused checks: `node --check <file>.js`, compile EJS templates with the installed `ejs` package, and rerun `npm run build:css` after changing classes or `@source` directives.
 
 ## Runtime constraints
@@ -49,7 +52,7 @@ The whole client is one IIFE. Keep these boundaries when editing:
 
 ## Verification
 
-- Before claiming a change works, run `npm test`, `node --check` on changed JS, an EJS compile of touched templates, and `npm run build:css` when classes changed.
+- Before claiming a change works, run `npm test`, `node --check` on changed JS, `npm run format:check`, an EJS compile of touched templates, and `npm run build:css` when classes changed.
 - For behaviour, run both servers (API on 8080, this on 4000) and exercise the flow in a browser at desktop and mobile widths.
 - Stop any server started for verification.
 - Do not run destructive Git commands, edit `node_modules/`, or commit generated artifacts other than `public/css/style.css` when its source changed.
