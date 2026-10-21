@@ -9,13 +9,13 @@
 ## 2) System Flow
 
 ```text
-Navegador → GET /receitas
-  → index.js: res.render("receita")            (sem dados)
+Navegador → GET /recipes
+  → index.js: res.render("recipes")            (sem dados)
   → views/partials/header.ejs                  (Phosphor + /css/style.css)
   → HTML com contêineres vazios (#listaReceitas, #mensagens, [data-user])
   → views/partials/footer.ejs                  (window.API_URL, script.js, app.js)
   → app.js: guarda de rota (tem token?)
-  → app.js: fetch {API_URL}/receitas + /user com Bearer
+  → app.js: fetch {API_URL}/recipes + /user com Bearer
   → app.js: preenche #listaReceitas e [data-user]; erro → #mensagens
 ```
 
@@ -31,7 +31,7 @@ Navegador → GET /receitas
 | Layer or module | Owns | Must not own | Evidence |
 |-----------------|------|--------------|----------|
 | `index.js` | Bootstrap do Express, estáticos, rotas GET, `window.API_URL` | Dados, autenticação, chamadas à API | `index.js` |
-| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/receita.ejs`, `views/usuario.ejs` |
+| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/recipes.ejs`, `views/usuario.ejs` |
 | `views/partials/footer.ejs` | `window.API_URL`, ordem de carregamento dos scripts | Lógica de tela | `views/partials/footer.ejs` |
 | `public/js/app.js` | Chamadas à API, token, guarda de rota, mensagens, render de listas | Regra de negócio, autorização real | `public/js/app.js` |
 | `public/js/script.js` | Shell: sidebar, drawer, modais, senha, prévia de foto | Chamadas à API | `public/js/script.js` |
