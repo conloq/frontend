@@ -54,7 +54,7 @@ Rotas registradas em `index.js` (somente GET):
 
 ## 4) Naming and Organization Rules
 
-- File naming pattern: templates em camelCase com `.ejs` (`adicionarTemperatura.ejs`, `topBar.ejs`); JavaScript em camelCase (`index.js`, `app.js`, `script.js`); CSS em kebab-case.
+- File naming pattern: templates em camelCase com `.ejs` (`temperatureForm.ejs`, `topBar.ejs`); JavaScript em camelCase (`index.js`, `app.js`, `script.js`); CSS em kebab-case.
 - Directory organization pattern: por camada de apresentação (`views/`, `views/partials/`, `public/css/`, `public/js/`, `public/img/`, `public/icons/`).
 - Import aliasing or path conventions: `index.js` usa `node:` para builtins e caminhos relativos; `public/js/*.js` são scripts clássicos carregados por `<script src>` (sem `import`), na ordem definida em `views/partials/footer.ejs`: `script.js` e depois `app.js`.
 - Contrato HTML↔JS por string: o cliente encontra elementos por `id`/atributo (`#formLogin`, `#listaReceitas`, `[data-user]`). Renomear um deles quebra o comportamento sem erro.

@@ -65,11 +65,10 @@ Arquivo: `public/js/script.js`
 - `views/partials/sidebar.ejs`
 - `views/partials/topBar.ejs`
 - `views/partials/footer.ejs`
-- `views/receita.ejs`
-- `views/adicionarTemperatura.ejs`
-- `views/editarTemperatura.ejs`
-- `views/adicionarIodo.ejs`
-- `views/editarIodo.ejs`
+- `views/recipes.ejs`
+- `views/recipe.ejs`
+- `views/temperatureForm.ejs`
+- `views/iodineDemo.ejs`
 - `views/usuario.ejs`
 - `public/js/script.js`
 - `public/css/tailwind.css`
