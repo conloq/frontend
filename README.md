@@ -24,6 +24,20 @@ npm start
 
 Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://localhost:8080`); copie `.env.example` para `.env` para trocar.
 
+## Formatação e commits
+
+O código segue o Prettier (`.prettierrc.json`: 4 espaços e aspas simples; JSON e CSS com 2 espaços e aspas duplas). Você não precisa formatar à mão: o `npm install` instala um hook do Git que formata no commit.
+
+1. `git add` dos arquivos.
+2. `git commit`: antes de criar o commit, o hook roda o Prettier nos arquivos **que estão no staging** (JS, CSS, JSON e HTML) e coloca a versão formatada no próprio commit.
+
+- Rode `npm install` depois de clonar e depois de puxar mudanças no `package.json`. Sem isso o hook não existe e o commit sai sem formatar.
+- As views `.ejs` e o Markdown não são formatados.
+- Se o Prettier achar um erro de sintaxe, o commit não é criado: corrija e commite de novo.
+- `npm run format` formata o projeto inteiro; `npm run format:check` só confere.
+
+No PR, o Super-Linter confere ESLint e Prettier nos arquivos alterados. Ele só aponta o erro; não faz commit no seu branch.
+
 ## Como funciona
 
 - `index.js` (Express 5 + EJS) registra uma rota `GET` por tela, serve `public/` e `/vendor/phosphor`, e publica `API_URL` para o navegador como `window.API_URL`.
