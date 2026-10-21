@@ -57,6 +57,13 @@ The whole client is one IIFE. Keep these boundaries when editing:
 - Stop any server started for verification.
 - Do not run destructive Git commands, edit `node_modules/`, or commit generated artifacts other than `public/css/style.css` when its source changed.
 
+## Pull requests
+
+- Before `gh pr create` or editing a PR body, read the effective PR template from the base branch: the repository's own `.github/pull_request_template.md` first; only when it does not exist, the organization one in `conloq/.github` (`gh api repos/conloq/.github/contents/.github/pull_request_template.md -q .content | base64 -d`). Never open a PR with a free-form `--body`.
+- Keep every section and DoD item verbatim, written in pt-BR. Tick only the items that apply; leave N/A items unticked with a short note. Use `Closes conloq/mash#N` (or `Fixes` for a bug), or "Relacionada a" for a partial delivery.
+- No `Co-Authored-By` and no "Generated with" line in commits or PR bodies. `gh pr edit` fails on this account (Projects classic GraphQL error): edit the body with `gh api -X PATCH repos/<owner>/<repo>/pulls/<n> -F body=@file`.
+- Full procedure: skill `coordenacao-commit-seguro` (coordination repo).
+
 ## Source of truth
 
 - Treat `package.json` scripts, `index.js`, `public/js/app.js` and the current templates as authoritative over stale documentation.
