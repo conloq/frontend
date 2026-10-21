@@ -19,10 +19,10 @@
 |-----------|---------------|-------|-----------------|---------------|
 | Estado de sessão sem geração/versão | Um único slot mutável de token, compartilhado entre abas | `public/js/app.js` | Um `401` atrasado apaga um token novo; um login atrasado repõe estado após logout em outra aba | Comparar a identidade do token antes de apagar, ou versionar a sessão |
 | Logout só limpa o cliente | A API não revoga token | `public/js/app.js` (`sair`), `index.js` (`/logout`) | O token continua válido até expirar (1 dia) se for copiado antes do logout | Documentar; considerar endpoint de revogação no Back-End |
-| Nenhum teste | Sem runner no projeto | repositório inteiro | Regressão de renderização ou de contrato HTML↔JS só aparece em uso manual | Smoke de compilação EJS + status das 10 rotas |
+| Nenhum teste | Sem runner no projeto | repositório inteiro | Regressão de renderização ou de contrato HTML↔JS só aparece em uso manual | Smoke de compilação EJS + status das 14 rotas |
 | Contrato HTML↔JS por string de seletor | Um script para todas as telas | `public/js/app.js` ↔ `views/**/*.ejs` | Renomear um `id` quebra o comportamento sem erro (`?.` engole a falha) | Comentar o contrato no topo do script ou testar presença de seletores |
 | Linhas e mensagens vêm de `<template>` nas views | `clonar()` preenche `[data-slot]` com `textContent`/`setAttribute`, sem montar HTML com dados da API | `public/js/app.js`, `views/*.ejs` | Reintroduzir `innerHTML` com dados da API reabriria XSS | Manter dados só via `textContent`/`setAttribute` |
-| Cache-busting manual | Forçar recarga do shell | `views/partials/footer.ejs` (`?v=4`) | Esquecer de incrementar faz o navegador servir JS antigo | Incrementar a cada mudança em `script.js` |
+| Cache-busting manual | Forçar recarga do shell | `views/partials/footer.ejs` (`?v=5`) | Esquecer de incrementar faz o navegador servir JS antigo | Incrementar a cada mudança em `script.js` ou `app.js` |
 | `views/index.ejs` órfão | Sobra de teste (`<h1>Teste</h1>`) | `views/index.ejs` | Confunde quem procura a home (a home é `login.ejs`) | Remover |
 | 20 PNGs em `public/icons/` sem referência | Ícones anteriores à adoção do Phosphor | `public/icons/` | Peso morto no repositório | Remover ou documentar quem usa |
 

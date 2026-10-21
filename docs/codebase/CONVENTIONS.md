@@ -12,23 +12,24 @@
 | Rotas | inglês, minúsculas, plural nas coleções; login/cadastro/perfil migram na #73 | `/recipes`, `/recipes/:id/temperatures/new`, `/logout` | `index.js` |
 | Campos de formulário | inglês; os que vão para a API seguem o nome da API: camelCase (decisão de 08/10/2026, aplicada na #86); ids em pt-BR/camelCase | `name="minTemperatureRamp"` com `id="senha"` | `views/temperatureForm.ejs`, `views/login.ejs` |
 | Atributos de ligação | `data-*` em kebab-case, valor em camelCase | `data-user="urlImage"`, `data-excluir` | `views/partials/topBar.ejs`, `public/js/app.js` |
-| Tokens de tema | prefixo `mash-` | `--color-mash-brown`, `--color-mash-orange`, `--color-mash-cream` | `public/css/tailwind.css` |
+| Tokens de tema | `--color-*` em pt-BR por função; prefixo `mash-` só nas cores de marca | `--color-acao`, `--color-texto-2`, `--color-perigo-suave`, `--color-mash-brown` | `public/css/tailwind.css` |
 
 ## 2) Formatting and Linting
 
-- Formatter: nenhum configurado (sem Prettier/EditorConfig).
-- Linter: nenhum configurado (sem ESLint/Stylelint).
-- Estilo observado: indentação de 2 espaços em `index.js`, EJS e CSS; 4 espaços em `public/js/app.js` e `script.js`; aspas simples no JS do cliente, aspas duplas em `index.js`.
-- Most relevant enforced rules: `node --check` para sintaxe; o build Tailwind falha se `@source`/`@import` estiver inválido.
-- Run commands: `npm test`, `node --check <arquivo>.js`, `npm run build:css`.
-- Revisão de PR: `.coderabbit.yaml` (pt-BR, perfil `chill`, sem exigir testes automatizados; foco em segurança, tratamento de erros e contrato da issue).
+- Formatter: Prettier (`.prettierrc.json`). JS com 4 espaços, aspas simples, ponto e vírgula, `trailingComma: es5` e linha de até 100 caracteres; JSON e CSS com 2 espaços e aspas duplas. `.prettierignore` deixa de fora `public/css/style.css`, `package-lock.json` e `docs/`. Os templates `.ejs` não são formatados (2 espaços por convenção).
+- Pre-commit: o `npm install` instala um hook do husky; no `git commit`, o lint-staged roda `prettier --write` nos arquivos JS, CSS, JSON e HTML do staging e coloca o resultado no commit.
+- Linter: ESLint com a configuração padrão do Super-Linter (`eslint:recommended`, globais de navegador e Node), só no CI. Não há configuração de ESLint no repositório.
+- CI: o Super-Linter (`.github/workflows/super-linter.yml`) confere ESLint, Prettier e HTMLHint nos arquivos alterados, em PR e no `main`, e nunca faz commit. O CodeQL roda pelo default setup do GitHub.
+- Most relevant enforced rules: `node --check` para sintaxe; `no-unused-vars` do ESLint; o build Tailwind falha se `@source`/`@import` estiver inválido.
+- Run commands: `npm test`, `node --check <arquivo>.js`, `npm run format`, `npm run format:check`, `npm run build:css`.
+- Revisão de PR: `.coderabbit.yaml` (pt-BR, perfil `chill`, revisão automática dos PRs para o `main`, resumo no comentário do CodeRabbit, sem exigir testes automatizados).
 
 ## 3) Import and Module Conventions
 
 - Import grouping/order: `node:` primeiro, depois pacotes (`express`).
 - Alias vs relative import policy: apenas caminhos relativos/`node:`; sem aliases.
 - Public exports/barrel policy: `index.js` não exporta nada (executa e faz `listen`). `public/js/app.js` e `public/js/script.js` são scripts clássicos (IIFE no caso do `app.js`), não módulos: não usam `import`/`export`.
-- Ordem de carregamento: `footer.ejs` carrega `script.js?v=4` e depois `app.js`; `app.js` depende de `window.API_URL`, definido no mesmo arquivo antes dos scripts.
+- Ordem de carregamento: `footer.ejs` carrega `script.js?v=5` e depois `app.js?v=5`; `app.js` depende de `window.API_URL`, definido no mesmo arquivo antes dos scripts.
 
 ## 4) Error and Logging Conventions
 
@@ -50,6 +51,8 @@
 - `views/partials/footer.ejs`
 - `public/css/tailwind.css`
 - `.coderabbit.yaml`
+- `.prettierrc.json`, `.prettierignore`, `.husky/pre-commit`, `package.json` (`lint-staged`)
+- `.github/workflows/super-linter.yml`
 
 ## Receitas e rampas: integração da #86
 

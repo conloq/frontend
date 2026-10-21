@@ -61,6 +61,7 @@ The whole client is one IIFE. Keep these boundaries when editing:
 
 - Treat `package.json` scripts, `index.js`, `public/js/app.js` and the current templates as authoritative over stale documentation.
 - `codemap.md` is the repository atlas; read it before non-trivial work. The seven files in `docs/codebase/` describe this repository.
+- Keep them current: when a change adds, removes or renames files, routes, partials, tokens, scripts or tooling, update the matching `codemap.md` (root and that folder's) and the affected `docs/codebase/` file in the same PR. A codemap that lists files that no longer exist is a bug.
 - Ignore any document that describes `config/`, `routes/`, `controller/`, `middleware/`, `models/`, `services/`, MySQL, Sequelize, sessions, bcrypt or Multer as part of this repository: that is the legacy monolith `conloq/mash`, kept in the coordination repo `haimonvieira/conloq-pi-coordenacao` (local `D:/Fatec/PI/team-lead`).
 
 ## Repository Map
