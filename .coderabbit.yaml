@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "pt-BR"
-tone_instructions: "Seja objetivo e técnico. Foque em segurança, tratamento de erros e no contrato da issue (códigos HTTP, message/error, JSON em camelCase). Não peça testes automatizados."
+tone_instructions: "Seja objetivo e técnico. Este repositório só tem telas (EJS, Tailwind CSS e JavaScript do navegador). Foque em segurança no navegador, acessibilidade e nas regras do AGENTS.md. Não peça testes automatizados."
 reviews:
   profile: "chill"
   request_changes_workflow: false
@@ -13,8 +13,16 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-    base_branches:
-      - "main"
+  # Arquivos gerados ou grandes demais para revisar
+  path_filters:
+    - "!public/css/style.css"
+    - "!package-lock.json"
+    - "!docs/design/**"
+    - "!docs/figma-export/**"
+  tools:
+    # O projeto usa Prettier e ESLint; o Biome sugeriria outro estilo
+    biome:
+      enabled: false
   finishing_touches:
     autofix:
       enabled: false

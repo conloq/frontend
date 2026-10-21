@@ -22,7 +22,7 @@
 - CI: o Super-Linter (`.github/workflows/super-linter.yml`) confere ESLint, Prettier e HTMLHint nos arquivos alterados, em PR e no `main`, e nunca faz commit. O CodeQL roda pelo default setup do GitHub.
 - Most relevant enforced rules: `node --check` para sintaxe; `no-unused-vars` do ESLint; o build Tailwind falha se `@source`/`@import` estiver inválido.
 - Run commands: `npm test`, `node --check <arquivo>.js`, `npm run format`, `npm run format:check`, `npm run build:css`.
-- Revisão de PR: `.coderabbit.yaml` (pt-BR, perfil `chill`, revisão automática dos PRs para o `main`, resumo no comentário do CodeRabbit, sem exigir testes automatizados).
+- Revisão de PR: `.coderabbit.yaml` (pt-BR, perfil `chill`, revisão automática dos PRs para o `main`, resumo no comentário do CodeRabbit, sem exigir testes automatizados). Usa o `AGENTS.md` como guia de revisão, ignora arquivos gerados (`style.css`, `package-lock.json`, `docs/design/`, `docs/figma-export/`) e não roda o Biome. Ele leva cerca de 10 minutos para começar: espere o comentário antes do merge.
 
 ## 3) Import and Module Conventions
 
