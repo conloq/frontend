@@ -34,19 +34,23 @@ Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://l
 
 ## Rotas do frontend
 
+Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da API pelo navegador.
+
 | Rota GET | Tela |
 |---|---|
 | `/` | redireciona para `/recipes` |
 | `/login` | `views/login.ejs` |
 | `/cadastro` | `views/cadastro.ejs` |
 | `/logout` | redireciona para `/login` (o cliente limpa o token) |
-| `/usuario` | `views/usuario.ejs` |
+| `/usuario` | `views/usuario.ejs` (perfil) |
 | `/recipes` | `views/recipes.ejs` |
-| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
-| `/recipes/:id/temperatures/new` | `views/newTemperature.ejs` |
-| `/receitas/temperatura/editar/:id` | `views/editarTemperatura.ejs` |
-| `/recipes/:id/iodine/new` | `views/newIodine.ejs` |
-| `/recipes/:id/iodine/edit` | `views/editIodine.ejs` |
+| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` (mesma tela: renomear e editar/excluir rampas) |
+| `/recipes/:id/temperatures/new` | `views/temperatureForm.ejs` (nova rampa) |
+| `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` (editar rampa) |
+| `/lots` | `views/lots.ejs` |
+| `/lots/:id` | `views/lot.ejs` |
+| `/analyses/new` | `views/iodineDemo.ejs` (demonstração do teste de iodo) |
+| `/analyses/:id` | `views/analysis.ejs` |
 
 ## Rotas da API usadas pelo navegador
 
@@ -55,11 +59,12 @@ Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://l
 | Login | `POST /login` |
 | Cadastro | `POST /user` |
 | Perfil | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` |
-| Receitas | `GET/POST /recipes`, `GET/PUT/DELETE /recipes/:id` |
-| Temperatura | `GET /recipes/:id/temperatures`, `POST /recipes/:id/temperatures` |
+| Receitas | `GET/POST /recipes`, `GET /recipes/:id/temperatures` (contagem e faixa de cada receita), `DELETE /recipes/:id` |
+| Receita | `GET/PUT/DELETE /recipes/:id`, `GET /recipes/:id/temperatures` |
+| Nova rampa | `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
+| Editar rampa | `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar ainda não tem rota na API (#97) |
 
-Iodo e edição de temperatura ainda não têm rota na API: essas telas são só layout (`conloq/mash#73`).
-
+As telas internas também chamam `GET /user` para preencher o topo. Lotes, análises e o teste de iodo ainda não têm rota na API: mostram dados de exemplo e avisam em vez de salvar (#31, #92, #1, #3). A leitura do iodo será feita pelo Back-End com Python e OpenCV (#34); o usuário não envia foto.
 
 ## Documentação
 
@@ -72,6 +77,6 @@ Iodo e edição de temperatura ainda não têm rota na API: essas telas são só
 
 O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista em `recipes`, detalhe em `recipe` e rampas em `temperatures`. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
 
-Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` (`newTemperature.ejs`), `/recipes/:id/iodine/new` (`newIodine.ejs`) e `/recipes/:id/iodine/edit` (`editIodine.ejs`). As duas telas de iodo continuam apenas layout, fora do fluxo desta entrega. Edição e exclusão de rampas permanecem na #97.
+Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` e `/recipes/:id/temperatures/:temperatureId/edit` (`temperatureForm.ejs`). Edição e exclusão de rampas permanecem na #97.
 
 Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.
