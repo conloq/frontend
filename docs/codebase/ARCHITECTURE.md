@@ -31,7 +31,7 @@ Navegador → GET /recipes
 | Layer or module | Owns | Must not own | Evidence |
 |-----------------|------|--------------|----------|
 | `index.js` | Bootstrap do Express, estáticos, rotas GET, `window.API_URL` | Dados, autenticação, chamadas à API | `index.js` |
-| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/receita.ejs`, `views/usuario.ejs` |
+| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/recipes.ejs`, `views/usuario.ejs` |
 | `views/partials/footer.ejs` | `window.API_URL`, ordem de carregamento dos scripts | Lógica de tela | `views/partials/footer.ejs` |
 | `public/js/app.js` | Chamadas à API, token, guarda de rota, mensagens, render de listas | Regra de negócio, autorização real | `public/js/app.js` |
 | `public/js/script.js` | Shell: sidebar, drawer, modais, senha, prévia de foto | Chamadas à API | `public/js/script.js` |
