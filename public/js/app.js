@@ -135,14 +135,21 @@
     // ------------------------------------------------------------ diálogo de confirmação
 
     // Substitui o confirm(): resolve true só no botão de confirmar
-    function confirmar({ titulo, mensagem, botao = 'Excluir' }) {
+    // Com aoConfirmar, o diálogo fica aberto com o botão em "Excluindo…" até a API responder
+    function confirmar({
+        titulo,
+        mensagem,
+        botao = 'Excluir',
+        carregandoTexto = 'Excluindo…',
+        aoConfirmar,
+    }) {
         const dialogo = q('#dialogoConfirmar');
         if (!dialogo) return Promise.resolve(false);
 
         q('#dialogoConfirmarTitulo').textContent = titulo;
         q('#dialogoConfirmarMensagem').textContent = mensagem;
         q('#dialogoConfirmarBotao').textContent = botao;
-        const anterior = document.activeElement;
+        let liberarFoco;
 
         return new Promise((resolve) => {
             const fechar = (resposta) => {
@@ -150,22 +157,36 @@
                 dialogo.setAttribute('aria-hidden', 'true');
                 document.removeEventListener('keydown', teclado);
                 dialogo.removeEventListener('click', clique);
-                anterior?.focus();
+                liberarFoco();
                 resolve(resposta);
             };
+            let ocupado = false;
             const teclado = (event) => {
-                if (event.key === 'Escape') fechar(false);
+                if (event.key === 'Escape' && !ocupado) fechar(false);
             };
-            const clique = (event) => {
+            const clique = async (event) => {
+                if (ocupado) return;
                 if (event.target === dialogo) return fechar(false);
                 const escolha = event.target.closest('[data-confirmar]');
-                if (escolha) fechar(escolha.dataset.confirmar === 'sim');
+                if (!escolha) return;
+                if (escolha.dataset.confirmar !== 'sim') return fechar(false);
+                if (!aoConfirmar) return fechar(true);
+
+                ocupado = true;
+                const cancelar = q('[data-confirmar="nao"]', dialogo);
+                cancelar.disabled = true;
+                carregando(escolha, true, carregandoTexto);
+                const resultado = await aoConfirmar();
+                carregando(escolha, false);
+                cancelar.disabled = false;
+                fechar(resultado);
             };
 
             dialogo.classList.replace('hidden', 'flex');
             dialogo.setAttribute('aria-hidden', 'false');
             document.addEventListener('keydown', teclado);
             dialogo.addEventListener('click', clique);
+            liberarFoco = prenderFoco(dialogo);
             q('[data-confirmar="nao"]', dialogo).focus();
         });
     }
@@ -219,9 +240,7 @@
     function fecharModal(id) {
         const modal = document.getElementById(id);
         if (!modal) return;
-        modal.classList.add('hidden');
-        modal.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('overflow-hidden');
+        closeModal(modal);
     }
 
     const abrirModal = (id) => q(`[data-modal-open="${id}"]`)?.click();
@@ -277,18 +296,23 @@
         try {
             // FormData (upload de foto): o navegador define o Content-Type com o boundary
             const multipart = corpo instanceof FormData;
+            const signal = AbortSignal.timeout(15000);
             const resposta = await fetch(API + caminhoApi, {
                 method: metodo,
+                signal,
                 headers: {
                     ...(!multipart && { 'Content-Type': 'application/json' }),
                     ...(token && { Authorization: `Bearer ${token}` }),
                 },
                 ...(corpo && { body: multipart ? corpo : JSON.stringify(corpo) }),
             });
-            const data = await resposta.json().catch(() => ({}));
+            const data = await resposta.json().catch(() => {
+                signal.throwIfAborted();
+                return {};
+            });
 
             // Token ausente, inválido ou expirado: volta ao login
-            if (resposta.status === 401 && token) {
+            if (resposta.status === 401 && token && guardar.get(TOKEN_KEY) === token) {
                 guardar.del(TOKEN_KEY);
                 irPara(
                     '/login',
@@ -298,8 +322,18 @@
             }
 
             return { status: resposta.status, data };
-        } catch {
-            return { status: 503, data: { error: 'Não foi possível falar com a API' } };
+        } catch (erro) {
+            return {
+                status: 503,
+                data: {
+                    error:
+                        erro.name === 'TimeoutError'
+                            ? metodo === 'GET'
+                                ? 'A API demorou para responder. Tente novamente.'
+                                : 'A API demorou para responder. A alteração pode ter sido salva; confira os dados antes de tentar novamente.'
+                            : 'Não foi possível falar com a API',
+                },
+            };
         }
     }
 
@@ -398,8 +432,22 @@
     }
 
     async function carregarUsuario() {
+        const salvar = q('#btnSalvar');
+        if (salvar) {
+            salvar.disabled = true;
+            limparAlerta();
+        }
         const { status, data } = await api('GET', '/user');
-        if (status !== 200 || !data.user) return;
+        if (status !== 200 || !data.user) {
+            if (q('#formPerfil'))
+                mostrarAlerta(
+                    'danger',
+                    mensagemDaApi(data, 'Não foi possível carregar o perfil'),
+                    'Carregue seus dados antes de salvar alterações.',
+                    { texto: 'Tentar de novo', aoClicar: carregarUsuario }
+                );
+            return;
+        }
 
         usuario = data.user;
         qa('[data-user="name"]').forEach((el) => {
@@ -415,6 +463,7 @@
             if (usuario.createdAt) el.textContent = dataBR(usuario.createdAt);
         });
         preencherPerfil();
+        if (salvar) salvar.disabled = false;
     }
 
     if (!paginaPublica) carregarUsuario();
@@ -424,6 +473,7 @@
     q('#formPerfil')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const form = event.target;
+        if (q('#btnSalvar')?.disabled || !usuario) return;
         const { name, email, phone, password, confirmarSenha } = formData(form);
         limparErros(form);
         limparAlerta();
@@ -484,19 +534,18 @@
     });
 
     q('#btnExcluir')?.addEventListener('click', async () => {
-        const ok = await confirmar({
+        const excluida = await confirmar({
             titulo: 'Excluir sua conta?',
             mensagem: 'Você sai do MASH e perde o acesso às suas receitas. Não dá para desfazer.',
             botao: 'Excluir conta',
+            aoConfirmar: async () => {
+                const { status, data } = await api('DELETE', '/user');
+                if (status === 204) return true;
+                mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível excluir a conta'));
+                return false;
+            },
         });
-        if (!ok) return;
-
-        const { status, data } = await api('DELETE', '/user');
-        if (status !== 204) {
-            return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível excluir a conta'));
-        }
-
-        sair('Conta excluída');
+        if (excluida) sair('Conta excluída');
     });
 
     // ------------------------------------------------------------ receitas
@@ -520,7 +569,7 @@
                     ? plural(rampas.length, 'rampa', 'rampas')
                     : 'Nenhuma'
                 : '—',
-            faixa: faixa ?? 'Sem rampas',
+            faixa: rampas === null ? 'Não foi possível carregar' : (faixa ?? 'Sem rampas'),
             criadaEm: dataBR(receita.createdAt),
             novaRampa: {
                 href: `/recipes/${receita.id}/temperatures/new`,
@@ -605,20 +654,18 @@
     }
 
     async function excluirReceita(receita) {
-        const ok = await confirmar({
+        return confirmar({
             titulo: `Excluir a receita ${receita.name}?`,
             mensagem:
                 'As rampas de temperatura desta receita também serão excluídas. Não dá para desfazer.',
             botao: 'Excluir receita',
+            aoConfirmar: async () => {
+                const { status, data } = await api('DELETE', `/recipes/${receita.id}`);
+                if (status === 204) return true;
+                mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível excluir a receita'));
+                return false;
+            },
         });
-        if (!ok) return false;
-
-        const { status, data } = await api('DELETE', `/recipes/${receita.id}`);
-        if (status !== 204) {
-            mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível excluir a receita'));
-            return false;
-        }
-        return true;
     }
 
     q('#buscaReceitas')?.addEventListener('input', desenharReceitas);
@@ -888,7 +935,7 @@
 
     iniciarFormRampa();
 
-    // ------------------------------------------------------------ telas com dados de exemplo (lotes e iodo)
+    // ------------------------------------------------------------ ações ainda indisponíveis
 
     // Ações dessas telas ainda não têm rota na API: avisam em vez de fingir que salvaram
     function avisarSemApi(event) {

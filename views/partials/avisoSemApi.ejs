@@ -1,5 +1,5 @@
-<%# Aviso das telas com dados de exemplo (a API ainda não tem a rota). Recebe issue e, opcional, titulo. %>
+<%# Aviso para ações que ainda não têm rota na API. Recebe issue e, opcional, titulo. %>
 <p class="flex items-start gap-3 rounded-[10px] bg-info-suave px-4 py-3 text-sm">
   <i class="ph-fill ph-info mt-0.5 text-xl text-info" aria-hidden="true"></i>
-  <span><strong class="font-semibold"><%= locals.titulo ?? 'Dados de exemplo.' %></strong> Esta área ainda não tem rota na API (<%= issue %>); nada aqui é salvo.</span>
+  <span><strong class="font-semibold"><%= locals.titulo ?? 'Recurso indisponível.' %></strong> Esta área ainda não tem rota na API (<%= issue %>); nada aqui é salvo.</span>
 </p>

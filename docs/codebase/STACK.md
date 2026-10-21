@@ -26,7 +26,7 @@ O cliente HTTP é o `fetch` nativo do navegador: não há axios, ky ou similar. 
 | Tool | Purpose | Evidence |
 |------|---------|----------|
 | `tailwindcss` + `@tailwindcss/cli` (`^4.3.3`) | BUILD: compilação/watch do CSS | `package.json`, `public/css/tailwind.css` |
-| `node --check` | CHECK: verificação sintática; é todo o `npm test` | `package.json` |
+| `node --check` | CHECK: sintaxe do servidor; `npm test` também executa verificações com assert/VM e renderização EJS | `package.json` |
 | CodeRabbit (`.coderabbit.yaml`) | REVIEW: revisão automática de PRs para `main`, perfil `chill`, pt-BR | `.coderabbit.yaml` |
 | `prettier` (`^3.9.10`) | FORMAT: formatação de JS, CSS, JSON e HTML (`.prettierrc.json`) | `package.json`, `.prettierrc.json` |
 | `husky` (`^9.1.7`) + `lint-staged` (`^17.6.0`) | FORMAT: hook de pre-commit que roda o Prettier nos arquivos do staging | `package.json`, `.husky/pre-commit` |
@@ -42,7 +42,7 @@ npm install
 npm run build:css          # npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css
 npm run watch:css
 npm start                  # npx nodemon index.js  (porta 4000)
-npm test                   # node --check index.js  (sai com 0; não é suíte de testes)
+npm test                   # sintaxe + scripts/verify-{profile-contract,upload,client}.mjs
 npm run format             # Prettier em **/*.{js,mjs,css,json,html}
 npm run format:check       # só confere a formatação
 node --check public/js/app.js

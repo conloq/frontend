@@ -5,12 +5,22 @@ import ejs from 'ejs';
 
 const profile = {
     elements: Object.fromEntries(
-        ['name', 'email', 'phone', 'password'].map((name) => [name, { value: '' }])
+        ['name', 'email', 'phone', 'password', 'confirmarSenha'].map((name) => [
+            name,
+            { value: '' },
+        ])
     ),
+    querySelector() {
+        return null;
+    },
+    querySelectorAll() {
+        return [];
+    },
     addEventListener(type, handler) {
         if (type === 'submit') this.submit = handler;
     },
 };
+const save = { disabled: true };
 const photo = { src: '/img/foto-perfil.png' };
 const calls = [];
 class FormDataMock {
@@ -36,13 +46,15 @@ runInNewContext(source, {
     window: { API_URL: 'http://api.test' },
     location,
     FormData: FormDataMock,
+    AbortSignal,
     localStorage: {
         getItem: (key) => storage.get(key),
         setItem: (key, value) => storage.set(key, value),
         removeItem: (key) => storage.delete(key),
     },
     document: {
-        querySelector: (selector) => (selector === '#formPerfil' ? profile : null),
+        querySelector: (selector) =>
+            selector === '#formPerfil' ? profile : selector === '#btnSalvar' ? save : null,
         querySelectorAll: (selector) => (selector === '[data-user="urlImage"]' ? [photo] : []),
     },
     fetch: async (url, options) => {
@@ -75,7 +87,10 @@ assert.deepEqual(JSON.parse(update.body), {
     email: 'profile@example.test',
     phone: '11988887777',
 });
-assert.equal(location.href, '/usuario');
+await new Promise(setImmediate);
+assert.equal(location.href, '');
+assert.equal(save.disabled, false);
+assert.equal(calls.filter((call) => call.method === 'GET').length, 2);
 for (const file of ['../views/usuario.ejs', '../views/partials/topBar.ejs']) {
     const url = new URL(file, import.meta.url);
     const template = readFileSync(url, 'utf8');

@@ -11,7 +11,9 @@
 | `views/partials/` | Shell compartilhado: header, footer, sidebar, topBar, mensagens | `views/partials/*.ejs` |
 | `public/css/` | Fonte Tailwind v4 (`tailwind.css`) e CSS compilado (`style.css`) | `public/css/` |
 | `public/img/`, `public/icons/` | Imagens usadas pelos templates e PNGs de apoio | `public/img/`, `public/icons/` |
-| `docs/` | Documentação, planos, specs, export Figma e `docs/codebase/` | `docs/` |
+| `scripts/` | Verificações executadas por `npm test`, sem dependências adicionais | `scripts/codemap.md` |
+| `docs/` | Documentação, planos, specs, export Figma e `docs/codebase/` | `scripts/` | Verificações executadas por `npm test`, sem dependências adicionais | `scripts/codemap.md` |
+| `docs/` |
 | `codemap.md`, `AGENTS.md`, `README.md` | Atlas, regras de trabalho e visão do projeto | raiz |
 | `.env.example`, `.coderabbit.yaml` | Variáveis de ambiente e revisão automática | raiz |
 
@@ -33,8 +35,8 @@ Rotas registradas em `index.js` (somente GET):
 | `/recipes` | `views/recipes.ejs` |
 | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
 | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` |
-| `/lots`, `/lots/:id` | `views/lots.ejs`, `views/lot.ejs` (dados de exemplo) |
-| `/analyses/new`, `/analyses/:id` | `views/iodineDemo.ejs` (demonstração), `views/analysis.ejs` (dados de exemplo) |
+| `/lots`, `/lots/:id` | `views/lots.ejs`, `views/lot.ejs` (indisponível) |
+| `/analyses/new`, `/analyses/:id` | `views/iodineDemo.ejs` (demonstração simulada), `views/analysis.ejs` (indisponível) |
 
 ## 3) Module Boundaries
 
@@ -47,6 +49,7 @@ Rotas registradas em `index.js` (somente GET):
 | `views/partials/` | Shell compartilhado e carregamento de assets | Lógica específica de uma tela |
 | `public/css/tailwind.css` | Tema (`--color-mash-*`), `@source` e estilos do shell | CSS gerado |
 | `public/css/style.css` | Saída do build Tailwind | Edição manual |
+| `scripts/` | Verificações executadas por `npm test`, sem dependências adicionais | `scripts/codemap.md` |
 | `docs/` | Documentação, planos, specs e export Figma | Código de aplicação |
 
 ## 4) Naming and Organization Rules

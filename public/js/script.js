@@ -109,8 +109,53 @@ inputFoto?.addEventListener('change', () => {
     reader.readAsDataURL(file);
 });
 
+// Torna inativos os irmãos de cada ancestral, sem bloquear o próprio diálogo.
+function prenderFoco(modal) {
+    const anterior = document.activeElement;
+    const bloqueados = [];
+    for (let ramo = modal; ramo.parentElement; ramo = ramo.parentElement) {
+        for (const irmao of ramo.parentElement.children) {
+            if (irmao !== ramo && !irmao.inert) {
+                irmao.inert = true;
+                bloqueados.push(irmao);
+            }
+        }
+    }
+    const teclado = (event) => {
+        if (event.key !== 'Tab') return;
+        const campos = [
+            ...modal.querySelectorAll('a[href], button, input, select, textarea, [tabindex]'),
+        ].filter((el) => !el.disabled && el.tabIndex >= 0 && el.getClientRects().length);
+        const alvo = event.shiftKey ? campos.at(-1) : campos[0];
+        const limite = event.shiftKey ? campos[0] : campos.at(-1);
+        if (
+            !modal.contains(document.activeElement) ||
+            document.activeElement === limite ||
+            !campos.length
+        ) {
+            event.preventDefault();
+            (alvo ?? modal).focus();
+        }
+    };
+    const tabindex = modal.getAttribute('tabindex');
+    modal.tabIndex = -1;
+    document.addEventListener('keydown', teclado);
+    return () => {
+        document.removeEventListener('keydown', teclado);
+        bloqueados.forEach((el) => {
+            el.inert = false;
+        });
+        if (tabindex === null) modal.removeAttribute('tabindex');
+        else modal.setAttribute('tabindex', tabindex);
+        anterior?.focus();
+    };
+}
+
+const liberarModal = new WeakMap();
+
 function openModal(modal) {
-    if (!modal) return;
+    if (!modal || liberarModal.has(modal)) return;
+    liberarModal.set(modal, prenderFoco(modal));
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('overflow-hidden');
@@ -121,6 +166,8 @@ function closeModal(modal) {
     if (!modal) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
+    liberarModal.get(modal)?.();
+    liberarModal.delete(modal);
     if (![...$$('.js-modal')].some((item) => !item.classList.contains('hidden')))
         document.body.classList.remove('overflow-hidden');
 }

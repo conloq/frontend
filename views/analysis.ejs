@@ -1,32 +1,10 @@
-<%- include('partials/shellInicio.ejs', { titulo: 'Análise de 20/10/2026 · 14:52', trilha: ['Teste de iodo', 'Análise'] }) %>
-<div class="flex flex-col gap-1">
-  <a href="/lots/1" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Lote 12/03</a>
-  <h1 class="text-[30px] font-semibold">Análise de 20/10/2026 · 14:52</h1>
-</div>
+<%- include('partials/shellInicio.ejs', { titulo: 'Análise de iodo', trilha: ['Teste de iodo', 'Análise'] }) %>
+<a href="/analyses/new" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Teste de iodo</a>
+<h1 class="text-[30px] font-semibold">Análise de iodo</h1>
 
-<%- include('partials/avisoSemApi.ejs', { issue: 'conloq/mash#1' }) %>
-
-<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_480px]">
-  <section class="card flex flex-col gap-4 self-start p-8" aria-labelledby="analiseEstadoTitulo">
-    <div class="flex flex-col gap-2">
-      <span class="selo-info self-start">Em processamento</span>
-      <h2 id="analiseEstadoTitulo" class="text-2xl font-semibold">Aguardando classificação</h2>
-      <p class="text-texto-2">A coleta está registrada. A classificação automática pelo OpenCV entra no próximo semestre.</p>
-    </div>
-    <div class="pt-2">
-      <button type="button" class="btn-secundario" data-sem-api="conloq/mash#1"><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Atualizar</button>
-    </div>
-  </section>
-
-  <section class="card self-start px-6 py-5" aria-labelledby="tituloDadosColeta">
-    <h2 id="tituloDadosColeta" class="text-lg font-semibold">Dados da coleta</h2>
-    <dl class="mt-2 flex flex-col">
-      <% [['Lote', 'Lote 12/03'], ['Coleta', '20/10/2026 às 14:52'], ['Temperatura na coleta', '66 ºC'], ['Origem da leitura', 'Câmera da bancada'], ['Registrada em', '20/10/2026 às 14:53']].forEach(([rotulo, valor]) => { %>
-        <div class="flex min-h-13 items-center justify-between gap-4 border-b border-linha last:border-b-0">
-          <dt class="text-texto-2"><%= rotulo %></dt><dd class="text-right font-semibold"><%= valor %></dd>
-        </div>
-      <% }) %>
-    </dl>
-  </section>
-</div>
+<section class="card flex flex-col items-center gap-3 px-6 py-16 text-center" aria-labelledby="tituloIndisponivel">
+  <i class="ph ph-clock text-4xl text-texto-2" aria-hidden="true"></i>
+  <h2 id="tituloIndisponivel" class="text-xl font-semibold">Detalhes da análise indisponíveis</h2>
+  <p class="max-w-md text-texto-2">Ainda não é possível consultar a coleta e o resultado desta análise.</p>
+</section>
 <%- include('partials/shellFim.ejs') %>

@@ -45,10 +45,10 @@ app.get(
     '/recipes/:id/temperatures/:temperatureId/edit',
     tela('temperatureForm', { editando: true })
 );
-// Lotes e teste de iodo: telas com dados de exemplo até a API ter as rotas (#31, #33, #1, #3)
+// Lotes e análises: estados de indisponibilidade até a API ter as rotas.
 app.get('/lots', tela('lots'));
 app.get('/lots/:id', tela('lot'));
-app.get('/analyses/new', tela('iodineDemo')); // demonstração com dados falsos; a leitura real é do OpenCV (#34)
+app.get('/analyses/new', tela('iodineDemo')); // demonstração simulada; leitura real ainda indisponível (#34)
 app.get('/analyses/:id', tela('analysis'));
 
 // Inicia o servidor.

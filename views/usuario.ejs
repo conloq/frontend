@@ -30,7 +30,7 @@
     </section>
   </div>
 
-  <form id="formPerfil" class="card flex flex-col gap-5 self-start p-6" novalidate>
+  <form id="formPerfil" method="post" class="card flex flex-col gap-5 self-start p-6" novalidate>
     <h2 class="text-lg font-semibold">Dados da conta</h2>
     <div class="grid gap-5 md:grid-cols-2">
       <div class="campo" data-campo="name">
@@ -73,7 +73,7 @@
     </div>
     <div class="flex flex-wrap justify-end gap-3 pt-2">
       <button type="button" id="btnDescartar" class="btn-secundario">Descartar</button>
-      <button type="submit" id="btnSalvar" class="btn-primario">Salvar alterações</button>
+      <button type="submit" id="btnSalvar" disabled class="btn-primario">Salvar alterações</button>
     </div>
   </form>
 </div>
