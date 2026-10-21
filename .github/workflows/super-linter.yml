@@ -1,0 +1,57 @@
+name: Super-Linter
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: read
+  # Publica o resultado de cada linter como status do commit
+  statuses: write
+
+jobs:
+  lint:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          # Histórico completo para listar os arquivos alterados
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Run Super-Linter
+        uses: super-linter/super-linter@v9.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # JavaScript
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_JAVASCRIPT_PRETTIER: true
+
+          # CSS
+          VALIDATE_CSS_PRETTIER: true
+
+          # HTML (só arquivos .html; as views .ejs ficam de fora)
+          VALIDATE_HTML: true
+          VALIDATE_HTML_PRETTIER: true
+
+          # JSON
+          VALIDATE_JSON_PRETTIER: true
+
+          # Analisa somente arquivos alterados
+          VALIDATE_ALL_CODEBASE: false
+
+          # Ignora arquivos ignorados pelo Git
+          IGNORE_GITIGNORED_FILES: true
+
+          # CSS gerado pelo Tailwind
+          FILTER_REGEX_EXCLUDE: ^public/css/style\.css$

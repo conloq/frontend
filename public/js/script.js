@@ -8,8 +8,20 @@ const closeButton = $('.sidebar-close');
 const collapseButton = $('.sidebar-collapse');
 const sidebarStorageKey = 'mash-sidebar-collapsed';
 
-const lerStorage = (key) => { try { return localStorage.getItem(key); } catch { return null; } };
-const gravarStorage = (key, value) => { try { localStorage.setItem(key, value); } catch { /* sem storage */ } };
+const lerStorage = (key) => {
+    try {
+        return localStorage.getItem(key);
+    } catch {
+        return null;
+    }
+};
+const gravarStorage = (key, value) => {
+    try {
+        localStorage.setItem(key, value);
+    } catch {
+        /* sem storage */
+    }
+};
 
 function setDesktopSidebarState(collapsed, persist = true) {
     if (!sidebar || !collapseButton) return;
@@ -27,7 +39,8 @@ function setDesktopSidebarState(collapsed, persist = true) {
 
 if (sidebar && collapseButton) {
     const savedState = lerStorage(sidebarStorageKey);
-    if (savedState === 'true' || savedState === 'false') setDesktopSidebarState(savedState === 'true', false);
+    if (savedState === 'true' || savedState === 'false')
+        setDesktopSidebarState(savedState === 'true', false);
 }
 
 collapseButton?.addEventListener('click', (event) => {
@@ -57,7 +70,9 @@ document.addEventListener('keydown', (event) => {
 
 // Item ativo: a seção do link (data-secao) é prefixo do caminho atual; o ícone fica preenchido
 $$('.menu-link[data-secao]').forEach((link) => {
-    const ativo = link.dataset.secao.split(' ').some((secao) => window.location.pathname.startsWith(secao));
+    const ativo = link.dataset.secao
+        .split(' ')
+        .some((secao) => window.location.pathname.startsWith(secao));
     if (!ativo) return;
     link.classList.add('menu-link-active');
     link.setAttribute('aria-current', 'page');
@@ -73,7 +88,12 @@ $$('[data-toggle-senha]').forEach((botao) => {
         const visivel = campo.type === 'text';
         campo.type = visivel ? 'password' : 'text';
         botao.setAttribute('aria-label', visivel ? 'Mostrar senha' : 'Ocultar senha');
-        botao.querySelector('i')?.classList.replace(visivel ? 'ph-eye-slash' : 'ph-eye', visivel ? 'ph-eye' : 'ph-eye-slash');
+        botao
+            .querySelector('i')
+            ?.classList.replace(
+                visivel ? 'ph-eye-slash' : 'ph-eye',
+                visivel ? 'ph-eye' : 'ph-eye-slash'
+            );
     });
 });
 
@@ -83,7 +103,9 @@ inputFoto?.addEventListener('change', () => {
     const preview = $('#previewFoto');
     if (!file || !preview) return;
     const reader = new FileReader();
-    reader.addEventListener('load', (event) => { preview.src = event.target.result; });
+    reader.addEventListener('load', (event) => {
+        preview.src = event.target.result;
+    });
     reader.readAsDataURL(file);
 });
 
@@ -99,9 +121,18 @@ function closeModal(modal) {
     if (!modal) return;
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
-    if (![...$$('.js-modal')].some((item) => !item.classList.contains('hidden'))) document.body.classList.remove('overflow-hidden');
+    if (![...$$('.js-modal')].some((item) => !item.classList.contains('hidden')))
+        document.body.classList.remove('overflow-hidden');
 }
 
-$$('[data-modal-open]').forEach((button) => button.addEventListener('click', () => openModal($('#' + button.dataset.modalOpen))));
-$$('[data-modal-close]').forEach((button) => button.addEventListener('click', () => closeModal(button.closest('.js-modal'))));
-$$('.js-modal').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(modal); }));
+$$('[data-modal-open]').forEach((button) =>
+    button.addEventListener('click', () => openModal($('#' + button.dataset.modalOpen)))
+);
+$$('[data-modal-close]').forEach((button) =>
+    button.addEventListener('click', () => closeModal(button.closest('.js-modal')))
+);
+$$('.js-modal').forEach((modal) =>
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) closeModal(modal);
+    })
+);

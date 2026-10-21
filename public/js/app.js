@@ -16,9 +16,27 @@
     // ------------------------------------------------------------ storage
 
     const guardar = {
-        get: (key) => { try { return localStorage.getItem(key); } catch { return null; } },
-        set: (key, value) => { try { localStorage.setItem(key, value); } catch { /* sem storage */ } },
-        del: (key) => { try { localStorage.removeItem(key); } catch { /* sem storage */ } },
+        get: (key) => {
+            try {
+                return localStorage.getItem(key);
+            } catch {
+                return null;
+            }
+        },
+        set: (key, value) => {
+            try {
+                localStorage.setItem(key, value);
+            } catch {
+                /* sem storage */
+            }
+        },
+        del: (key) => {
+            try {
+                localStorage.removeItem(key);
+            } catch {
+                /* sem storage */
+            }
+        },
     };
 
     // ------------------------------------------------------------ templates
@@ -48,12 +66,6 @@
     const dataBR = (iso) => (iso ? new Date(iso).toLocaleDateString('pt-BR') : '—');
     const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
-    function isoParaLocal(iso) {
-        const d = new Date(iso);
-        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        return d.toISOString().slice(0, 16);
-    }
-
     // ------------------------------------------------------------ mensagens
 
     const ALERTAS = {
@@ -68,7 +80,12 @@
         if (!area) return;
 
         const estilo = ALERTAS[tipo] ?? ALERTAS.danger;
-        const alerta = clonar('tplAlerta', { titulo, texto: texto || null, acao: acao ? {} : null, acaoTexto: acao?.texto });
+        const alerta = clonar('tplAlerta', {
+            titulo,
+            texto: texto || null,
+            acao: acao ? {} : null,
+            acaoTexto: acao?.texto,
+        });
         alerta.classList.add(estilo.fundo);
         alerta.setAttribute('role', estilo.papel);
         q('[data-slot="icone"]', alerta).classList.add(...estilo.icone);
@@ -110,7 +127,9 @@
         try {
             const { tipo, texto } = JSON.parse(salvo);
             mostrarMensagem(tipo, texto);
-        } catch { /* flash inválido */ }
+        } catch {
+            /* flash inválido */
+        }
     }
 
     // ------------------------------------------------------------ diálogo de confirmação
@@ -134,7 +153,9 @@
                 anterior?.focus();
                 resolve(resposta);
             };
-            const teclado = (event) => { if (event.key === 'Escape') fechar(false); };
+            const teclado = (event) => {
+                if (event.key === 'Escape') fechar(false);
+            };
             const clique = (event) => {
                 if (event.target === dialogo) return fechar(false);
                 const escolha = event.target.closest('[data-confirmar]');
@@ -222,7 +243,8 @@
             acaoBotao: acao && !acao.href ? {} : null,
         });
         q('[data-slot="icone"]', estado).classList.add(icone);
-        if (erro) q('[data-slot="marcador"]', estado).classList.replace('text-texto-2', 'text-perigo');
+        if (erro)
+            q('[data-slot="marcador"]', estado).classList.replace('text-texto-2', 'text-perigo');
         if (acao) {
             const botao = q('[data-slot="acaoLink"], [data-slot="acaoBotao"]', estado);
             q('i', botao).classList.add(acao.icone);
@@ -268,7 +290,11 @@
             // Token ausente, inválido ou expirado: volta ao login
             if (resposta.status === 401 && token) {
                 guardar.del(TOKEN_KEY);
-                irPara('/login', 'warning', mensagemDaApi(data, 'Sessão expirada. Entre novamente.'));
+                irPara(
+                    '/login',
+                    'warning',
+                    mensagemDaApi(data, 'Sessão expirada. Entre novamente.')
+                );
             }
 
             return { status: resposta.status, data };
@@ -376,8 +402,12 @@
         if (status !== 200 || !data.user) return;
 
         usuario = data.user;
-        qa('[data-user="name"]').forEach((el) => { el.textContent = usuario.name ?? ''; });
-        qa('[data-user="email"]').forEach((el) => { el.textContent = usuario.email ?? ''; });
+        qa('[data-user="name"]').forEach((el) => {
+            el.textContent = usuario.name ?? '';
+        });
+        qa('[data-user="email"]').forEach((el) => {
+            el.textContent = usuario.email ?? '';
+        });
         qa('[data-user="urlImage"]').forEach((el) => {
             if (usuario.urlImage) el.src = usuario.urlImage;
         });
@@ -400,8 +430,10 @@
 
         if (!name.trim()) erroCampo(form, 'name', 'Informe seu nome.');
         if (!email.trim()) erroCampo(form, 'email', 'Informe seu e-mail.');
-        if (password && /\s/.test(password)) erroCampo(form, 'password', 'A senha não pode conter espaços');
-        if (password && password !== confirmarSenha) erroCampo(form, 'confirmarSenha', 'As senhas não conferem');
+        if (password && /\s/.test(password))
+            erroCampo(form, 'password', 'A senha não pode conter espaços');
+        if (password && password !== confirmarSenha)
+            erroCampo(form, 'confirmarSenha', 'As senhas não conferem');
         if (q('.campo-erro', form)) return focarPrimeiroErro(form);
 
         carregando(botaoEnviar(form), true);
@@ -426,7 +458,12 @@
         const form = event.target;
         const arquivo = q('#inputFoto')?.files[0];
         limparAlerta();
-        if (!arquivo) return mostrarAlerta('danger', 'Nenhuma imagem foi enviada', 'Escolha uma foto JPEG ou PNG.');
+        if (!arquivo)
+            return mostrarAlerta(
+                'danger',
+                'Nenhuma imagem foi enviada',
+                'Escolha uma foto JPEG ou PNG.'
+            );
 
         const corpo = new FormData();
         corpo.append('image', arquivo);
@@ -440,7 +477,10 @@
         }
 
         mostrarToast(mensagemDaApi(data, 'Imagem enviada com sucesso'));
-        if (data.url) qa('[data-user="urlImage"]').forEach((el) => { el.src = data.url; });
+        if (data.url)
+            qa('[data-user="urlImage"]').forEach((el) => {
+                el.src = data.url;
+            });
     });
 
     q('#btnExcluir')?.addEventListener('click', async () => {
@@ -475,14 +515,25 @@
         const faixa = faixaDasRampas(rampas);
         const linha = clonar('tplLinhaReceita', {
             nome: { href: `/recipes/${receita.id}`, texto: receita.name },
-            rampas: rampas ? (rampas.length ? plural(rampas.length, 'rampa', 'rampas') : 'Nenhuma') : '—',
+            rampas: rampas
+                ? rampas.length
+                    ? plural(rampas.length, 'rampa', 'rampas')
+                    : 'Nenhuma'
+                : '—',
             faixa: faixa ?? 'Sem rampas',
             criadaEm: dataBR(receita.createdAt),
-            novaRampa: { href: `/recipes/${receita.id}/temperatures/new`, 'aria-label': `Adicionar rampa em ${receita.name}` },
-            renomear: { href: `/recipes/${receita.id}/edit`, 'aria-label': `Editar ${receita.name}` },
+            novaRampa: {
+                href: `/recipes/${receita.id}/temperatures/new`,
+                'aria-label': `Adicionar rampa em ${receita.name}`,
+            },
+            renomear: {
+                href: `/recipes/${receita.id}/edit`,
+                'aria-label': `Editar ${receita.name}`,
+            },
             excluir: { 'aria-label': `Excluir ${receita.name}` },
         });
-        if (!faixa) q('[data-slot="faixa"]', linha).classList.replace('font-medium', 'text-texto-2');
+        if (!faixa)
+            q('[data-slot="faixa"]', linha).classList.replace('font-medium', 'text-texto-2');
         q('[data-slot="excluir"]', linha).addEventListener('click', async () => {
             if (!(await excluirReceita(receita))) return;
             mostrarToast('Receita excluída');
@@ -494,19 +545,33 @@
     function desenharReceitas() {
         const lista = q('#listaReceitas');
         const termo = (q('#buscaReceitas')?.value ?? '').trim().toLowerCase();
-        const visiveis = receitasCarregadas.filter(({ receita }) => receita.name.toLowerCase().includes(termo));
-        q('#contagemReceitas').textContent = plural(receitasCarregadas.length, 'receita', 'receitas');
+        const visiveis = receitasCarregadas.filter(({ receita }) =>
+            receita.name.toLowerCase().includes(termo)
+        );
+        q('#contagemReceitas').textContent = plural(
+            receitasCarregadas.length,
+            'receita',
+            'receitas'
+        );
 
         if (!receitasCarregadas.length) {
             return listaEstado(lista, {
                 icone: 'ph-scroll',
                 titulo: 'Nenhuma receita cadastrada',
                 texto: 'Crie uma receita e adicione as rampas de temperatura para usá-la nos seus lotes.',
-                acao: { texto: 'Criar primeira receita', icone: 'ph-plus', aoClicar: () => abrirModal('modalReceita') },
+                acao: {
+                    texto: 'Criar primeira receita',
+                    icone: 'ph-plus',
+                    aoClicar: () => abrirModal('modalReceita'),
+                },
             });
         }
         if (!visiveis.length) {
-            return listaEstado(lista, { icone: 'ph-magnifying-glass', titulo: 'Nenhuma receita encontrada', texto: 'Tente outro nome.' });
+            return listaEstado(lista, {
+                icone: 'ph-magnifying-glass',
+                titulo: 'Nenhuma receita encontrada',
+                texto: 'Tente outro nome.',
+            });
         }
         lista.removeAttribute('aria-busy');
         lista.replaceChildren(...visiveis.map(linhaReceita));
@@ -520,14 +585,21 @@
         const { status, data } = await api('GET', '/recipes');
         if (status !== 200) {
             mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível carregar as receitas'));
-            return listaErro(lista, 'Não foi possível carregar as receitas', data, carregarReceitas);
+            return listaErro(
+                lista,
+                'Não foi possível carregar as receitas',
+                data,
+                carregarReceitas
+            );
         }
 
         const receitas = data.recipes ?? [];
-        const rampas = await Promise.all(receitas.map((r) => api('GET', `/recipes/${r.id}/temperatures`)));
+        const rampas = await Promise.all(
+            receitas.map((r) => api('GET', `/recipes/${r.id}/temperatures`))
+        );
         receitasCarregadas = receitas.map((receita, i) => ({
             receita,
-            rampas: rampas[i].status === 200 ? rampas[i].data.temperatures ?? [] : null,
+            rampas: rampas[i].status === 200 ? (rampas[i].data.temperatures ?? []) : null,
         }));
         desenharReceitas();
     }
@@ -535,7 +607,8 @@
     async function excluirReceita(receita) {
         const ok = await confirmar({
             titulo: `Excluir a receita ${receita.name}?`,
-            mensagem: 'As rampas de temperatura desta receita também serão excluídas. Não dá para desfazer.',
+            mensagem:
+                'As rampas de temperatura desta receita também serão excluídas. Não dá para desfazer.',
             botao: 'Excluir receita',
         });
         if (!ok) return false;
@@ -591,7 +664,10 @@
             timer: t.timer,
             inicio: t.initialization,
             ideal: t.idealTime,
-            editar: { href: `/recipes/${receitaId}/temperatures/${t.id}/edit`, 'aria-label': `Editar rampa ${ordem}` },
+            editar: {
+                href: `/recipes/${receitaId}/temperatures/${t.id}/edit`,
+                'aria-label': `Editar rampa ${ordem}`,
+            },
             excluir: { 'aria-label': `Excluir rampa ${ordem}` },
         });
         // Excluir rampa ainda não tem rota na API (conloq/mash#97): avisa em vez de apagar
@@ -614,7 +690,11 @@
                 icone: 'ph-thermometer-simple',
                 titulo: 'Nenhuma rampa ainda',
                 texto: 'Adicione a primeira rampa de temperatura desta receita.',
-                acao: { texto: 'Adicionar rampa', icone: 'ph-plus', href: `/recipes/${receitaId}/temperatures/new` },
+                acao: {
+                    texto: 'Adicionar rampa',
+                    icone: 'ph-plus',
+                    href: `/recipes/${receitaId}/temperatures/new`,
+                },
             });
         } else {
             lista.removeAttribute('aria-busy');
@@ -631,7 +711,10 @@
         const { status, data } = await api('GET', `/recipes/${receitaId}`);
         if (status !== 200) {
             q('#recipeResumo').textContent = '';
-            return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível carregar a receita'));
+            return mostrarAlerta(
+                'danger',
+                mensagemDaApi(data, 'Não foi possível carregar a receita')
+            );
         }
 
         const receita = data.recipe;
@@ -641,9 +724,15 @@
 
         const rampas = await carregarRampasDaReceita();
         q('#recipeResumo').textContent = [
-            rampas ? (rampas.length ? plural(rampas.length, 'rampa', 'rampas') : 'nenhuma rampa') : null,
+            rampas
+                ? rampas.length
+                    ? plural(rampas.length, 'rampa', 'rampas')
+                    : 'nenhuma rampa'
+                : null,
             `criada em ${dataBR(receita.createdAt)}`,
-        ].filter(Boolean).join(' · ');
+        ]
+            .filter(Boolean)
+            .join(' · ');
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -658,7 +747,11 @@
             const resposta = await api('PUT', `/recipes/${receitaId}`, { name });
             carregando(botaoEnviar(form), false);
             if (resposta.status !== 200) {
-                erroCampo(form, 'name', mensagemDaApi(resposta.data, 'Não foi possível salvar a receita'));
+                erroCampo(
+                    form,
+                    'name',
+                    mensagemDaApi(resposta.data, 'Não foi possível salvar a receita')
+                );
                 return focarPrimeiroErro(form);
             }
 
@@ -679,7 +772,12 @@
 
     // ------------------------------------------------------------ nova rampa de temperatura
 
-    const TEMPERATURAS = ['minTemperatureRamp', 'maxTemperatureRamp', 'minTemperatureLimit', 'maxTemperatureLimit'];
+    const TEMPERATURAS = [
+        'minTemperatureRamp',
+        'maxTemperatureRamp',
+        'minTemperatureLimit',
+        'maxTemperatureLimit',
+    ];
     const HORARIOS = ['timer', 'initialization', 'idealTime'];
     const HORARIO_VALIDO = /^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
     const comSegundos = (valor) => (/^\d{2}:\d{2}$/.test(valor ?? '') ? `${valor}:00` : valor);
@@ -688,19 +786,38 @@
     function validarRampa(form, campos) {
         TEMPERATURAS.forEach((key) => {
             const n = Number(campos[key]);
-            if (campos[key] === '' || !Number.isInteger(n) || n < 0 || n > 100) erroCampo(form, key, 'Use um número inteiro de 0 a 100 ºC.');
+            if (campos[key] === '' || !Number.isInteger(n) || n < 0 || n > 100)
+                erroCampo(form, key, 'Use um número inteiro de 0 a 100 ºC.');
         });
         const valido = (key) => !q(`[data-campo="${key}"].campo-erro`, form);
-        if (valido('minTemperatureRamp') && valido('maxTemperatureRamp') && Number(campos.minTemperatureRamp) > Number(campos.maxTemperatureRamp)) {
-            erroCampo(form, 'maxTemperatureRamp', `Precisa ser igual ou maior que a mínima (${campos.minTemperatureRamp} ºC).`);
+        if (
+            valido('minTemperatureRamp') &&
+            valido('maxTemperatureRamp') &&
+            Number(campos.minTemperatureRamp) > Number(campos.maxTemperatureRamp)
+        ) {
+            erroCampo(
+                form,
+                'maxTemperatureRamp',
+                `Precisa ser igual ou maior que a mínima (${campos.minTemperatureRamp} ºC).`
+            );
         }
-        if (valido('minTemperatureLimit') && valido('maxTemperatureLimit') && Number(campos.minTemperatureLimit) > Number(campos.maxTemperatureLimit)) {
-            erroCampo(form, 'maxTemperatureLimit', `Precisa ser igual ou maior que o limite mínimo (${campos.minTemperatureLimit} ºC).`);
+        if (
+            valido('minTemperatureLimit') &&
+            valido('maxTemperatureLimit') &&
+            Number(campos.minTemperatureLimit) > Number(campos.maxTemperatureLimit)
+        ) {
+            erroCampo(
+                form,
+                'maxTemperatureLimit',
+                `Precisa ser igual ou maior que o limite mínimo (${campos.minTemperatureLimit} ºC).`
+            );
         }
         HORARIOS.forEach((key) => {
-            if (!HORARIO_VALIDO.test(comSegundos(campos[key]) ?? '')) erroCampo(form, key, 'Use hora, minuto e segundo: 00:40:00.');
+            if (!HORARIO_VALIDO.test(comSegundos(campos[key]) ?? ''))
+                erroCampo(form, key, 'Use hora, minuto e segundo: 00:40:00.');
         });
-        if (campos.orderRamp !== '' && !Number.isInteger(Number(campos.orderRamp))) erroCampo(form, 'orderRamp', 'Ordem da rampa deve ser um inteiro válido');
+        if (campos.orderRamp !== '' && !Number.isInteger(Number(campos.orderRamp)))
+            erroCampo(form, 'orderRamp', 'Ordem da rampa deve ser um inteiro válido');
         return !q('.campo-erro', form);
     }
 
@@ -708,7 +825,10 @@
         const form = q('#formTemperatura');
         if (!form) return;
 
-        const [, idReceita, idRampa] = caminho.match(/^\/recipes\/([1-9][0-9]*)\/temperatures\/(?:new|([1-9][0-9]*)\/edit)$/) ?? [];
+        const [, idReceita, idRampa] =
+            caminho.match(
+                /^\/recipes\/([1-9][0-9]*)\/temperatures\/(?:new|([1-9][0-9]*)\/edit)$/
+            ) ?? [];
         const urlReceita = `/recipes/${idReceita}`;
         q('#voltarReceita').href = urlReceita;
         q('#cancelarRampa').href = urlReceita;
@@ -739,7 +859,10 @@
             carregando(botaoEnviar(form), false);
 
             if (status !== 201) {
-                return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível salvar a temperatura'));
+                return mostrarAlerta(
+                    'danger',
+                    mensagemDaApi(data, 'Não foi possível salvar a temperatura')
+                );
             }
 
             irPara(urlReceita, 'success', mensagemDaApi(data, 'Temperatura criada com sucesso'));
@@ -748,11 +871,19 @@
 
     async function preencherRampa(form, idReceita, idRampa) {
         const { status, data } = await api('GET', `/recipes/${idReceita}/temperatures`);
-        const rampa = status === 200 && (data.temperatures ?? []).find((t) => String(t.id) === idRampa);
+        const rampa =
+            status === 200 && (data.temperatures ?? []).find((t) => String(t.id) === idRampa);
         if (!rampa) {
-            return mostrarAlerta('danger', status === 200 ? 'Rampa não encontrada nesta receita' : mensagemDaApi(data, 'Não foi possível carregar a rampa'));
+            return mostrarAlerta(
+                'danger',
+                status === 200
+                    ? 'Rampa não encontrada nesta receita'
+                    : mensagemDaApi(data, 'Não foi possível carregar a rampa')
+            );
         }
-        [...TEMPERATURAS, ...HORARIOS, 'orderRamp'].forEach((key) => { form.elements[key].value = rampa[key] ?? ''; });
+        [...TEMPERATURAS, ...HORARIOS, 'orderRamp'].forEach((key) => {
+            form.elements[key].value = rampa[key] ?? '';
+        });
     }
 
     iniciarFormRampa();
@@ -763,8 +894,14 @@
     function avisarSemApi(event) {
         event.preventDefault();
         const issue = event.currentTarget.dataset.semApi;
-        qa('.js-modal').forEach((modal) => { if (!modal.classList.contains('hidden')) fecharModal(modal.id); });
-        mostrarAlerta('info', 'Ainda sem rota na API', `Nada foi alterado. Esta ação entra com a ${issue}.`);
+        qa('.js-modal').forEach((modal) => {
+            if (!modal.classList.contains('hidden')) fecharModal(modal.id);
+        });
+        mostrarAlerta(
+            'info',
+            'Ainda sem rota na API',
+            `Nada foi alterado. Esta ação entra com a ${issue}.`
+        );
     }
 
     qa('form[data-sem-api]').forEach((form) => form.addEventListener('submit', avisarSemApi));
@@ -772,10 +909,38 @@
 
     // Demonstração do teste de iodo com dados falsos (a leitura real virá do serviço Python + OpenCV)
     const COLETAS_DEMO = [
-        { hora: '14:25', resultado: 'Amido presente', cor: '#2b1a3d', posicao: 6, detalhe: 'Coleta 1 · 66 ºC', descricao: 'Ainda há amido no mosto. A mosturação continua.' },
-        { hora: '14:35', resultado: 'Conversão parcial', cor: '#7a2f3a', posicao: 32, detalhe: 'Coleta 2 · 66 ºC', descricao: 'A conversão avançou, mas ainda reage ao iodo.' },
-        { hora: '14:45', resultado: 'Conversão parcial', cor: '#9c3d1e', posicao: 58, detalhe: 'Coleta 3 · 67 ºC', descricao: 'Quase lá. Próxima coleta em 10 minutos.' },
-        { hora: '14:55', resultado: 'Sem amido detectável', cor: '#e9b949', posicao: 94, detalhe: 'Coleta 4 · 67 ºC', descricao: 'A amostra ficou amarela: não há amido detectável.' },
+        {
+            hora: '14:25',
+            resultado: 'Amido presente',
+            cor: '#2b1a3d',
+            posicao: 6,
+            detalhe: 'Coleta 1 · 66 ºC',
+            descricao: 'Ainda há amido no mosto. A mosturação continua.',
+        },
+        {
+            hora: '14:35',
+            resultado: 'Conversão parcial',
+            cor: '#7a2f3a',
+            posicao: 32,
+            detalhe: 'Coleta 2 · 66 ºC',
+            descricao: 'A conversão avançou, mas ainda reage ao iodo.',
+        },
+        {
+            hora: '14:45',
+            resultado: 'Conversão parcial',
+            cor: '#9c3d1e',
+            posicao: 58,
+            detalhe: 'Coleta 3 · 67 ºC',
+            descricao: 'Quase lá. Próxima coleta em 10 minutos.',
+        },
+        {
+            hora: '14:55',
+            resultado: 'Sem amido detectável',
+            cor: '#e9b949',
+            posicao: 94,
+            detalhe: 'Coleta 4 · 67 ºC',
+            descricao: 'A amostra ficou amarela: não há amido detectável.',
+        },
     ];
 
     if (q('#demoColetas')) {
@@ -790,12 +955,17 @@
         function reiniciarDemo() {
             timers.forEach(clearTimeout);
             timers = [];
-            q('#demoColetas').replaceChildren(Object.assign(document.createElement('li'), {
-                id: 'demoSemColetas', className: 'py-6 text-center text-sm text-texto-2', textContent: 'As coletas aparecem aqui.',
-            }));
+            q('#demoColetas').replaceChildren(
+                Object.assign(document.createElement('li'), {
+                    id: 'demoSemColetas',
+                    className: 'py-6 text-center text-sm text-texto-2',
+                    textContent: 'As coletas aparecem aqui.',
+                })
+            );
             q('#demoAmostra').style.background = '#b9b0a8';
             q('#demoResultado').textContent = 'Nenhuma coleta ainda';
-            q('#demoDescricao').textContent = 'Inicie a demonstração para ver as coletas acontecendo.';
+            q('#demoDescricao').textContent =
+                'Inicie a demonstração para ver as coletas acontecendo.';
             q('#demoMarcador').classList.add('hidden');
             q('#demoPronto').classList.replace('flex', 'hidden');
             q('#demoAoVivo').textContent = 'Aguardando início';
@@ -813,13 +983,17 @@
             q('#demoMarcador').classList.remove('hidden');
             q('#demoMarcador').style.left = `${coleta.posicao}%`;
             const minutos = 30 + i * 10;
-            q('#demoTempo').textContent = [Math.floor(minutos / 60), minutos % 60].map((n) => String(n).padStart(2, '0')).join(':');
-            q('#demoColetas').prepend(clonar('tplColeta', {
-                cor: { style: `background:${coleta.cor}` },
-                resultado: coleta.resultado,
-                detalhe: coleta.detalhe,
-                hora: coleta.hora,
-            }));
+            q('#demoTempo').textContent = [Math.floor(minutos / 60), minutos % 60]
+                .map((n) => String(n).padStart(2, '0'))
+                .join(':');
+            q('#demoColetas').prepend(
+                clonar('tplColeta', {
+                    cor: { style: `background:${coleta.cor}` },
+                    resultado: coleta.resultado,
+                    detalhe: coleta.detalhe,
+                    hora: coleta.hora,
+                })
+            );
         }
 
         q('#demoIniciar').addEventListener('click', () => {
@@ -830,11 +1004,13 @@
                 timers.push(setTimeout(() => mostrarLendo(true), i * passo + 200));
                 timers.push(setTimeout(() => aplicarColeta(coleta, i), i * passo + passo * 0.6));
             });
-            timers.push(setTimeout(() => {
-                q('#demoPronto').classList.replace('hidden', 'flex');
-                q('#demoAoVivo').textContent = 'Teste concluído';
-                q('#demoIniciar').disabled = false;
-            }, COLETAS_DEMO.length * passo));
+            timers.push(
+                setTimeout(() => {
+                    q('#demoPronto').classList.replace('hidden', 'flex');
+                    q('#demoAoVivo').textContent = 'Teste concluído';
+                    q('#demoIniciar').disabled = false;
+                }, COLETAS_DEMO.length * passo)
+            );
         });
         q('#demoReiniciar').addEventListener('click', reiniciarDemo);
     }
