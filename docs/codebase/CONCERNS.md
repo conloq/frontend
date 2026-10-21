@@ -39,7 +39,7 @@ Formulários com senha usam `method="post"`; um 401 atrasado não remove outro t
 
 | Concern | Evidence | Current symptom | Scaling risk | Suggested improvement |
 |---------|----------|-----------------|-------------|-----------------------|
-| N+1 de temperaturas por receita | `public/js/app.js` (`carregarReceitas`) | Nenhum no volume atual | Abrir `/receitas` com muitas receitas dispara N chamadas | Rota na API que devolva as temperaturas junto |
+| N+1 de temperaturas por receita | `public/js/app.js` (`carregarReceitas`) | Nenhum no volume atual | Abrir `/recipes` com muitas receitas dispara N chamadas | Rota na API que devolva as temperaturas junto |
 | `public/img/mash.png` (190,7 KB) sem otimização | scan, "Top 10 largest files" | Nenhum em local | Peso de página em conexão lenta | Comprimir/redimensionar antes de publicar |
 | Compilação Tailwind manual | `package.json` (`build:css`) | Build esquecido faz classes novas não existirem | Telas quebradas silenciosamente | Rodar `watch:css` durante o desenvolvimento |
 
