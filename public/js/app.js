@@ -48,12 +48,6 @@
     const dataBR = (iso) => (iso ? new Date(iso).toLocaleDateString('pt-BR') : '—');
     const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
-    function isoParaLocal(iso) {
-        const d = new Date(iso);
-        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-        return d.toISOString().slice(0, 16);
-    }
-
     // ------------------------------------------------------------ mensagens
 
     const ALERTAS = {
