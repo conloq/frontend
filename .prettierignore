@@ -1,0 +1,10 @@
+# Gerados
+public/css/style.css
+package-lock.json
+
+# Design e ferramentas locais
+docs/
+graphify-out/
+.impeccable/
+.omp/
+.delta/

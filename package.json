@@ -9,7 +9,10 @@
     "test": "node --check index.js",
     "start": "npx nodemon index.js",
     "build:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css",
-    "watch:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css --watch"
+    "watch:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css --watch",
+    "prepare": "husky",
+    "format": "prettier --write \"**/*.{js,mjs,css,json,html}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,css,json,html}\""
   },
   "dependencies": {
     "@phosphor-icons/web": "^2.1.2",
@@ -20,6 +23,12 @@
   "type": "module",
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3"
+  },
+  "lint-staged": {
+    "*.{js,mjs,css,json,html}": "prettier --write"
   }
 }
