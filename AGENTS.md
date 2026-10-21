@@ -36,7 +36,7 @@ The whole client is one IIFE. Keep these boundaries when editing:
 
 - `api(metodo, caminho, corpo)` never throws: it returns `{ status, data }`. On network failure it returns `{ status: 503 }` with a pt-BR message. Use it for every API call instead of raw `fetch`.
 - A `401` with a token present clears the token and redirects to `/login`.
-- The route guard runs at load: public pages are `/login` and `/cadastro`. Without a token, other pages redirect to `/login`; with a token, public pages redirect to `/receitas`.
+- The route guard runs at load: public pages are `/login` and `/cadastro`. Without a token, other pages redirect to `/login`; with a token, public pages redirect to `/recipes`.
 - API messages are shown as returned, in pt-BR, read as `data.error ?? data.message ?? <fallback>`. The login `400` responds in `message`; other errors use `error`.
 - Markup lives in the views. Rows, toasts, alerts, loading and empty states are `<template>` elements (`tplLinhaReceita`, `tplLinhaRampa`, `tplToast`, `tplAlerta`, `tplEstado`, `tplCarregando`); `clonar(id, dados)` clones them and fills `[data-slot]` with `textContent` or `setAttribute`. Do not build HTML strings from API data or use `innerHTML` with it.
 - Success messages become a toast (`#toasts`); `danger`, `warning` and `info` become an alert in `#mensagens`. Destructive actions use `confirmar({ titulo, mensagem, botao })` (`#dialogoConfirmar`), never `confirm()`. Field errors use `erroCampo(form, nome, texto)` on `[data-campo]`/`[data-erro]`.
