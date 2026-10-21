@@ -105,9 +105,6 @@
   .campo-caixa > select {
     @apply cursor-pointer appearance-none pr-7;
   }
-  .campo-erro #areaImagem {
-    @apply border-2 border-solid border-perigo bg-perigo-suave;
-  }
   .campo-caixa > i {
     @apply text-xl text-texto-2;
   }

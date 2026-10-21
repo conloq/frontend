@@ -24,6 +24,10 @@ npm start
 
 Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://localhost:8080`); copie `.env.example` para `.env` para trocar.
 
+## Verificações
+
+`npm test` verifica a sintaxe do servidor e executa os scripts de perfil, upload e regressão do cliente, incluindo renderização EJS. Não requer API nem banco.
+
 ## Formatação e commits
 
 O código segue o Prettier (`.prettierrc.json`: 4 espaços e aspas simples; JSON e CSS com 2 espaços e aspas duplas). Você não precisa formatar à mão: o `npm install` instala um hook do Git que formata no commit.
@@ -63,7 +67,7 @@ Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da A
 | `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` (editar rampa) |
 | `/lots` | `views/lots.ejs` |
 | `/lots/:id` | `views/lot.ejs` |
-| `/analyses/new` | `views/iodineDemo.ejs` (demonstração do teste de iodo) |
+| `/analyses/new` | `views/iodineDemo.ejs` (demonstração simulada do teste de iodo) |
 | `/analyses/:id` | `views/analysis.ejs` |
 
 ## Rotas da API usadas pelo navegador
@@ -78,7 +82,7 @@ Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da A
 | Nova rampa | `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
 | Editar rampa | `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar ainda não tem rota na API (#97) |
 
-As telas internas também chamam `GET /user` para preencher o topo. Lotes, análises e o teste de iodo ainda não têm rota na API: mostram dados de exemplo e avisam em vez de salvar (#31, #92, #1, #3). A leitura do iodo será feita pelo Back-End com Python e OpenCV (#34); o usuário não envia foto.
+As telas internas também chamam `GET /user` para preencher o topo. Lotes e análises ainda não têm rota na API e mostram estados de indisponibilidade (#31, #92, #1, #3). O teste de iodo mantém uma demonstração identificada com dados simulados, sem salvar nada. A leitura do iodo será feita pelo Back-End com Python e OpenCV (#34); o usuário não envia foto.
 
 ## Documentação
 

@@ -8,6 +8,7 @@ const form = {
     },
 };
 const calls = [];
+const photo = { src: '' };
 class FormDataMock {
     constructor() {
         this.values = [];
@@ -32,6 +33,7 @@ runInNewContext(source, {
     window: { API_URL: 'http://api.test' },
     location,
     FormData: FormDataMock,
+    AbortSignal,
     localStorage: {
         getItem: (k) => storage.get(k),
         setItem: (k, v) => storage.set(k, v),
@@ -40,7 +42,7 @@ runInNewContext(source, {
     document: {
         querySelector: (s) =>
             s === '#formFoto' ? form : s === '#inputFoto' ? { files: [file] } : null,
-        querySelectorAll: () => [],
+        querySelectorAll: (selector) => (selector === '[data-user="urlImage"]' ? [photo] : []),
     },
     fetch: async (url, options) => {
         calls.push({ url, ...options });
@@ -62,5 +64,8 @@ assert.equal(call.headers['Content-Type'], undefined);
 assert.equal(call.body.values.length, 1);
 assert.equal(call.body.values[0][0], 'image');
 assert.equal(call.body.values[0][1], file);
-assert.equal(location.href, '/usuario');
-console.log('PASS upload: image, multipart sem Content-Type manual, Bearer e retorno ao perfil');
+assert.equal(location.href, '');
+assert.equal(photo.src, 'https://example.test/photo.png');
+console.log(
+    'PASS upload: image, multipart sem Content-Type manual, Bearer e foto atualizada sem redirecionar'
+);

@@ -1,63 +1,10 @@
-<%- include('partials/shellInicio.ejs', { titulo: 'Lote 12/03', trilha: ['Lotes', 'Lote 12/03'] }) %>
-<div class="flex flex-col gap-2">
-  <a href="/lots" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todos os lotes</a>
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div class="flex min-w-0 flex-col gap-1.5">
-      <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-[30px] font-semibold">Lote 12/03</h1>
-        <span class="selo-aviso">Em andamento</span>
-      </div>
-      <p class="text-texto-2">American Pale Ale · mosturação iniciada em 20/10/2026 às 14:05</p>
-    </div>
-    <div class="flex flex-wrap items-center gap-3">
-      <button type="button" class="btn-fantasma text-perigo hover:bg-perigo-suave" data-sem-api="conloq/mash#92"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
-      <button type="button" class="btn-secundario" data-modal-open="modalLote"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Editar</button>
-      <a href="/analyses/new" class="btn-primario"><i class="ph ph-test-tube" aria-hidden="true"></i>Acompanhar teste de iodo</a>
-    </div>
-  </div>
-</div>
+<%- include('partials/shellInicio.ejs', { titulo: 'Lote', trilha: ['Lotes', 'Lote'] }) %>
+<a href="/lots" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todos os lotes</a>
+<h1 class="text-[30px] font-semibold">Lote</h1>
 
-<%- include('partials/avisoSemApi.ejs', { issue: 'conloq/mash#31 e #3' }) %>
-
-<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-  <section class="card overflow-hidden" aria-labelledby="tituloAnalises">
-    <div class="flex flex-col gap-0.5 border-b border-linha px-6 py-5">
-      <h2 id="tituloAnalises" class="text-lg font-semibold">Análises de iodo</h2>
-      <p class="text-sm text-texto-2">Da coleta mais recente para a mais antiga. A classificação automática chega no próximo semestre.</p>
-    </div>
-    <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 md:grid md:grid-cols-[200px_160px_minmax(0,1fr)_170px_44px]" aria-hidden="true">
-      <span>Coleta</span><span>Temperatura</span><span>Resultado</span><span>Status</span><span></span>
-    </div>
-    <% [['20/10/2026 · 14:52', '66 ºC'], ['20/10/2026 · 14:40', 'Não informada']].forEach(([coleta, temperatura]) => { %>
-      <a href="/analyses/1" class="tabela-linha grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 px-6 py-4 hover:bg-fundo md:min-h-16 md:grid-cols-[200px_160px_minmax(0,1fr)_170px_44px] md:items-center md:py-0">
-        <span class="font-semibold"><%= coleta %></span>
-        <span class="text-sm max-md:col-start-1 md:text-[15px] <%= temperatura.startsWith('Não') ? 'text-texto-2' : '' %>"><%= temperatura %></span>
-        <span class="text-sm text-texto-2 max-md:col-start-1 md:text-[15px]">Aguardando classificação</span>
-        <span class="max-md:col-start-2 max-md:row-start-1"><span class="selo-info">Em processamento</span></span>
-        <span class="btn-icone -mr-2 justify-self-end max-md:hidden" aria-hidden="true"><i class="ph ph-caret-right"></i></span>
-      </a>
-    <% }) %>
-  </section>
-
-  <section class="card self-start overflow-hidden" aria-labelledby="tituloReceitaLote">
-    <div class="flex items-center justify-between gap-2 border-b border-linha py-5 pl-6 pr-4">
-      <div class="flex min-w-0 flex-col gap-0.5">
-        <h2 id="tituloReceitaLote" class="truncate text-lg font-semibold">American Pale Ale</h2>
-        <p class="text-sm text-texto-2">Receita usada neste lote</p>
-      </div>
-      <a href="/recipes" class="btn-fantasma text-sm">Receitas <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
-    </div>
-    <div class="px-6 py-2">
-      <% [['1', '52 – 55 ºC', '00:15:00'], ['2', '63 – 68 ºC', '00:40:00'], ['3', '72 – 75 ºC', '00:05:00']].forEach(([ordem, faixa, timer]) => { %>
-        <div class="tabela-linha flex min-h-13 items-center gap-3 py-2">
-          <span class="grid size-7 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold"><%= ordem %></span>
-          <span class="flex-1 font-semibold"><%= faixa %></span>
-          <span class="text-texto-2"><%= timer %></span>
-        </div>
-      <% }) %>
-    </div>
-  </section>
-</div>
-
-<%- include('partials/modalLote.ejs', { titulo: 'Editar lote', descricao: null, botao: 'Salvar alterações', valores: { nome: 'Lote 12/03', receita: 'American Pale Ale', inicio: '2026-10-20T14:05', status: 'active' } }) %>
+<section class="card flex flex-col items-center gap-3 px-6 py-16 text-center" aria-labelledby="tituloIndisponivel">
+  <i class="ph ph-clock text-4xl text-texto-2" aria-hidden="true"></i>
+  <h2 id="tituloIndisponivel" class="text-xl font-semibold">Detalhes do lote indisponíveis</h2>
+  <p class="max-w-md text-texto-2">Ainda não é possível consultar os dados deste lote.</p>
+</section>
 <%- include('partials/shellFim.ejs') %>

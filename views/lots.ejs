@@ -1,36 +1,9 @@
 <%- include('partials/shellInicio.ejs', { titulo: 'Lotes', trilha: ['Lotes', 'Todos os lotes'] }) %>
 <h1 class="text-[30px] font-semibold">Lotes</h1>
 
-<%- include('partials/avisoSemApi.ejs', { issue: 'conloq/mash#31' }) %>
-
-<section class="flex flex-col gap-3" aria-labelledby="tituloTabelaLotes">
-  <h2 id="tituloTabelaLotes" class="sr-only">Lista de lotes</h2>
-  <div class="card grid min-h-[72px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 md:grid-cols-[minmax(0,1fr)_220px_160px_150px_132px]">
-    <span class="font-display text-[15px] font-medium max-md:text-texto-2"><span class="max-md:hidden">Nome do lote</span><span class="md:hidden">3 lotes</span></span>
-    <span class="hidden font-display text-[15px] font-medium md:block">Receita</span>
-    <span class="hidden font-display text-[15px] font-medium md:block">Data de criação</span>
-    <span class="hidden font-display text-[15px] font-medium md:block">Status</span>
-    <button type="button" class="btn-primario min-w-14 justify-self-end px-4 text-xl" data-modal-open="modalLote"><i class="ph ph-plus" aria-hidden="true"></i><span class="text-base md:sr-only">Novo lote</span></button>
-  </div>
-  <ul id="listaLotes" class="flex flex-col gap-3">
-    <% [
-      ['Lote 12/03', 'American Pale Ale', '12/03/2026', 'active'],
-      ['Lote 05/03', 'Witbier', '05/03/2026', 'completed'],
-      ['Lote 26/02', 'Dry Stout', '26/02/2026', 'completed'],
-    ].forEach(([nome, receita, data, status]) => { %>
-      <li class="card grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-5 py-4 md:min-h-[84px] md:grid-cols-[minmax(0,1fr)_220px_160px_150px_132px] md:py-0">
-        <a href="/lots/1" class="truncate text-[17px] font-semibold hover:text-acao hover:underline"><%= nome %></a>
-        <span class="truncate text-texto-2 max-md:col-start-1 md:text-texto"><%= receita %></span>
-        <span class="tabular-nums text-texto-2 max-md:col-start-1 md:text-texto"><%= data %></span>
-        <span class="font-medium max-md:col-start-2 max-md:row-start-1 max-md:justify-self-end <%= status === 'active' ? 'text-aviso' : 'text-sucesso' %>"><%= status === 'active' ? 'Em andamento' : 'Concluído' %></span>
-        <span class="flex gap-2 justify-self-end max-md:col-start-2 max-md:row-span-2 max-md:row-start-2 max-md:self-end">
-          <button type="button" class="btn-primario w-14 px-0 text-xl" data-sem-api="conloq/mash#92" aria-label="Editar <%= nome %>"><i class="ph ph-pencil-simple" aria-hidden="true"></i></button>
-          <button type="button" class="btn-perigo w-14 px-0 text-xl" data-sem-api="conloq/mash#92" aria-label="Excluir <%= nome %>"><i class="ph ph-x" aria-hidden="true"></i></button>
-        </span>
-      </li>
-    <% }) %>
-  </ul>
+<section class="card flex flex-col items-center gap-3 px-6 py-16 text-center" aria-labelledby="tituloIndisponivel">
+  <i class="ph ph-clock text-4xl text-texto-2" aria-hidden="true"></i>
+  <h2 id="tituloIndisponivel" class="text-xl font-semibold">Consulta de lotes indisponível</h2>
+  <p class="max-w-md text-texto-2">Os lotes poderão ser consultados quando a funcionalidade estiver disponível.</p>
 </section>
-
-<%- include('partials/modalLote.ejs', { titulo: 'Novo lote', descricao: 'Um lote é uma brassagem feita com uma das suas receitas.', botao: 'Criar lote' }) %>
 <%- include('partials/shellFim.ejs') %>

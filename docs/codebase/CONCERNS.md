@@ -1,15 +1,17 @@
 # Codebase Concerns
 
+## Correções verificadas em 21/10/2026
+
+Formulários com senha usam `method="post"`; um 401 atrasado não remove outro token; chamadas têm timeout de 15 segundos, com aviso de resultado incerto nas gravações. Modais e confirmação compartilham controle de foco e fundo `inert`. Perfil só permite salvar após carregar e oferece tentar novamente. Falhas de rampas não aparecem como lista vazia. O template de teste `index.ejs` e o seletor `#areaImagem` foram removidos. `npm test` executa verificações de perfil, upload, cliente e renderização EJS; detalhes em `TESTING.md`.
+
 ## 1) Top Risks (Prioritized)
 
 | Severity | Concern | Evidence | Impact | Suggested action |
 |----------|---------|----------|--------|------------------|
-| high | Formulários de login e cadastro não têm `action` nem `method`; dependem inteiramente de `app.js` | `views/login.ejs:30`, `views/cadastro.ejs:6` | Se o JS falhar, for bloqueado ou não inicializar, o submit nativo vira `GET` para a própria URL e coloca e-mail e senha na query string (histórico, logs de acesso) | Definir `method="post"` e um destino que não exponha credenciais, ou desabilitar o botão até o cliente estar pronto |
 | high | Token JWT em `localStorage` em vez do cookie `HttpOnly` descrito na `conloq/mash#6` | `public/js/app.js` (`TOKEN_KEY`), issue #6 | Qualquer XSS no domínio lê o token e assume a sessão (perfil, exclusão de conta, receitas) | Decisão do time: adotar cookie `HttpOnly` no servidor EJS, ou aceitar e documentar o risco |
 | high | O frontend depende de CORS que ainda não está em `main` no Back-End | `conloq/Back-End` branch `feat/cors-frontend` (`8b8518a`) | Mergeado o PR #4 sem o CORS, todas as chamadas falham no navegador | Mergear o PR de CORS antes ou junto; definir `FRONTEND_URL` no `.env` do Back-End (hoje ausente) |
-| medium | Lotes e teste de iodo ainda não têm rota na API; as telas mostram dados de exemplo | `views/lots.ejs`, `views/lot.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs` | Dados de exemplo podem ser confundidos com dados reais | Aviso `avisoSemApi.ejs` em cada tela e ações `data-sem-api` que avisam em vez de salvar; ligar à API quando #31/#33/#1/#3 entrarem |
+| medium | Lotes, análises e leitura real de iodo ainda indisponíveis | `views/lots.ejs`, `views/lot.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs` | A consulta e o acompanhamento ainda não podem ser usados | Lotes e análises mostram indisponibilidade; teste de iodo é uma demonstração identificada, sem persistência; integrar quando a API entregar as rotas |
 | medium | `#listaReceitas` busca a temperatura de cada receita em paralelo, uma requisição por receita | `public/js/app.js` (`carregarReceitas`) | N+1: com muitas receitas, N requisições ao abrir a tela; a API não tem rota que traga as temperaturas junto | Aceitável no volume atual; revisar se a API ganhar `include` das temperaturas |
-| medium | Sem `AbortController`/timeout no `fetch` | `public/js/app.js` (`api`) | API pendurada deixa a tela sem dados e sem mensagem, indefinidamente | Adicionar timeout com `AbortSignal.timeout(...)` |
 | low | `.omp/state/continuity.md` é artefato de agente, não versionado hoje | `git status` | Ruído no PR se for adicionado por engano | Manter fora do versionamento |
 | low | `public/css/style.css` é artefato gerado e está versionado | `git ls-files`, `public/css/style.css` | Drift entre fonte Tailwind e CSS servido; conflito de merge em arquivo grande | Regenerar e commitar junto de toda mudança de classe |
 
@@ -17,13 +19,10 @@
 
 | Debt item | Why it exists | Where | Risk if ignored | Suggested fix |
 |-----------|---------------|-------|-----------------|---------------|
-| Estado de sessão sem geração/versão | Um único slot mutável de token, compartilhado entre abas | `public/js/app.js` | Um `401` atrasado apaga um token novo; um login atrasado repõe estado após logout em outra aba | Comparar a identidade do token antes de apagar, ou versionar a sessão |
 | Logout só limpa o cliente | A API não revoga token | `public/js/app.js` (`sair`), `index.js` (`/logout`) | O token continua válido até expirar (1 dia) se for copiado antes do logout | Documentar; considerar endpoint de revogação no Back-End |
-| Nenhum teste | Sem runner no projeto | repositório inteiro | Regressão de renderização ou de contrato HTML↔JS só aparece em uso manual | Smoke de compilação EJS + status das 14 rotas |
 | Contrato HTML↔JS por string de seletor | Um script para todas as telas | `public/js/app.js` ↔ `views/**/*.ejs` | Renomear um `id` quebra o comportamento sem erro (`?.` engole a falha) | Comentar o contrato no topo do script ou testar presença de seletores |
 | Linhas e mensagens vêm de `<template>` nas views | `clonar()` preenche `[data-slot]` com `textContent`/`setAttribute`, sem montar HTML com dados da API | `public/js/app.js`, `views/*.ejs` | Reintroduzir `innerHTML` com dados da API reabriria XSS | Manter dados só via `textContent`/`setAttribute` |
 | Cache-busting manual | Forçar recarga do shell | `views/partials/footer.ejs` (`?v=5`) | Esquecer de incrementar faz o navegador servir JS antigo | Incrementar a cada mudança em `script.js` ou `app.js` |
-| `views/index.ejs` órfão | Sobra de teste (`<h1>Teste</h1>`) | `views/index.ejs` | Confunde quem procura a home (a home é `login.ejs`) | Remover |
 | 20 PNGs em `public/icons/` sem referência | Ícones anteriores à adoção do Phosphor | `public/icons/` | Peso morto no repositório | Remover ou documentar quem usa |
 
 ## 3) Security Concerns
@@ -32,7 +31,6 @@
 |------|--------------------------------|----------|--------------------|-----|
 | Token legível por JavaScript | A07 Identification and Authentication Failures | `public/js/app.js` (`localStorage`) | Nenhuma | Risco aceito em 12/10/2026, quando o time trocou o cookie `HttpOnly` pelo `localStorage` (#6) |
 | Injeção de atributo na lista de receitas | A03 Injection | `public/js/app.js` (`clonar`, `href`, `aria-label`) | Dados entram só por `textContent` e `setAttribute`; nenhum HTML é montado com dados da API | Evitar regressão para `innerHTML` |
-| Credenciais na URL se o JS falhar | A04 Insecure Design | `views/login.ejs:30`, `views/cadastro.ejs:6` | Nenhuma | Formulários sem `method`/`action` |
 | Sem CSP nem cabeçalhos de segurança | A05 Security Misconfiguration | `index.js`, `views/partials/header.ejs` | Nenhuma | Revisar antes de qualquer deploy |
 | `FRONTEND_URL` ausente no `.env` do Back-End | A05 Security Misconfiguration | `conloq/Back-End/.env` | Código tem default `http://localhost:4000` | Em deploy, definir a origem real (senão o CORS bloqueia ou fica amplo demais) |
 | Chave de API já removida do histórico recente | A02 Cryptographic Failures | commit `cf2dc27` | Removida do `opencode.json` | Verificar se a chave exposta foi rotacionada |
@@ -44,15 +42,12 @@
 | N+1 de temperaturas por receita | `public/js/app.js` (`carregarReceitas`) | Nenhum no volume atual | Abrir `/receitas` com muitas receitas dispara N chamadas | Rota na API que devolva as temperaturas junto |
 | `public/img/mash.png` (190,7 KB) sem otimização | scan, "Top 10 largest files" | Nenhum em local | Peso de página em conexão lenta | Comprimir/redimensionar antes de publicar |
 | Compilação Tailwind manual | `package.json` (`build:css`) | Build esquecido faz classes novas não existirem | Telas quebradas silenciosamente | Rodar `watch:css` durante o desenvolvimento |
-| Sem timeout em `fetch` | `public/js/app.js` (`api`) | Tela vazia se a API pendurar | Piora com latência em deploy | `AbortSignal.timeout(...)` |
 
 ## 5) Fragile/High-Churn Areas
 
 | Area | Why fragile | Churn signal | Safe change strategy |
 |------|-------------|-------------|----------------------|
-| `public/js/app.js` (328 linhas) | Concentra todo o cliente: token, guarda, 9 fluxos e render de HTML por string | Arquivo novo, já revisado 2x no PR #4 | Testar cada tela afetada; não remover os `?.` |
 | `views/usuario.ejs` | Maior template: perfil, edição, modal de foto e prévia | Maior template do scan | Alterar em blocos e reabrir `/usuario` |
-| `views/receita.ejs` | Lista montada por HTML em string no cliente, com grid de colunas fixas | Já editado em commits recentes | Preservar `grid-cols-[...]` e `min-w-[680px]` |
 | `public/css/tailwind.css` | Contém o shell inteiro em `@layer components`, com media query de 1024px | Fonte do CSS servido | Rebuild obrigatório; conferir sidebar expandida/recolhida |
 | `docs/` | Prosa histórica que descrevia o monólito antigo | `docs/superpowers/**` e `docs/frontend-*.md` | Tratar como histórico, não como estado atual |
 
