@@ -955,7 +955,7 @@
     qa('form[data-sem-api]').forEach((form) => form.addEventListener('submit', avisarSemApi));
     qa('button[data-sem-api]').forEach((botao) => botao.addEventListener('click', avisarSemApi));
 
-    // Demonstração do teste de iodo com dados falsos (a leitura real virá do serviço Python + OpenCV)
+    // Simulação do teste de iodo, sem etiqueta na tela por decisão de 21/10/2026 (conloq/mash#9); a leitura real virá do serviço Python + OpenCV (#34)
     const COLETAS_DEMO = [
         {
             hora: '14:25',
@@ -1012,8 +1012,7 @@
             );
             q('#demoAmostra').style.background = '#b9b0a8';
             q('#demoResultado').textContent = 'Nenhuma coleta ainda';
-            q('#demoDescricao').textContent =
-                'Inicie a demonstração para ver as coletas acontecendo.';
+            q('#demoDescricao').textContent = 'Inicie o teste para ver as coletas acontecendo.';
             q('#demoMarcador').classList.add('hidden');
             q('#demoPronto').classList.replace('flex', 'hidden');
             q('#demoAoVivo').textContent = 'Aguardando início';
@@ -1047,7 +1046,7 @@
         q('#demoIniciar').addEventListener('click', () => {
             reiniciarDemo();
             q('#demoIniciar').disabled = true;
-            q('#demoAoVivo').textContent = 'Ao vivo (simulado)';
+            q('#demoAoVivo').textContent = 'Ao vivo';
             COLETAS_DEMO.forEach((coleta, i) => {
                 timers.push(setTimeout(() => mostrarLendo(true), i * passo + 200));
                 timers.push(setTimeout(() => aplicarColeta(coleta, i), i * passo + passo * 0.6));

@@ -82,7 +82,7 @@ Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da A
 | Nova rampa | `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
 | Editar rampa | `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar ainda não tem rota na API (#97) |
 
-As telas internas também chamam `GET /user` para preencher o topo. Lotes e análises ainda não têm rota na API e mostram estados de indisponibilidade (#31, #92, #1, #3). O teste de iodo mantém uma demonstração identificada com dados simulados, sem salvar nada. A leitura do iodo será feita pelo Back-End com Python e OpenCV (#34); o usuário não envia foto.
+As telas internas também chamam `GET /user` para preencher o topo. Lotes e análises ainda não têm rota na API e mostram estados de indisponibilidade (#31, #92, #1, #3). O teste de iodo é uma simulação no frontend com dados locais, sem salvar nada e sem etiqueta de simulação na tela, para a cena do pitch (decisão de 21/10/2026, conloq/mash#9). A leitura do iodo será feita pelo Back-End com Python e OpenCV (#34); o usuário não envia foto.
 
 ## Documentação
 
