@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@phosphor-icons/web": "^2.1.2",
-    "ejs": "^5.0.2",
+    "ejs": "^7.0.2",
     "express": "^5.3.0",
     "nodemon": "^3.1.14"
   },
