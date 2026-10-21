@@ -8,12 +8,10 @@
 
 <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_480px]">
   <section class="card flex flex-col gap-4 self-start p-8" aria-labelledby="analiseEstadoTitulo">
-    <div class="flex items-center gap-4">
-      <span class="grid size-14 shrink-0 place-items-center rounded-full bg-info-suave text-[28px] text-info"><i class="ph ph-hourglass-medium" aria-hidden="true"></i></span>
-      <div class="flex flex-col gap-1">
-        <h2 id="analiseEstadoTitulo" class="text-2xl font-semibold">Em processamento</h2>
-        <p class="text-texto-2">O MASH registrou a coleta. A classificação automática pelo OpenCV chega no próximo semestre.</p>
-      </div>
+    <div class="flex flex-col gap-2">
+      <span class="selo-info self-start">Em processamento</span>
+      <h2 id="analiseEstadoTitulo" class="text-2xl font-semibold">Aguardando classificação</h2>
+      <p class="text-texto-2">A coleta está registrada. A classificação automática pelo OpenCV entra no próximo semestre.</p>
     </div>
     <div class="pt-2">
       <button type="button" class="btn-secundario" data-sem-api="conloq/mash#1"><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Atualizar</button>

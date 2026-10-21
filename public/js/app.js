@@ -222,8 +222,7 @@
             acaoBotao: acao && !acao.href ? {} : null,
         });
         q('[data-slot="icone"]', estado).classList.add(icone);
-        if (erro) q('[data-slot="marcador"]', estado).classList.replace('bg-acao-suave', 'bg-perigo-suave');
-        if (erro) q('[data-slot="marcador"]', estado).classList.replace('text-foco', 'text-perigo');
+        if (erro) q('[data-slot="marcador"]', estado).classList.replace('text-texto-2', 'text-perigo');
         if (acao) {
             const botao = q('[data-slot="acaoLink"], [data-slot="acaoBotao"]', estado);
             q('i', botao).classList.add(acao.icone);
@@ -440,7 +439,7 @@
             return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível enviar a foto'));
         }
 
-        mostrarToast(mensagemDaApi(data, 'Imagem enviada com sucesso!'));
+        mostrarToast(mensagemDaApi(data, 'Imagem enviada com sucesso'));
         if (data.url) qa('[data-user="urlImage"]').forEach((el) => { el.src = data.url; });
     });
 
@@ -770,30 +769,6 @@
 
     qa('form[data-sem-api]').forEach((form) => form.addEventListener('submit', avisarSemApi));
     qa('button[data-sem-api]').forEach((botao) => botao.addEventListener('click', avisarSemApi));
-
-    // Filtro e busca da lista de lotes
-    const listaLotes = q('#listaLotes');
-    if (listaLotes) {
-        let filtro = 'todos';
-        const aplicarFiltro = () => {
-            const termo = q('#buscaLotes').value.trim().toLowerCase();
-            let visiveis = 0;
-            qa('[data-lote]', listaLotes).forEach((linha) => {
-                const mostrar = (filtro === 'todos' || linha.dataset.status === filtro) && linha.dataset.busca.includes(termo);
-                linha.classList.toggle('hidden', !mostrar);
-                linha.classList.toggle('grid', mostrar);
-                if (mostrar) visiveis += 1;
-            });
-            q('#lotesVazio').classList.toggle('hidden', visiveis > 0);
-            q('#lotesVazio').classList.toggle('flex', visiveis === 0);
-        };
-        q('#buscaLotes').addEventListener('input', aplicarFiltro);
-        qa('[data-filtro]').forEach((botao) => botao.addEventListener('click', () => {
-            filtro = botao.dataset.filtro;
-            qa('[data-filtro]').forEach((b) => b.setAttribute('aria-pressed', String(b === botao)));
-            aplicarFiltro();
-        }));
-    }
 
     // Demonstração do teste de iodo com dados falsos (a leitura real virá do serviço Python + OpenCV)
     const COLETAS_DEMO = [

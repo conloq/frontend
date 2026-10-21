@@ -1,6 +1,6 @@
 <%- include('partials/header.ejs', { titulo: 'Criar conta' }) %>
 <div class="flex min-h-screen bg-superficie">
-  <%- include('partials/painelMarca.ejs', { chamada: 'Sua jornada começa aqui' }) %>
+  <%- include('partials/painelMarca.ejs', { chamada: 'Do teste de iodo à fervura' }) %>
   <main class="flex w-full flex-col items-center justify-between px-6 pb-8 pt-12 lg:w-[864px] lg:shrink-0">
     <span aria-hidden="true"></span>
     <div class="flex w-full max-w-[440px] flex-col gap-7">
@@ -8,10 +8,7 @@
         <img src="/img/logo-mash.png" alt="" class="size-10 rounded-full">
         <span class="font-display text-xl font-bold tracking-[0.15em]">MASH</span>
       </div>
-      <div class="flex flex-col gap-2">
-        <h1 class="text-[32px] font-bold">Crie sua conta</h1>
-        <p class="text-texto-2">Leva menos de um minuto.</p>
-      </div>
+      <h1 class="text-[32px] font-bold">Criar conta</h1>
       <%- include('partials/mensagens.ejs') %>
       <form id="formCadastro" class="flex flex-col gap-[18px]" novalidate>
         <label class="campo" for="nome">

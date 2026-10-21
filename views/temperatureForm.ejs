@@ -42,7 +42,7 @@
       <fieldset class="flex flex-col gap-4">
         <legend class="mb-4">
           <span class="block font-display text-lg font-semibold">Tempo</span>
-          <span class="text-sm text-texto-2">Horários com hora, minuto e segundo.</span>
+          <span class="text-sm text-texto-2">Contado em hora, minuto e segundo.</span>
         </legend>
         <div class="grid gap-5 md:grid-cols-3">
           <% horario('timer', 'Temporizador', 'Quanto a rampa dura.') %>
@@ -69,12 +69,12 @@
     </div>
 
     <aside class="card flex flex-col gap-3.5 self-start p-6" aria-labelledby="tituloComoPreencher">
-      <h2 id="tituloComoPreencher" class="flex items-center gap-2.5 text-lg font-semibold"><i class="ph ph-info text-[22px] text-info" aria-hidden="true"></i>Como preencher</h2>
-      <ul class="flex flex-col gap-3 text-sm leading-relaxed">
-        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>Temperaturas em números inteiros, de 0 a 100 ºC.</li>
-        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>A mínima nunca passa da máxima, na faixa e nos limites.</li>
-        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>Horários sempre com hora, minuto e segundo: 00:40:00.</li>
-        <li class="flex gap-2.5"><i class="ph ph-check mt-0.5 text-lg text-sucesso" aria-hidden="true"></i>Todos os campos são obrigatórios, menos a ordem.</li>
+      <h2 id="tituloComoPreencher" class="text-lg font-semibold">Como preencher</h2>
+      <ul class="flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed marker:text-texto-2">
+        <li>Temperaturas em números inteiros, de 0 a 100&nbsp;ºC.</li>
+        <li>A mínima nunca passa da máxima, na faixa e nos limites.</li>
+        <li>Horários com hora, minuto e segundo, como 00:40:00.</li>
+        <li>Só a ordem é opcional.</li>
       </ul>
     </aside>
   </div>

@@ -5,7 +5,6 @@
 <div id="dialogoConfirmar" class="fixed inset-0 z-[70] hidden items-center justify-center bg-texto/60 p-4" aria-hidden="true">
   <div class="w-full max-w-[440px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="alertdialog" aria-modal="true" aria-labelledby="dialogoConfirmarTitulo" aria-describedby="dialogoConfirmarMensagem">
     <div class="flex flex-col gap-4 p-6 pb-5">
-      <span class="grid size-12 place-items-center rounded-full bg-perigo-suave text-2xl text-perigo"><i class="ph ph-trash" aria-hidden="true"></i></span>
       <div class="flex flex-col gap-1.5">
         <h2 id="dialogoConfirmarTitulo" class="text-xl font-semibold"></h2>
         <p id="dialogoConfirmarMensagem" class="leading-relaxed text-texto-2"></p>
@@ -21,8 +20,8 @@
 <%# Moldes que o app.js clona e preenche com textContent (data-slot) %>
 <template id="tplToast">
   <div class="pointer-events-auto flex w-full max-w-[400px] gap-3 rounded-xl border border-linha bg-superficie py-3.5 pl-4 pr-2 shadow-[0_12px_32px_rgba(31,26,23,0.16)]">
-    <span class="grid size-8 shrink-0 place-items-center rounded-full bg-sucesso-suave text-xl text-sucesso"><i class="ph-fill ph-check-circle" aria-hidden="true"></i></span>
-    <div class="flex min-w-0 flex-1 flex-col gap-0.5 pt-1">
+    <i class="ph-fill ph-check-circle shrink-0 pt-0.5 text-2xl text-sucesso" aria-hidden="true"></i>
+    <div class="flex min-w-0 flex-1 flex-col gap-0.5 pt-0.5">
       <p class="font-semibold" data-slot="titulo"></p>
       <p class="text-sm text-texto-2" data-slot="texto"></p>
     </div>
@@ -43,7 +42,7 @@
 
 <template id="tplEstado">
   <div class="flex flex-col items-center gap-3 px-6 py-16 text-center">
-    <span class="grid size-16 place-items-center rounded-full bg-acao-suave text-3xl text-foco" data-slot="marcador"><i class="ph" data-slot="icone" aria-hidden="true"></i></span>
+    <span class="text-4xl text-texto-2" data-slot="marcador"><i class="ph" data-slot="icone" aria-hidden="true"></i></span>
     <p class="font-display text-xl font-semibold" data-slot="titulo"></p>
     <p class="max-w-md leading-relaxed text-texto-2" data-slot="texto"></p>
     <div class="pt-2" data-slot="acao">
