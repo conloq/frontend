@@ -9,13 +9,13 @@
 ## 2) System Flow
 
 ```text
-Navegador → GET /receitas
-  → index.js: res.render("receita")            (sem dados)
+Navegador → GET /recipes
+  → index.js: res.render("recipes")            (sem dados)
   → views/partials/header.ejs                  (Phosphor + /css/style.css)
   → HTML com contêineres vazios (#listaReceitas, #mensagens, [data-user])
   → views/partials/footer.ejs                  (window.API_URL, script.js, app.js)
   → app.js: guarda de rota (tem token?)
-  → app.js: fetch {API_URL}/receitas + /user com Bearer
+  → app.js: fetch {API_URL}/recipes + /user com Bearer
   → app.js: preenche #listaReceitas e [data-user]; erro → #mensagens
 ```
 
