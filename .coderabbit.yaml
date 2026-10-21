@@ -5,6 +5,8 @@ reviews:
   profile: "chill"
   request_changes_workflow: false
   high_level_summary: true
+  # Resumo no comentário do CodeRabbit, sem editar a descrição do PR
+  high_level_summary_in_walkthrough: true
   # Sem o aviso "Review skipped" nos PRs
   review_status: false
   poem: false
