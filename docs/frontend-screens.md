@@ -5,17 +5,21 @@
 | Tela | Template | Composição visual |
 |---|---|---|
 | Login | `views/login.ejs` | Header/footer, formulário de autenticação, campos de e-mail e senha, link de cadastro. |
-| Cadastro | `views/cadastro.ejs` | Header/footer, formulário de criação de conta e confirmação visual de senha. |
+| Cadastro | `views/signup.ejs` | Header/footer, formulário de criação de conta e confirmação visual de senha. |
 
 ## Telas autenticadas
 
 | Tela | Rota | Template | Composição visual |
 |---|---|---|---|
-| Perfil | `/usuario` | `views/usuario.ejs` | Shell autenticado, dados do perfil, edição, foto com preview e exclusão da conta com diálogo de confirmação. |
+| Perfil | `/profile` | `views/profile.ejs` | Shell autenticado, dados do perfil, edição, foto com preview e exclusão da conta com diálogo de confirmação. |
 | Receitas | `/recipes` | `views/recipes.ejs` | Shell autenticado, título, botão "Nova receita", listagem tabular e modal de criação. |
 | Receita | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` | Shell autenticado, rampas da receita, modal de renomear, exclusão e ações de editar/excluir rampa. |
-| Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` | Shell autenticado, formulário de rampas, limites e temporização, com erro por campo; na edição, salvar avisa que a API ainda não tem rota (#97). |
-| Lotes | `/lots`, `/lots/:id` | `views/lots.ejs`, `views/lot.ejs` | Shell autenticado e estado de indisponibilidade, sem registros fictícios. |
+| Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` | Shell autenticado, formulário de rampas, limites e temporização, com erro por campo; na edição, salvar não envia nada e não mostra aviso, porque a API ainda não tem rota (#97). |
+| Painel | `/dashboard` | `views/dashboard.ejs` | Indicadores com "—" e cards em estado vazio. |
+| Lotes | `/lots`, `/lots/:id`, `/lots/:id/monitoring` | `views/lots.ejs`, `views/lot.ejs`, `views/lotMonitoring.ejs` | Layout completo em estado vazio, sem registros fictícios; excluir lote é `data-sem-api`. |
+| Novo e editar lote | `/lots/new`, `/lots/:id/edit` | modal `views/partials/modalLote.ejs` sobre a lista e o detalhe | Receitas reais no seletor (`GET /recipes`); salvar é `data-sem-api`. |
+| Sessão do iodo | `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `views/iodineSession.ejs` | Câmera desconectada, calibração pendente, capturas vazias. |
+| Recuperar senha | `/forgot-password`, `/codigo`, `/redefinir` | `views/forgotPassword.ejs` | Páginas públicas; código de 6 dígitos; formulários `data-sem-api`. |
 | Teste de iodo | `/analyses/new` | `views/iodineDemo.ejs` | Shell autenticado e simulação de frontend das coletas, sem envio de imagem nem persistência. |
 | Análise | `/analyses/:id` | `views/analysis.ejs` | Shell autenticado e estado de indisponibilidade (consulta sem rota na API). |
 
@@ -43,16 +47,16 @@
 - Todas as telas usam `header.ejs` e `footer.ejs`.
 - Telas autenticadas usam `shellInicio.ejs` (com `sidebar.ejs` e `topBar.ejs`) e `shellFim.ejs`.
 - `recipes.ejs` e `recipe.ejs` usam listagem, ações icon-only e modais; as linhas vêm de `<template>`.
-- `usuario.ejs` usa formulário, diálogo de confirmação e preview de imagem.
+- `profile.ejs` usa formulário, diálogo de confirmação e preview de imagem.
 - `temperatureForm.ejs` usa cards de formulário com erro por campo.
-- `lots.ejs`, `lot.ejs` e `analysis.ejs` usam um `card` estático de indisponibilidade (`#tituloIndisponivel`), sem chamada à API; `avisoSemApi.ejs` aparece só na edição de rampa.
+- `dashboard.ejs`, `lots.ejs`, `lot.ejs`, `lotMonitoring.ejs` e `iodineSession.ejs` usam o partial `estadoVazio.ejs`, sem chamada à API além de `GET /user`; `analysis.ejs` mantém o card de indisponibilidade (`#tituloIndisponivel`).
 
 ## Evidências
 
 - `index.js`
 - `views/login.ejs`
-- `views/cadastro.ejs`
-- `views/usuario.ejs`
+- `views/signup.ejs`
+- `views/profile.ejs`
 - `views/recipes.ejs`
 - `views/recipe.ejs`
 - `views/temperatureForm.ejs`

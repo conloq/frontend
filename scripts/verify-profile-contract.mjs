@@ -33,7 +33,7 @@ class FormDataMock {
 }
 const storage = new Map([['mash-token', 'test-token']]);
 const location = {
-    pathname: '/usuario',
+    pathname: '/profile',
     href: '',
     replace() {
         throw new Error('Unexpected redirect');
@@ -91,13 +91,13 @@ await new Promise(setImmediate);
 assert.equal(location.href, '');
 assert.equal(save.disabled, false);
 assert.equal(calls.filter((call) => call.method === 'GET').length, 2);
-for (const file of ['../views/usuario.ejs', '../views/partials/topBar.ejs']) {
+for (const file of ['../views/profile.ejs', '../views/partials/topBar.ejs']) {
     const url = new URL(file, import.meta.url);
     const template = readFileSync(url, 'utf8');
     ejs.compile(template, { filename: url.pathname });
     assert.match(template, /data-user="urlImage"/);
     assert.doesNotMatch(template, /data-user="url_image"/);
-    if (file.endsWith('usuario.ejs')) {
+    if (file.endsWith('profile.ejs')) {
         assert.match(template, /name="phone"/);
         assert.match(template, /id="telefone"/);
         assert.match(template, /Telefone/);

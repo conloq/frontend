@@ -31,7 +31,7 @@ Navegador → GET /recipes
 | Layer or module | Owns | Must not own | Evidence |
 |-----------------|------|--------------|----------|
 | `index.js` | Bootstrap do Express, estáticos, rotas GET, `window.API_URL` | Dados, autenticação, chamadas à API | `index.js` |
-| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/recipes.ejs`, `views/usuario.ejs` |
+| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/recipes.ejs`, `views/profile.ejs` |
 | `views/partials/footer.ejs` | `window.API_URL`, ordem de carregamento dos scripts | Lógica de tela | `views/partials/footer.ejs` |
 | `public/js/app.js` | Chamadas à API, token, guarda de rota, mensagens, render de listas | Regra de negócio, autorização real | `public/js/app.js` |
 | `public/js/script.js` | Shell: sidebar, drawer, modais, senha, prévia de foto | Chamadas à API | `public/js/script.js` |
@@ -45,7 +45,7 @@ Navegador → GET /recipes
 | Guarda de rota no load | `public/js/app.js` | Redireciona quem não tem token e quem já está logado |
 | Mensagens lidas como `data.error ?? data.message` | `public/js/app.js` | A API responde `message` no 400 do login e `error` nos demais |
 | Flash por `localStorage` | `public/js/app.js` (`mash-flash`) | Mensagem sobrevive a um redirecionamento |
-| Preenchimento por atributo (`data-user`) | `views/partials/topBar.ejs`, `views/usuario.ejs` | Um seletor preenche vários lugares |
+| Preenchimento por atributo (`data-user`) | `views/partials/topBar.ejs`, `views/profile.ejs` | Um seletor preenche vários lugares |
 | Partial composition | `views/*.ejs` | Não duplicar `<head>` e carregamento de assets |
 | Shell em `@layer components` | `public/css/tailwind.css` | Estado expandido/recolhido da sidebar sem utilitários repetidos |
 

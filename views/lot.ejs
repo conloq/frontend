@@ -1,10 +1,38 @@
-<%- include('partials/shellInicio.ejs', { titulo: 'Lote', trilha: ['Lotes', 'Lote'] }) %>
-<a href="/lots" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todos os lotes</a>
-<h1 class="text-[30px] font-semibold">Lote</h1>
+<%# Detalhe do lote: a API ainda não tem lotes; cada área mostra o estado vazio. Excluir usa data-sem-api. %>
+<%- include('partials/shellInicio.ejs', { titulo: 'Lote', trilha: ['Lotes', 'Lote'], voltar: '/lots' }) %>
+<div class="flex flex-col gap-2">
+  <a href="/lots" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todos os lotes</a>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <h1 class="text-[30px] font-semibold">Lote</h1>
+    <div class="acoes">
+      <button type="button" class="btn-perigo" data-sem-api="conloq/mash#31"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
+      <a href="/lots/<%= locals.id %>/edit" class="btn-secundario" data-modal-open="modalLote"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Editar</a>
+      <a href="/lots/<%= locals.id %>/monitoring" class="btn-secundario max-lg:col-span-2"><i class="ph ph-chart-line" aria-hidden="true"></i>Monitoramento</a>
+      <a href="/lots/<%= locals.id %>/iodine" class="btn-primario max-lg:hidden"><i class="ph ph-video-camera" aria-hidden="true"></i>Iniciar leitura do iodo</a>
+    </div>
+  </div>
+</div>
 
-<section class="card flex flex-col items-center gap-3 px-6 py-16 text-center" aria-labelledby="tituloIndisponivel">
-  <i class="ph ph-clock text-4xl text-texto-2" aria-hidden="true"></i>
-  <h2 id="tituloIndisponivel" class="text-xl font-semibold">Detalhes do lote indisponíveis</h2>
-  <p class="max-w-md text-texto-2">Ainda não é possível consultar os dados deste lote.</p>
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
+  <section class="card overflow-hidden" aria-labelledby="tituloLeituras">
+    <div class="flex flex-col gap-0.5 border-b border-linha px-6 py-5">
+      <h2 id="tituloLeituras" class="text-lg font-semibold">Leituras do iodo</h2>
+      <p class="text-sm text-texto-2">Da captura mais recente para a mais antiga.</p>
+    </div>
+    <%- include('partials/estadoVazio.ejs', { icone: 'ph-test-tube', titulo: 'Nenhuma leitura neste lote', texto: 'Cada captura da câmera aparece aqui com hora, temperatura e classe.', compacto: true }) %>
+  </section>
+  <section class="card overflow-hidden" aria-labelledby="tituloReceitaLote">
+    <h2 id="tituloReceitaLote" class="border-b border-linha px-6 py-5 text-lg font-semibold">Receita do lote</h2>
+    <%- include('partials/estadoVazio.ejs', { icone: 'ph-scroll', titulo: 'Receita não informada', compacto: true }) %>
+  </section>
+</div>
+
+<section class="card overflow-hidden" aria-labelledby="tituloTemperaturaLote">
+  <h2 id="tituloTemperaturaLote" class="border-b border-linha px-6 py-5 text-lg font-semibold">Temperatura</h2>
+  <%- include('partials/estadoVazio.ejs', { icone: 'ph-chart-line', titulo: 'Sem leituras de temperatura', texto: 'A curva da mosturação aparece quando o sensor enviar leituras deste lote.' }) %>
 </section>
+<div class="barra-mobile lg:hidden">
+  <a href="/lots/<%= locals.id %>/iodine" class="btn-primario w-full"><i class="ph ph-video-camera" aria-hidden="true"></i>Iniciar leitura do iodo</a>
+</div>
+<%- include('partials/modalLote.ejs', { editando: true, abrir: locals.abrirLote, voltar: `/lots/${locals.id}` }) %>
 <%- include('partials/shellFim.ejs') %>

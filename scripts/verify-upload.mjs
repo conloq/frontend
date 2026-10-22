@@ -18,7 +18,7 @@ class FormDataMock {
     }
 }
 const location = {
-    pathname: '/usuario',
+    pathname: '/profile',
     href: '',
     replace() {
         throw new Error('redirect inesperado');

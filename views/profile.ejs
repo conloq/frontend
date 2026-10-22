@@ -4,9 +4,10 @@
   <p class="text-texto-2">Conta criada em <span data-user="createdAt">—</span>.</p>
 </div>
 
+<%# Mobile: foto, dados, últimos acessos e excluir conta (ordem do Pen); no xl, coluna da esquerda e formulário à direita %>
 <div class="grid gap-6 xl:grid-cols-[400px_minmax(0,1fr)]">
-  <div class="flex flex-col gap-6">
-    <section class="card flex flex-col items-center gap-5 p-6" aria-labelledby="tituloFoto">
+  <div class="flex flex-col gap-6 max-xl:contents">
+    <section class="card flex flex-col items-center gap-5 p-6 max-xl:order-1" aria-labelledby="tituloFoto">
       <div class="flex w-full flex-col gap-0.5">
         <h2 id="tituloFoto" class="text-lg font-semibold">Foto do perfil</h2>
         <p class="text-sm text-texto-2">JPEG ou PNG. Aparece no topo das telas.</p>
@@ -22,7 +23,7 @@
     </section>
 
     <%# Histórico de logins: preenchido pelo app.js com GET /user/login-history (conloq/mash#102) %>
-    <section class="card flex flex-col p-6" aria-labelledby="tituloAcessos">
+    <section class="card flex flex-col p-6 max-xl:order-3" aria-labelledby="tituloAcessos">
       <div class="flex flex-col gap-0.5 pb-2">
         <h2 id="tituloAcessos" class="text-lg font-semibold">Últimos acessos</h2>
         <p class="text-sm text-texto-2">Entradas recentes na sua conta.</p>
@@ -38,7 +39,7 @@
       </div>
     </template>
 
-    <section class="card flex flex-col gap-5 border-[#f2c9c4] p-6" aria-labelledby="tituloExcluirConta">
+    <section class="card flex flex-col gap-5 border-[#f2c9c4] p-6 max-xl:order-4" aria-labelledby="tituloExcluirConta">
       <div class="flex flex-col gap-0.5">
         <h2 id="tituloExcluirConta" class="text-lg font-semibold">Excluir conta</h2>
         <p class="text-sm text-texto-2">Apaga sua conta e sai do MASH. Não dá para desfazer.</p>
@@ -47,7 +48,7 @@
     </section>
   </div>
 
-  <form id="formPerfil" method="post" class="card flex flex-col gap-5 self-start p-6" novalidate>
+  <form id="formPerfil" method="post" class="card flex flex-col gap-5 self-start p-6 max-xl:order-2" novalidate>
     <h2 class="text-lg font-semibold">Dados da conta</h2>
     <div class="grid gap-5 md:grid-cols-2">
       <div class="campo" data-campo="name">
@@ -88,7 +89,7 @@
         <span class="campo-ajuda" data-erro></span>
       </div>
     </div>
-    <div class="flex flex-wrap justify-end gap-3 pt-2">
+    <div class="acoes pt-2 sm:self-end">
       <button type="button" id="btnDescartar" class="btn-secundario">Descartar</button>
       <button type="submit" id="btnSalvar" disabled class="btn-primario">Salvar alterações</button>
     </div>

@@ -69,6 +69,6 @@ Arquivo: `public/js/script.js`
 - `views/recipe.ejs`
 - `views/temperatureForm.ejs`
 - `views/iodineDemo.ejs`
-- `views/usuario.ejs`
+- `views/profile.ejs`
 - `public/js/script.js`
 - `public/css/tailwind.css`

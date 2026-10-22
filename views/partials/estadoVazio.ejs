@@ -1,0 +1,7 @@
+<%# Estado vazio estático (telas sem rota na API). Recebe icone, titulo, texto e, opcional, acao = { href, icone, texto } e compacto. %>
+<div class="flex flex-col items-center gap-3 px-6 text-center <%= locals.compacto ? 'py-10' : 'py-16' %>">
+  <i class="ph <%= icone %> text-4xl text-texto-2" aria-hidden="true"></i>
+  <p class="font-display <%= locals.compacto ? 'text-lg' : 'text-xl' %> font-semibold"><%= titulo %></p>
+  <% if (locals.texto) { %><p class="max-w-md leading-relaxed text-texto-2"><%= texto %></p><% } %>
+  <% if (locals.acao) { %><a href="<%= acao.href %>" class="btn-primario mt-2"><i class="ph <%= acao.icone %>" aria-hidden="true"></i><%= acao.texto %></a><% } %>
+</div>

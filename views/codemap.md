@@ -6,13 +6,14 @@ Templates EJS das telas do Sistema MASH: apresentação, navegação e formulár
 
 ## Design
 
-- `login.ejs` e `cadastro.ejs` formam o fluxo público de autenticação (`#formLogin`, `#formCadastro`), com o painel da marca de `partials/painelMarca.ejs`.
-- `usuario.ejs` é o Perfil: dados (`#formPerfil`, `PUT /user`), foto (`#formFoto`, `PUT /user/upload`) exclusão da conta (`#btnExcluir`, `DELETE /user`, com diálogo de confirmação) e o card "Últimos acessos" (`#listaAcessos`, linhas de `tplLinhaAcesso`, preenchido com `GET /user/login-history`).
-- `configuracao.ejs` é a Configuração, com abas Acessibilidade (`/configuracao`) e Segurança (`/configuracao/seguranca`), escolhidas pelo local `aba`. O `#formConfiguracao` usa `data-sem-api`: a API ainda não guarda preferências.
+- `login.ejs` e `signup.ejs` formam o fluxo público de autenticação (`#formLogin`, `#formCadastro`), com o painel da marca de `partials/painelMarca.ejs`.
+- `profile.ejs` é o Perfil: dados (`#formPerfil`, `PUT /user`), foto (`#formFoto`, `PUT /user/upload`) exclusão da conta (`#btnExcluir`, `DELETE /user`, com diálogo de confirmação) e o card "Últimos acessos" (`#listaAcessos`, linhas de `tplLinhaAcesso`, preenchido com `GET /user/login-history`).
+- `settings.ejs` é a Configuração, com abas (na lateral a partir de `lg`, no topo no mobile) Acessibilidade (`/settings`) e Segurança (`/settings/security`), escolhidas pelo local `aba`. O `#formConfiguracao` usa `data-sem-api`: a API ainda não guarda preferências.
 - `recipes.ejs` lista as receitas (`#listaReceitas`, molde `tplLinhaReceita`) e cria receita no modal `#modalReceita` (`#formReceita`).
-- `recipe.ejs` detalha a receita: rampas (`#detalheRampas`, molde `tplLinhaRampa`), renomear no modal `#modalRenomear` (`#formEditarReceita`) e excluir. `/recipes/:id/edit` usa a mesma tela; cada rampa tem editar e excluir (#97, `data-sem-api`).
-- `temperatureForm.ejs` cria rampa (`#formTemperatura`, `POST /recipes/:id/temperatures`), com erro em cada campo. Com `editando` (rota `.../temperatures/:temperatureId/edit`), carrega a rampa e o salvar avisa `data-sem-api` (#97).
-- `lots.ejs`, `lot.ejs` e `analysis.ejs` mostram estados de indisponibilidade, sem registros fictícios. `iodineDemo.ejs` é a simulação do teste de iodo em `/analyses/new`, com coletas locais, sem persistência e sem etiqueta de simulação na tela (decisão de 21/10/2026, conloq/mash#9).
+- `recipe.ejs` detalha a receita: rampas (`#detalheRampas`, molde `tplLinhaRampa`), perfil das rampas (`#perfilRampas`/`#perfilGrafico`, molde `tplFaixaRampa`, desenhado com o início e a duração do timer de cada rampa), renomear no modal `#modalRenomear` (`#formEditarReceita`) e excluir. `/recipes/:id/edit` usa a mesma tela; cada rampa tem editar e excluir (#97, `data-sem-api`).
+- `recipeIodine.ejs` é o teste de iodo da receita (`#formIodoReceita`): rampa (de `GET /recipes/:id/temperatures`), primeira coleta, intervalo e máximo de coletas; salvar é `data-sem-api` (#101) e a prévia (`#previaCapturas`, molde `tplCapturaPrevia`) é desenhada com os valores digitados.
+- `temperatureForm.ejs` cria rampa (`#formTemperatura`, `POST /recipes/:id/temperatures`), com erro em cada campo. Com `editando` (rota `.../temperatures/:temperatureId/edit`), carrega a rampa; o salvar tem `data-sem-api` e não envia nada, sem aviso (#97).
+- Telas sem rota na API, em estado vazio e honesto (partial `estadoVazio.ejs`, sem registros fictícios): `dashboard.ejs`, `lots.ejs`, `lot.ejs` (excluir `data-sem-api`), novo e editar lote no modal `partials/modalLote.ejs` (`#modalLote`/`#formLote`, `editando`; o seletor `#loteReceita` vem de `GET /recipes`; `/lots/new` e `/lots/:id/edit` abrem a tela com o modal aberto), `lotMonitoring.ejs`, `iodineSession.ejs` (`etapa` preparar/leitura; câmera desconectada) e `forgotPassword.ejs` (`#formRecuperar`, `etapa` email/codigo/redefinir, páginas públicas). `analysis.ejs` mostra indisponibilidade. `iodineDemo.ejs` é a simulação do teste de iodo em `/analyses/new`, com coletas locais, sem persistência e sem etiqueta de simulação na tela (decisão de 21/10/2026, conloq/mash#9).
 - `partials/` contém o shell compartilhado.
 
 ## Flow
@@ -28,8 +29,8 @@ Telas públicas incluem `partials/header.ejs` e `partials/footer.ejs`. Telas aut
 
 ## Evidências
 
-- `views/login.ejs`, `views/cadastro.ejs`, `views/usuario.ejs`
+- `views/login.ejs`, `views/signup.ejs`, `views/profile.ejs`
 - `views/recipes.ejs`, `views/recipe.ejs`, `views/temperatureForm.ejs`
-- `views/lots.ejs`, `views/lot.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs`
+- `views/dashboard.ejs`, `views/lots.ejs`, `views/lot.ejs`, `views/lotMonitoring.ejs`, `views/iodineSession.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs`, `views/forgotPassword.ejs`
 - `views/partials/*.ejs`
 - `index.js`
