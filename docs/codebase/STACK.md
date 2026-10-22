@@ -14,7 +14,7 @@
 
 | Dependency | Version | Role in system | Evidence |
 |------------|---------|----------------|----------|
-| `express` | `^5.3.0` | Servidor HTTP, estáticos, roteamento das 14 rotas GET | `package.json`, `index.js` |
+| `express` | `^5.3.0` | Servidor HTTP, estáticos, roteamento das 16 rotas GET | `package.json`, `index.js` |
 | `ejs` | `^7.0.2` | View engine dos templates em `views/` | `package.json`, `index.js` |
 | `@phosphor-icons/web` | `^2.1.2` | Fonte de ícones servida em `/vendor/phosphor` | `package.json`, `index.js`, `views/partials/header.ejs` |
 | `nodemon` | `^3.1.14` | Execução de desenvolvimento (`npm start`); declarado em `dependencies` | `package.json` |

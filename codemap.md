@@ -23,7 +23,7 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 | `/login` | `login.ejs` | `POST /login` |
 | `/cadastro` | `cadastro.ejs` | `POST /user` |
 | `/logout` | - | redireciona para `/login`; o `app.js` apaga o token |
-| `/usuario` | `usuario.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` (o card "Últimos acessos" é estático: a API não tem histórico de logins) |
+| `/usuario` | `usuario.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` e `GET /user/login-history` no card "Últimos acessos" (rota prevista na conloq/mash#102; enquanto a API responde 404, o card mostra "Histórico indisponível") |
 | `/configuracao`, `/configuracao/seguranca` | `configuracao.ejs` (`aba`) | nenhuma; salvar usa `data-sem-api` |
 | `/recipes` | `recipes.ejs` | `GET /user`, `GET /recipes`, `GET /recipes/:id/temperatures` (uma por receita), `POST /recipes`, `DELETE /recipes/:id` |
 | `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela; cada rampa tem editar e excluir com aviso `data-sem-api`, #97) |
@@ -32,7 +32,7 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 | `/lots`, `/lots/:id` | `lots.ejs`, `lot.ejs` | `GET /user` (consulta indisponível; API de lotes na #31/#92) |
 | `/analyses/new`, `/analyses/:id` | `iodineDemo.ejs`, `analysis.ejs` | `GET /user` (teste de iodo simulado no frontend em /analyses/new, sem rótulo de simulação; consulta indisponível em /analyses/:id; OpenCV na #34) |
 
-Fora desta entrega: `/recuperar-senha` (sem endpoint no depósito; o link sai ou mostra aviso, conloq/mash#73), editar temperatura, iodo, histórico de logins e preferências de configuração (a API não tem os quatro últimos).
+Fora desta entrega: `/recuperar-senha` (sem endpoint no depósito; o link sai ou mostra aviso, conloq/mash#73), editar temperatura, iodo e preferências de configuração (a API não tem os três últimos; o histórico de logins já é pedido à API, ver `/usuario`).
 
 ## Repository Directory Map
 

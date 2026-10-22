@@ -471,6 +471,59 @@
 
     q('#btnDescartar')?.addEventListener('click', preencherPerfil);
 
+    // Últimos acessos: a rota chega com conloq/mash#102; até lá a API responde 404
+    async function carregarAcessos() {
+        const lista = q('#listaAcessos');
+        if (!lista) return;
+
+        listaCarregando(lista, 2);
+        const { status, data } = await api('GET', '/user/login-history');
+        if (status === 404)
+            return listaEstado(lista, {
+                icone: 'ph-clock-counter-clockwise',
+                titulo: 'Histórico indisponível',
+                texto: 'A API ainda não registra os acessos da conta.',
+            });
+        if (status !== 200)
+            return listaErro(lista, 'Não foi possível carregar os acessos', data, carregarAcessos);
+
+        // shortcut: formato da resposta ainda não publicado no Swagger; ajustar quando a #102 sair
+        const acessos = data.loginHistory ?? [];
+        if (!acessos.length)
+            return listaEstado(lista, {
+                icone: 'ph-clock-counter-clockwise',
+                titulo: 'Nenhum acesso registrado',
+            });
+
+        lista.removeAttribute('aria-busy');
+        lista.replaceChildren(
+            ...acessos.map((acesso) => {
+                const linha = clonar('tplLinhaAcesso', {
+                    local: acesso.location,
+                    quando: `${new Date(acesso.loggedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} · ${acesso.ipAddress}`,
+                    // status = IP já visto nesta conta (não é sucesso/falha do login)
+                    status:
+                        acesso.status === null || acesso.status === undefined
+                            ? null
+                            : acesso.status
+                              ? 'Dispositivo conhecido'
+                              : 'Novo dispositivo',
+                });
+                q('[data-slot="status"]', linha)?.classList.add(
+                    acesso.status ? 'selo-sucesso' : 'selo-aviso'
+                );
+                return linha;
+            })
+        );
+    }
+
+    carregarAcessos();
+
+    const volume = q('#volume');
+    volume?.addEventListener('input', () =>
+        volume.setAttribute('aria-valuetext', ['Baixo', 'Médio', 'Alto'][volume.value])
+    );
+
     q('#formPerfil')?.addEventListener('submit', async (event) => {
         event.preventDefault();
         const form = event.target;

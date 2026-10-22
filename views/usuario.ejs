@@ -21,24 +21,22 @@
       </form>
     </section>
 
-    <%# Histórico de logins: a API ainda não tem rota; as linhas seguem o desenho do Pen %>
+    <%# Histórico de logins: preenchido pelo app.js com GET /user/login-history (conloq/mash#102) %>
     <section class="card flex flex-col p-6" aria-labelledby="tituloAcessos">
       <div class="flex flex-col gap-0.5 pb-2">
         <h2 id="tituloAcessos" class="text-lg font-semibold">Últimos acessos</h2>
         <p class="text-sm text-texto-2">Entradas recentes na sua conta.</p>
       </div>
-      <ul class="flex flex-col">
-        <% [['Registro, SP', '15/01/2026 · 22:00 · 192.168.1.104', 'selo-sucesso', 'Este dispositivo'],
-            ['Jacupiranga, SP', '12/01/2026 · 21:00 · 192.167.1.10', 'selo-aviso', 'Novo dispositivo'],
-            ['Registro, SP', '10/01/2026 · 08:15 · 192.168.1.104', 'selo-sucesso', 'Login seguro']].forEach(([local, quando, selo, status]) => { %>
-          <li class="flex items-center gap-3 border-b border-linha py-3 last:border-b-0">
-            <span class="grid size-9 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-map-pin text-lg text-texto-2" aria-hidden="true"></i></span>
-            <span class="flex min-w-0 flex-1 flex-col"><span class="text-sm font-semibold"><%= local %></span><span class="text-[13px] text-texto-2"><%= quando %></span></span>
-            <span class="<%= selo %>"><%= status %></span>
-          </li>
-        <% }) %>
-      </ul>
+      <div id="listaAcessos" class="flex flex-col" role="list" aria-live="polite"></div>
     </section>
+
+    <template id="tplLinhaAcesso">
+      <div class="flex items-center gap-3 border-b border-linha py-3 last:border-b-0" role="listitem">
+        <span class="grid size-9 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-map-pin text-lg text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex min-w-0 flex-1 flex-col"><span class="text-sm font-semibold" data-slot="local"></span><span class="text-[13px] text-texto-2" data-slot="quando"></span></span>
+        <span data-slot="status"></span>
+      </div>
+    </template>
 
     <section class="card flex flex-col gap-5 border-[#f2c9c4] p-6" aria-labelledby="tituloExcluirConta">
       <div class="flex flex-col gap-0.5">

@@ -4,7 +4,7 @@
 
 | Path | Purpose | Evidence |
 |------|---------|----------|
-| `index.js` | Ponto de entrada: Express, view engine EJS, estáticos e as 14 rotas GET | `index.js` |
+| `index.js` | Ponto de entrada: Express, view engine EJS, estáticos e as 16 rotas GET | `index.js` |
 | `public/js/app.js` | Cliente da API: login, token, perfil, receitas, temperatura | `public/js/app.js` |
 | `public/js/script.js` | Shell da interface: sidebar, modais, senha, prévia de foto | `public/js/script.js` |
 | `views/` | Templates EJS das telas, sem dados | `views/*.ejs` |
