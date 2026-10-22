@@ -26,7 +26,7 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 | `/usuario` | `usuario.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` e `GET /user/login-history` no card "Últimos acessos" (rota prevista na conloq/mash#102; enquanto a API responde 404, o card mostra "Histórico indisponível") |
 | `/configuracao`, `/configuracao/seguranca` | `configuracao.ejs` (`aba`) | nenhuma; salvar usa `data-sem-api` |
 | `/recipes` | `recipes.ejs` | `GET /user`, `GET /recipes`, `GET /recipes/:id/temperatures` (uma por receita), `POST /recipes`, `DELETE /recipes/:id` |
-| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela; cada rampa tem editar e excluir com aviso `data-sem-api`, #97) |
+| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela; cada rampa oferece ações para editar e excluir, ambas com aviso `data-sem-api`, #97) |
 | `/recipes/:id/temperatures/new` | `temperatureForm.ejs` | `GET /user`, `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
 | `/recipes/:id/temperatures/:temperatureId/edit` | `temperatureForm.ejs` (`editando`) | `GET /user`, `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar é `data-sem-api` (#97) |
 | `/lots`, `/lots/:id` | `lots.ejs`, `lot.ejs` | `GET /user` (consulta indisponível; API de lotes na #31/#92) |
