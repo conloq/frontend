@@ -12,7 +12,7 @@ Templates EJS das telas do Sistema MASH: apresentação, navegação e formulár
 - `recipes.ejs` lista as receitas (`#listaReceitas`, molde `tplLinhaReceita`) e cria receita no modal `#modalReceita` (`#formReceita`).
 - `recipe.ejs` detalha a receita: rampas (`#detalheRampas`, molde `tplLinhaRampa`), renomear no modal `#modalRenomear` (`#formEditarReceita`) e excluir. `/recipes/:id/edit` usa a mesma tela; cada rampa tem editar e excluir (#97, `data-sem-api`).
 - `temperatureForm.ejs` cria rampa (`#formTemperatura`, `POST /recipes/:id/temperatures`), com erro em cada campo. Com `editando` (rota `.../temperatures/:temperatureId/edit`), carrega a rampa e o salvar avisa `data-sem-api` (#97).
-- `lots.ejs`, `lot.ejs` e `analysis.ejs` mostram estados de indisponibilidade, sem registros fictícios. `iodineDemo.ejs` mantém o teste de iodo simulado no frontend, sem rótulo de simulação na cena, com coletas simuladas e sem persistência, em `/analyses/new`.
+- `lots.ejs`, `lot.ejs` e `analysis.ejs` mostram estados de indisponibilidade, sem registros fictícios. `iodineDemo.ejs` é a simulação do teste de iodo em `/analyses/new`, com coletas locais, sem persistência e sem etiqueta de simulação na tela (decisão de 21/10/2026, conloq/mash#9).
 - `partials/` contém o shell compartilhado.
 
 ## Flow

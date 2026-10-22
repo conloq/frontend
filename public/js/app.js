@@ -955,7 +955,7 @@
     qa('form[data-sem-api]').forEach((form) => form.addEventListener('submit', avisarSemApi));
     qa('button[data-sem-api]').forEach((botao) => botao.addEventListener('click', avisarSemApi));
 
-    // Demonstração do teste de iodo com dados falsos (a leitura real virá do serviço Python + OpenCV)
+    // Simulação do teste de iodo, sem etiqueta na tela por decisão de 21/10/2026 (conloq/mash#9); a leitura real virá do serviço Python + OpenCV (#34)
     const COLETAS_DEMO = [
         {
             hora: '14:25',

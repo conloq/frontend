@@ -23,7 +23,7 @@ Telas públicas (`login`, `cadastro`) incluem `header`, `painelMarca`, `mensagen
 
 - `shellInicio`/`shellFim`: `usuario`, `configuracao`, `recipes`, `recipe`, `temperatureForm`, `lots`, `lot`, `analysis` e `iodineDemo`.
 - `header`, `painelMarca`, `mensagens` e `footer` direto: `login` e `cadastro`.
-- `avisoSemApi`: `temperatureForm` (edição). `iodineDemo` não tem aviso: a cena do teste de iodo fica sem rótulo de simulação.
+- `avisoSemApi`: `temperatureForm` (edição). `iodineDemo` não exibe aviso de simulação (decisão de 21/10/2026, conloq/mash#9).
 - IDs e classes consumidos por `public/js/script.js`: `#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `.js-modal`, `[data-modal-open]` e `[data-modal-close]`.
 - IDs e moldes consumidos por `public/js/app.js`: `#mensagens`, `#toasts`, `#dialogoConfirmar`, `tplToast`, `tplAlerta`, `tplEstado`, `tplCarregando` e `[data-user]`.
 - Recursos servidos por `index.js`: `/css/style.css`, `/js/`, `/img/` e `/vendor/phosphor`.
