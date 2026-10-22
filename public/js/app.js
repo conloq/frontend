@@ -1012,8 +1012,7 @@
             );
             q('#demoAmostra').style.background = '#b9b0a8';
             q('#demoResultado').textContent = 'Nenhuma coleta ainda';
-            q('#demoDescricao').textContent =
-                'Inicie a demonstração para ver as coletas acontecendo.';
+            q('#demoDescricao').textContent = 'Inicie o teste para ver as coletas acontecendo.';
             q('#demoMarcador').classList.add('hidden');
             q('#demoPronto').classList.replace('flex', 'hidden');
             q('#demoAoVivo').textContent = 'Aguardando início';
@@ -1047,7 +1046,7 @@
         q('#demoIniciar').addEventListener('click', () => {
             reiniciarDemo();
             q('#demoIniciar').disabled = true;
-            q('#demoAoVivo').textContent = 'Ao vivo (simulado)';
+            q('#demoAoVivo').textContent = 'Ao vivo';
             COLETAS_DEMO.forEach((coleta, i) => {
                 timers.push(setTimeout(() => mostrarLendo(true), i * passo + 200));
                 timers.push(setTimeout(() => aplicarColeta(coleta, i), i * passo + passo * 0.6));

@@ -1,0 +1,105 @@
+<%# Configuração: abas Acessibilidade e Segurança (recebe aba). Salvar ainda não tem rota na API. %>
+<% const seguranca = locals.aba === 'seguranca'; %>
+<%- include('partials/shellInicio.ejs', { titulo: 'Configuração', trilha: ['Configuração', seguranca ? 'Segurança' : 'Acessibilidade'] }) %>
+<div class="flex flex-col gap-1.5">
+  <h1 class="text-[30px] font-semibold">Configuração</h1>
+  <p class="text-texto-2">Preferências de exibição, som e alertas do sistema.</p>
+</div>
+
+<nav class="flex gap-1" aria-label="Seções da configuração">
+  <a href="/configuracao" class="flex min-h-11 items-center gap-2 rounded-[10px] px-4 font-medium transition-colors <%= seguranca ? 'hover:bg-hover-neutro' : 'menu-link-active' %>"<%- seguranca ? '' : ' aria-current="page"' %>>
+    <i class="<%= seguranca ? 'ph' : 'ph-fill' %> ph-person text-lg text-texto-2" aria-hidden="true"></i>Acessibilidade
+  </a>
+  <a href="/configuracao/seguranca" class="flex min-h-11 items-center gap-2 rounded-[10px] px-4 font-medium transition-colors <%= seguranca ? 'menu-link-active' : 'hover:bg-hover-neutro' %>"<%- seguranca ? ' aria-current="page"' : '' %>>
+    <i class="<%= seguranca ? 'ph-fill' : 'ph' %> ph-shield-check text-lg text-texto-2" aria-hidden="true"></i>Segurança
+  </a>
+</nav>
+
+<form id="formConfiguracao" class="flex max-w-240 flex-col gap-5" data-sem-api="próxima entrega" novalidate>
+  <% if (!seguranca) { %>
+    <section class="card px-6 py-5" aria-labelledby="tituloAparencia">
+      <div class="pb-2">
+        <h2 id="tituloAparencia" class="text-[17px] font-semibold">Aparência e leitura</h2>
+        <p class="text-sm text-texto-2">Vale só para este navegador.</p>
+      </div>
+      <label class="flex items-center gap-4 py-4">
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-moon text-xl text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex flex-1 flex-col"><span class="font-semibold">Modo escuro</span><span class="text-sm text-texto-2">Troca o fundo claro por um tema escuro.</span></span>
+        <input type="checkbox" role="switch" name="modoEscuro" class="interruptor">
+      </label>
+      <div class="flex flex-wrap items-center gap-4 border-t border-linha py-4" role="radiogroup" aria-labelledby="rotuloFonte">
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-text-aa text-xl text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex flex-1 flex-col"><span id="rotuloFonte" class="font-semibold">Tamanho da fonte</span><span class="text-sm text-texto-2">Aumenta textos, campos e botões.</span></span>
+        <div class="segmentado w-full sm:w-auto">
+          <label><input type="radio" name="fonte" value="pequeno" class="sr-only" checked>Pequeno</label>
+          <label><input type="radio" name="fonte" value="medio" class="sr-only">Médio</label>
+          <label><input type="radio" name="fonte" value="grande" class="sr-only">Grande</label>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 border-t border-linha py-4">
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-palette text-xl text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex flex-1 flex-col"><label for="daltonico" class="font-semibold">Modo daltônico</label><span class="text-sm text-texto-2">Ajusta as cores de status para daltonismo.</span></span>
+        <span class="campo-caixa relative w-full sm:w-56">
+          <select id="daltonico" name="daltonico">
+            <option value="">Desativado</option>
+            <option value="protanopia">Protanopia</option>
+            <option value="deuteranopia">Deuteranopia</option>
+            <option value="tritanopia">Tritanopia</option>
+          </select>
+          <i class="ph ph-caret-down pointer-events-none absolute right-3.5 text-lg!" aria-hidden="true"></i>
+        </span>
+      </div>
+    </section>
+
+    <section class="card px-6 py-5" aria-labelledby="tituloSom">
+      <h2 id="tituloSom" class="pb-2 text-[17px] font-semibold">Som</h2>
+      <label class="flex items-center gap-4 py-4">
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-speaker-high text-xl text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex flex-1 flex-col"><span class="font-semibold">Feedback sonoro</span><span class="text-sm text-texto-2">Toca um som em alertas e confirmações.</span></span>
+        <input type="checkbox" role="switch" name="feedbackSonoro" class="interruptor" checked>
+      </label>
+      <div class="flex flex-col gap-2 pb-4 sm:pl-14">
+        <label for="volume" class="text-sm font-semibold">Volume</label>
+        <input id="volume" name="volume" type="range" min="0" max="2" value="1" class="deslizante" aria-valuetext="Médio">
+        <span class="flex justify-between text-[13px] text-texto-2" aria-hidden="true"><span>Baixo</span><span>Médio</span><span>Alto</span></span>
+      </div>
+    </section>
+  <% } else { %>
+    <section class="card px-6 py-5" aria-labelledby="tituloIodo">
+      <h2 id="tituloIodo" class="pb-2 text-[17px] font-semibold">Teste automático do iodo</h2>
+      <label class="flex items-center gap-4 py-4">
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-test-tube text-xl text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex flex-1 flex-col"><span class="font-semibold">Validação por repetição</span><span class="text-sm text-texto-2">O resultado só vale depois de alguns testes iguais seguidos.</span></span>
+        <input type="checkbox" role="switch" name="validacaoRepeticao" class="interruptor" checked>
+      </label>
+      <div class="flex flex-col gap-2 pb-4 sm:pl-14">
+        <label for="testesSeguidos" class="text-sm font-semibold">Testes seguidos</label>
+        <input id="testesSeguidos" name="testesSeguidos" type="range" min="0" max="10" value="3" class="deslizante">
+        <span class="flex justify-between text-[13px] text-texto-2" aria-hidden="true"><span>0</span><span>5</span><span>10</span></span>
+      </div>
+    </section>
+
+    <section class="card px-6 py-5" aria-labelledby="tituloAlertas">
+      <h2 id="tituloAlertas" class="pb-2 text-[17px] font-semibold">Alertas</h2>
+      <label class="flex items-center gap-4 py-4">
+        <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-bell-ringing text-xl text-texto-2" aria-hidden="true"></i></span>
+        <span class="flex flex-1 flex-col"><span class="font-semibold">Alerta sonoro</span><span class="text-sm text-texto-2">Desligar pode fazer você perder um alerta de temperatura.</span></span>
+        <input type="checkbox" role="switch" name="alertaSonoro" class="interruptor" checked>
+      </label>
+      <% [['temperaturaMaxima', 'Temperatura máxima', 'Avisa quando a mostura passar deste valor.', 'ph-thermometer-hot', 72],
+          ['temperaturaMinima', 'Temperatura mínima', 'Avisa quando a mostura ficar abaixo deste valor.', 'ph-thermometer-cold', 60]].forEach(([nome, rotulo, ajuda, icone, valor]) => { %>
+        <div class="flex items-center gap-4 border-t border-linha py-4">
+          <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph <%= icone %> text-xl text-texto-2" aria-hidden="true"></i></span>
+          <span class="flex flex-1 flex-col"><label for="<%= nome %>" class="font-semibold"><%= rotulo %></label><span class="text-sm text-texto-2"><%= ajuda %></span></span>
+          <span class="campo-caixa w-28"><input id="<%= nome %>" name="<%= nome %>" type="number" min="0" max="100" value="<%= valor %>" inputmode="numeric"><span class="campo-unidade">°C</span></span>
+        </div>
+      <% }) %>
+    </section>
+  <% } %>
+
+  <div class="flex flex-wrap justify-end gap-3">
+    <a href="<%= seguranca ? '/configuracao/seguranca' : '/configuracao' %>" class="btn-secundario">Cancelar</a>
+    <button type="submit" class="btn-primario">Salvar alterações</button>
+  </div>
+</form>
+<%- include('partials/shellFim.ejs') %>

@@ -36,6 +36,9 @@ app.get('/login', tela('login'));
 app.get('/cadastro', tela('cadastro'));
 app.get('/logout', (req, res) => res.redirect('/login')); // o app.js limpa o token
 app.get('/usuario', tela('usuario'));
+// Configuração: salvar ainda não tem rota na API (o formulário usa data-sem-api)
+app.get('/configuracao', tela('configuracao', { aba: 'acessibilidade' }));
+app.get('/configuracao/seguranca', tela('configuracao', { aba: 'seguranca' }));
 app.get('/recipes', tela('recipes'));
 app.get('/recipes/:id', tela('recipe'));
 app.get('/recipes/:id/edit', tela('recipe')); // mesma tela: renomear e editar/excluir rampas
