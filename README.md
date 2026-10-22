@@ -58,9 +58,9 @@ Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da A
 |---|---|
 | `/` | redireciona para `/recipes` |
 | `/login` | `views/login.ejs` |
-| `/cadastro` | `views/cadastro.ejs` |
+| `/signup` | `views/signup.ejs` |
 | `/logout` | redireciona para `/login` (o cliente limpa o token) |
-| `/usuario` | `views/usuario.ejs` (perfil) |
+| `/profile` | `views/profile.ejs` (perfil) |
 | `/recipes` | `views/recipes.ejs` |
 | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` (mesma tela: renomear e editar/excluir rampas) |
 | `/recipes/:id/temperatures/new` | `views/temperatureForm.ejs` (nova rampa) |

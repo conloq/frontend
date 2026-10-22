@@ -1,7 +1,7 @@
 <%# Menu lateral: 18rem aberto, 5rem recolhido (desktop); gaveta no mobile. public/js/script.js controla. %>
-<aside id="appSidebar" class="fixed inset-y-0 left-0 z-40 flex shrink-0 -translate-x-full flex-col border-r border-linha bg-superficie px-4 pb-5 transition-[width,transform] duration-200 lg:translate-x-0" aria-label="Navegação principal" data-sidebar-state="expanded">
+<aside id="appSidebar" class="fixed inset-y-0 left-0 z-40 flex shrink-0 -translate-x-full flex-col border-r border-linha bg-superficie px-4 pb-5 transition-[width,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:shadow-[8px_0_32px_rgba(31,26,23,0.18)] motion-reduce:transition-none lg:translate-x-0" aria-label="Navegação principal" data-sidebar-state="expanded">
   <div class="sidebar-marca flex min-h-18 items-center justify-between gap-2">
-    <a href="/recipes" class="flex min-w-0 items-center gap-2.5 rounded-[10px]" aria-label="MASH, ir para as receitas">
+    <a href="/dashboard" class="flex min-w-0 items-center gap-2.5 rounded-[10px]" aria-label="MASH, ir para o painel">
       <img src="/img/logo-mash.png" alt="" class="size-10 shrink-0 rounded-full object-cover">
       <span class="sidebar-label font-display text-xl font-bold tracking-wide">MASH</span>
     </a>
@@ -14,6 +14,10 @@
   </div>
 
   <nav class="mt-3 flex flex-col gap-1">
+    <a href="/dashboard" data-secao="/dashboard" class="menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro" title="Painel">
+      <i class="ph ph-squares-four text-[22px] text-texto-2" aria-hidden="true"></i>
+      <span class="sidebar-label">Painel</span>
+    </a>
     <a href="/recipes" data-secao="/recipes /temperatures" class="menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro" title="Receitas">
       <i class="ph ph-scroll text-[22px] text-texto-2" aria-hidden="true"></i>
       <span class="sidebar-label">Receitas</span>
@@ -26,11 +30,11 @@
       <i class="ph ph-test-tube text-[22px] text-texto-2" aria-hidden="true"></i>
       <span class="sidebar-label">Teste de iodo</span>
     </a>
-    <a href="/usuario" data-secao="/usuario" class="menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro" title="Perfil">
+    <a href="/profile" data-secao="/profile" class="menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro" title="Perfil">
       <i class="ph ph-user-circle text-[22px] text-texto-2" aria-hidden="true"></i>
       <span class="sidebar-label">Perfil</span>
     </a>
-    <a href="/configuracao" data-secao="/configuracao" class="menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro" title="Configuração">
+    <a href="/settings" data-secao="/settings" class="menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro" title="Configuração">
       <i class="ph ph-gear text-[22px] text-texto-2" aria-hidden="true"></i>
       <span class="sidebar-label">Configuração</span>
     </a>
@@ -41,4 +45,4 @@
     <span class="sidebar-label">Sair</span>
   </a>
 </aside>
-<div id="sidebarOverlay" class="fixed inset-0 z-30 hidden bg-texto/60 lg:hidden" aria-hidden="true"></div>
+<div id="sidebarOverlay" class="pointer-events-none fixed inset-0 z-30 bg-texto/60 opacity-0 transition-opacity duration-300 motion-reduce:transition-none lg:hidden" aria-hidden="true"></div>

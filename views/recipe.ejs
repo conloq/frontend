@@ -1,44 +1,82 @@
-<%- include('partials/shellInicio.ejs', { titulo: 'Receita', trilha: ['Receitas', 'Receita'] }) %>
+<%- include('partials/shellInicio.ejs', { titulo: 'Receita', trilha: ['Receitas', 'Receita'], voltar: '/recipes' }) %>
 <div class="flex flex-col gap-2">
-  <a href="/recipes" class="btn-fantasma self-start"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todas as receitas</a>
+  <a href="/recipes" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todas as receitas</a>
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div class="flex min-w-0 flex-col gap-1.5">
       <h1 id="recipeName" class="truncate text-[30px] font-semibold">Receita</h1>
       <p id="recipeResumo" class="text-texto-2">Carregando…</p>
     </div>
-    <div class="flex flex-wrap gap-3">
+    <div class="acoes">
       <button type="button" id="btnExcluirReceita" class="btn-perigo"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
       <button type="button" class="btn-secundario" data-modal-open="modalRenomear"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Renomear</button>
-      <a id="newTemperatureLink" href="#" class="btn-primario"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
+      <a id="iodoReceitaLink" href="#" class="btn-secundario max-lg:col-span-2"><i class="ph ph-test-tube" aria-hidden="true"></i>Teste de iodo</a>
+      <a id="newTemperatureLink" href="#" class="btn-primario max-lg:hidden"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
     </div>
   </div>
 </div>
 
-<section class="card overflow-hidden" aria-labelledby="tituloRampas">
-  <h2 id="tituloRampas" class="border-b border-linha px-6 py-5 text-lg font-semibold">Rampas de temperatura</h2>
+<%# No mobile a seção some como card: cada rampa vira o próprio card %>
+<section class="card overflow-hidden max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent" aria-labelledby="tituloRampas">
+  <h2 id="tituloRampas" class="border-b border-linha px-6 py-5 text-lg font-semibold max-lg:border-0 max-lg:px-0 max-lg:pb-3 max-lg:pt-0">Rampas de temperatura</h2>
   <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]" aria-hidden="true">
     <span>Ordem</span><span>Faixa da rampa</span><span>Limites</span><span>Temporizador</span><span>Início do timer</span><span>Tempo ideal</span><span class="text-right">Ações</span>
   </div>
   <div id="detalheRampas" aria-live="polite"></div>
 </section>
 
-<%# Linha da rampa; app.js clona e preenche os data-slot %>
-<template id="tplLinhaRampa">
-  <div class="tabela-linha grid grid-cols-[40px_minmax(0,1fr)] items-center gap-x-4 gap-y-1 px-6 py-4 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:py-0">
-    <span class="grid size-8 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold" data-slot="ordem"></span>
-    <span class="font-semibold" data-slot="faixa"></span>
-    <span class="text-texto-2 max-lg:col-start-2 max-lg:text-sm"><span class="lg:hidden">Limites </span><span data-slot="limites"></span></span>
-    <span class="max-lg:col-start-2 max-lg:text-sm"><span class="text-texto-2 lg:hidden">Temporizador </span><span data-slot="timer"></span></span>
-    <span class="max-lg:col-start-2 max-lg:text-sm"><span class="text-texto-2 lg:hidden">Início do timer </span><span data-slot="inicio"></span></span>
-    <span class="max-lg:col-start-2 max-lg:text-sm"><span class="text-texto-2 lg:hidden">Tempo ideal </span><span data-slot="ideal"></span></span>
-    <span class="flex gap-1 max-lg:col-start-2 max-lg:-ml-3 lg:justify-end">
-      <a class="btn-icone" data-slot="editar"><i class="ph ph-pencil-simple" aria-hidden="true"></i></a>
-      <button type="button" class="btn-icone-perigo" data-slot="excluir" data-sem-api="conloq/mash#97"><i class="ph ph-trash" aria-hidden="true"></i></button>
+<%# Perfil das rampas: app.js posiciona cada faixa pelo início e pela duração do timer %>
+<section id="perfilRampas" class="card hidden flex-col overflow-hidden" aria-labelledby="tituloPerfil">
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-linha px-6 py-5">
+    <div class="flex flex-col gap-0.5">
+      <h2 id="tituloPerfil" class="text-lg font-semibold">Perfil das rampas</h2>
+      <p class="text-sm text-texto-2">Faixa de cada rampa ao longo da mosturação, com os limites de alerta.</p>
+    </div>
+    <div class="flex gap-5 text-[13px] text-texto-2" aria-hidden="true">
+      <span class="flex items-center gap-2"><span class="h-3 w-4 rounded-[3px] border border-acao/40 bg-acao/25"></span>Faixa da rampa</span>
+      <span class="flex items-center gap-2"><span class="h-3 w-4 rounded-[3px] border border-acao/40 bg-acao/10"></span>Limites</span>
+    </div>
+  </div>
+  <div class="flex gap-3 px-6 pb-4 pt-5">
+    <div class="flex flex-col justify-between pb-6 text-xs tabular-nums text-texto-2" aria-hidden="true"><span data-perfil="teto"></span><span data-perfil="piso"></span></div>
+    <div class="flex min-w-0 flex-1 flex-col gap-2">
+      <div id="perfilGrafico" class="relative h-64 border-y border-linha" role="img"></div>
+      <div class="flex justify-between text-xs tabular-nums text-texto-2" aria-hidden="true"><span>0 min</span><span data-perfil="total"></span></div>
+    </div>
+  </div>
+</section>
+
+<template id="tplFaixaRampa">
+  <div class="absolute border-r-2 border-superficie bg-acao/10">
+    <div class="absolute inset-x-0 border-t-2 border-acao bg-acao/25" data-slot="faixa"></div>
+    <span class="absolute bottom-full mb-1 flex flex-col whitespace-nowrap text-xs leading-tight" data-slot="rotulo">
+      <span class="font-semibold" data-slot="nome"></span>
+      <span class="text-texto-2" data-slot="detalhe"></span>
     </span>
   </div>
 </template>
 
-<div id="modalRenomear" class="js-modal fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true">
+<div class="barra-mobile lg:hidden">
+  <a id="newTemperatureLinkMobile" href="#" class="btn-primario w-full"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
+</div>
+
+<%# Linha da rampa; app.js clona e preenche os data-slot %>
+<template id="tplLinhaRampa">
+  <%# Mobile: card por rampa (número, faixa e ações em cima; rótulo/valor embaixo). Desktop: linha da tabela %>
+  <div class="tabela-linha grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-6 py-4 max-lg:mb-3 max-lg:rounded-xl max-lg:border max-lg:bg-superficie max-lg:px-4 max-lg:pb-4 max-lg:pt-3 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:gap-x-4 lg:py-0">
+    <span class="grid size-8 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold" data-slot="ordem"></span>
+    <span class="font-semibold max-lg:text-[17px]" data-slot="faixa"></span>
+    <span class="flex gap-1 max-lg:col-start-3 max-lg:row-start-1 lg:col-start-7 lg:justify-end">
+      <a class="btn-icone" data-slot="editar"><i class="ph ph-pencil-simple" aria-hidden="true"></i></a>
+      <button type="button" class="btn-icone-perigo" data-slot="excluir" data-sem-api="conloq/mash#97"><i class="ph ph-trash" aria-hidden="true"></i></button>
+    </span>
+    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-3 lg:row-start-1 lg:text-texto-2"><span class="text-texto-2 lg:hidden">Limites</span><span data-slot="limites"></span></span>
+    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-4 lg:row-start-1"><span class="text-texto-2 lg:hidden">Temporizador</span><span data-slot="timer"></span></span>
+    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-5 lg:row-start-1"><span class="text-texto-2 lg:hidden">Início do timer</span><span data-slot="inicio"></span></span>
+    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-6 lg:row-start-1"><span class="text-texto-2 lg:hidden">Tempo ideal</span><span data-slot="ideal"></span></span>
+  </div>
+</template>
+
+<div id="modalRenomear" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true">
   <div class="flex min-h-full items-center justify-center">
     <div class="w-full max-w-[520px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="dialog" aria-modal="true" aria-labelledby="modalRenomearTitulo">
       <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
@@ -53,7 +91,7 @@
             <span class="campo-ajuda" data-erro>Até 255 caracteres. Não pode repetir o nome de outra receita sua.</span>
           </div>
         </div>
-        <div class="flex justify-end gap-3 border-t border-linha bg-[#faf8f6] px-6 py-4">
+        <div class="acoes border-t border-linha bg-[#faf8f6] px-6 py-4">
           <button type="button" class="btn-secundario" data-modal-close>Cancelar</button>
           <button type="submit" class="btn-primario">Salvar nome</button>
         </div>

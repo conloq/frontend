@@ -11,7 +11,8 @@
     const q = (selector, raiz = document) => raiz.querySelector(selector);
     const qa = (selector, raiz = document) => raiz.querySelectorAll(selector);
     const caminho = location.pathname;
-    const paginaPublica = ['/login', '/cadastro'].includes(caminho);
+    const paginaPublica =
+        ['/login', '/signup'].includes(caminho) || caminho.startsWith('/forgot-password');
     const rota = (regex) => caminho.match(regex)?.[1];
 
     // ------------------------------------------------------------ storage
@@ -330,9 +331,9 @@
                     error:
                         erro.name === 'TimeoutError'
                             ? metodo === 'GET'
-                                ? 'A API demorou para responder. Tente novamente.'
-                                : 'A API demorou para responder. A alteração pode ter sido salva; confira os dados antes de tentar novamente.'
-                            : 'Não foi possível falar com a API',
+                                ? 'O servidor demorou para responder. Tente novamente.'
+                                : 'O servidor demorou para responder. A alteração pode ter sido salva; confira os dados antes de tentar novamente.'
+                            : 'Não foi possível conectar ao servidor',
                 },
             };
         }
@@ -350,7 +351,7 @@
         return;
     }
     if (paginaPublica && guardar.get(TOKEN_KEY)) {
-        location.replace('/recipes');
+        location.replace('/dashboard');
         return;
     }
 
@@ -384,7 +385,7 @@
         }
 
         guardar.set(TOKEN_KEY, data.token);
-        location.href = '/recipes';
+        location.href = '/dashboard';
     });
 
     q('#formCadastro')?.addEventListener('submit', async (event) => {
@@ -471,24 +472,18 @@
 
     q('#btnDescartar')?.addEventListener('click', preencherPerfil);
 
-    // Últimos acessos: a rota chega com conloq/mash#102; até lá a API responde 404
+    // Últimos acessos: a rota chega com conloq/mash#102; até lá o 404 vira lista vazia
     async function carregarAcessos() {
         const lista = q('#listaAcessos');
         if (!lista) return;
 
         listaCarregando(lista, 2);
         const { status, data } = await api('GET', '/user/login-history');
-        if (status === 404)
-            return listaEstado(lista, {
-                icone: 'ph-clock-counter-clockwise',
-                titulo: 'Histórico indisponível',
-                texto: 'A API ainda não registra os acessos da conta.',
-            });
-        if (status !== 200)
+        if (status !== 200 && status !== 404)
             return listaErro(lista, 'Não foi possível carregar os acessos', data, carregarAcessos);
 
         // shortcut: formato da resposta ainda não publicado no Swagger; ajustar quando a #102 sair
-        const acessos = data.loginHistory ?? [];
+        const acessos = status === 404 ? [] : (data.loginHistory ?? []);
         if (!acessos.length)
             return listaEstado(lista, {
                 icone: 'ph-clock-counter-clockwise',
@@ -635,8 +630,13 @@
             },
             excluir: { 'aria-label': `Excluir ${receita.name}` },
         });
-        if (!faixa)
-            q('[data-slot="faixa"]', linha).classList.replace('font-medium', 'text-texto-2');
+        if (!faixa) {
+            q('[data-slot="faixa"]', linha).classList.remove('md:font-medium', 'md:text-texto');
+            // no mobile fica só "Sem rampas", sem o "Nenhuma ·" antes
+            ['rampas', 'separador'].forEach((slot) =>
+                q(`[data-slot="${slot}"]`, linha).classList.add('max-md:hidden')
+            );
+        }
         q('[data-slot="excluir"]', linha).addEventListener('click', async () => {
             if (!(await excluirReceita(receita))) return;
             mostrarToast('Receita excluída');
@@ -752,6 +752,29 @@
 
     carregarReceitas();
 
+    // ------------------------------------------------------------ novo lote: receitas reais no seletor
+
+    async function carregarReceitasDoLote() {
+        const seletor = q('#loteReceita');
+        if (!seletor) return;
+        const { status, data } = await api('GET', '/recipes');
+        if (status !== 200) {
+            seletor.options[0].textContent = 'Não foi possível carregar as receitas';
+            return erroCampo(
+                q('#formLote'),
+                'recipeId',
+                mensagemDaApi(data, 'Tente de novo em alguns segundos.')
+            );
+        }
+        const receitas = data.recipes ?? [];
+        seletor.options[0].textContent = receitas.length
+            ? 'Escolha a receita'
+            : 'Nenhuma receita cadastrada';
+        receitas.forEach((r) => seletor.add(new Option(r.name, r.id)));
+    }
+
+    carregarReceitasDoLote();
+
     // ------------------------------------------------------------ detalhe da receita
 
     const receitaId = rota(/^\/recipes\/([1-9][0-9]*)(?:\/edit)?$/);
@@ -776,12 +799,75 @@
         return linha;
     }
 
+    // "HH:MM:SS" em minutos; NaN quando o formato não bate
+    const minutos = (hms) => {
+        const [h, m, seg] = String(hms ?? '')
+            .split(':')
+            .map(Number);
+        return h * 60 + m + seg / 60;
+    };
+
+    // Perfil das rampas: cada faixa ocupa do início do timer até o fim, na altura da temperatura
+    function desenharPerfil(rampas) {
+        const perfil = q('#perfilRampas');
+        if (!perfil) return;
+        const faixas = (rampas ?? [])
+            .map((t, i) => ({ t, i, ini: minutos(t.initialization), dur: minutos(t.timer) }))
+            .filter((f) => Number.isFinite(f.ini) && f.dur > 0);
+        perfil.classList.toggle('hidden', !faixas.length);
+        perfil.classList.toggle('flex', faixas.length > 0);
+        if (!faixas.length) return;
+
+        const total = Math.max(...faixas.map((f) => f.ini + f.dur));
+        const piso =
+            Math.floor((Math.min(...faixas.map((f) => f.t.minTemperatureLimit)) - 2) / 5) * 5;
+        // folga em cima para o rótulo da rampa mais quente
+        const teto =
+            Math.ceil((Math.max(...faixas.map((f) => f.t.maxTemperatureLimit)) + 8) / 5) * 5;
+        const pct = (v) => `${v * 100}%`;
+        const grafico = q('#perfilGrafico');
+
+        grafico.replaceChildren(
+            ...faixas.map(({ t, i, ini, dur }) => {
+                const ordem = t.orderRamp ?? i + 1;
+                const limite = Math.max(t.maxTemperatureLimit - t.minTemperatureLimit, 1);
+                const caixa = clonar('tplFaixaRampa', {
+                    nome: `Rampa ${ordem}`,
+                    detalhe: `${t.minTemperatureRamp} – ${t.maxTemperatureRamp} ºC · ${Math.round(dur)} min`,
+                });
+                Object.assign(caixa.style, {
+                    left: pct(ini / total),
+                    width: pct(dur / total),
+                    top: pct((teto - t.maxTemperatureLimit) / (teto - piso)),
+                    height: pct(limite / (teto - piso)),
+                });
+                Object.assign(q('[data-slot="faixa"]', caixa).style, {
+                    top: pct((t.maxTemperatureLimit - t.maxTemperatureRamp) / limite),
+                    height: pct((t.maxTemperatureRamp - t.minTemperatureRamp) / limite),
+                });
+                // rótulo alinhado à direita nas rampas do fim, para não sair do gráfico
+                q('[data-slot="rotulo"]', caixa).classList.add(
+                    ini / total > 0.6 ? 'right-0' : 'left-1'
+                );
+                return caixa;
+            })
+        );
+        grafico.setAttribute(
+            'aria-label',
+            `${plural(faixas.length, 'rampa', 'rampas')} entre ${piso} e ${teto} ºC em ${Math.round(total)} minutos. Os valores estão na tabela acima.`
+        );
+        q('[data-perfil="piso"]').textContent = `${piso} ºC`;
+        q('[data-perfil="teto"]').textContent = `${teto} ºC`;
+        q('[data-perfil="total"]').textContent = `${Math.round(total)} min`;
+    }
+
     async function carregarRampasDaReceita() {
         const lista = q('#detalheRampas');
         listaCarregando(lista, 2);
         const { status, data } = await api('GET', `/recipes/${receitaId}/temperatures`);
         if (status !== 200) {
             listaErro(lista, 'Não foi possível carregar as rampas', data, carregarRampasDaReceita);
+            desenharPerfil(null);
             return null;
         }
 
@@ -801,6 +887,7 @@
             lista.removeAttribute('aria-busy');
             lista.replaceChildren(...rampas.map(linhaRampa));
         }
+        desenharPerfil(rampas);
         return rampas;
     }
 
@@ -809,6 +896,8 @@
         if (!form || !receitaId) return;
 
         q('#newTemperatureLink').href = `/recipes/${receitaId}/temperatures/new`;
+        q('#newTemperatureLinkMobile').href = `/recipes/${receitaId}/temperatures/new`;
+        q('#iodoReceitaLink').href = `/recipes/${receitaId}/iodine`;
         const { status, data } = await api('GET', `/recipes/${receitaId}`);
         if (status !== 200) {
             q('#recipeResumo').textContent = '';
@@ -932,6 +1021,7 @@
             ) ?? [];
         const urlReceita = `/recipes/${idReceita}`;
         q('#voltarReceita').href = urlReceita;
+        q('#voltarTopo').href = urlReceita;
         q('#cancelarRampa').href = urlReceita;
         api('GET', urlReceita).then(({ status, data }) => {
             if (status === 200) q('#voltarReceita span').textContent = data.recipe.name;
@@ -989,20 +1079,95 @@
 
     iniciarFormRampa();
 
+    // ------------------------------------------------------------ teste de iodo da receita
+
+    const receitaIodo = rota(/^\/recipes\/([1-9][0-9]*)\/iodine$/);
+
+    // Prévia: capturas a partir da primeira coleta, no intervalo, até o máximo; a faixa é a duração da rampa
+    function desenharPrevia(form, rampas) {
+        const primeira = Number(form.elements.primeiraColeta.value);
+        const intervalo = Number(form.elements.intervalo.value);
+        const maximo = Number(form.elements.maximoColetas.value);
+        const rampa = rampas.find((t) => String(t.id) === form.elements.rampa.value);
+        const capturas = q('#previaCapturas');
+        const faixa = q('#previaRampa');
+
+        const valido =
+            primeira >= 0 &&
+            intervalo > 0 &&
+            Number.isInteger(maximo) &&
+            maximo >= 1 &&
+            maximo <= 20;
+        if (!valido) {
+            capturas.replaceChildren();
+            faixa.style.width = '0';
+            q('#previaResumo').textContent =
+                'Preencha a primeira coleta, o intervalo e o máximo para ver a prévia.';
+            return;
+        }
+
+        const minutosCaptura = Array.from({ length: maximo }, (_, i) => primeira + i * intervalo);
+        const duracao = rampa ? minutos(rampa.timer) : 0;
+        const total = Math.max(duracao || 0, minutosCaptura.at(-1)) + intervalo;
+        // 4% de folga nas pontas para o número da captura não cortar
+        const pos = (m) => `${4 + (92 * m) / total}%`;
+
+        faixa.style.width = duracao > 0 ? pos(duracao) : '0';
+        capturas.replaceChildren(
+            ...minutosCaptura.map((m, i) => {
+                const marcador = clonar('tplCapturaPrevia', {
+                    numero: String(i + 1),
+                    minuto: `${m} min`,
+                });
+                marcador.style.left = pos(m);
+                return marcador;
+            })
+        );
+        const nomeRampa = rampa
+            ? `da rampa ${rampa.orderRamp ?? rampas.indexOf(rampa) + 1}`
+            : 'da rampa';
+        q('#previaResumo').textContent =
+            `${plural(maximo, 'captura', 'capturas')} a partir de ${primeira} min ${nomeRampa}, a cada ${intervalo} min` +
+            (duracao > 0 ? `; a rampa tem ${Math.round(duracao)} min programados.` : '.');
+    }
+
+    async function iniciarTesteIodoReceita() {
+        const form = q('#formIodoReceita');
+        if (!form || !receitaIodo) return;
+
+        const seletor = form.elements.rampa;
+        const { status, data } = await api('GET', `/recipes/${receitaIodo}/temperatures`);
+        const rampas = status === 200 ? (data.temperatures ?? []) : [];
+        if (status !== 200)
+            erroCampo(form, 'rampa', mensagemDaApi(data, 'Não foi possível carregar as rampas'));
+        seletor.options[0].textContent = rampas.length
+            ? 'Escolha a rampa'
+            : 'Nenhuma rampa nesta receita';
+        rampas.forEach((t, i) =>
+            seletor.add(
+                new Option(
+                    `Rampa ${t.orderRamp ?? i + 1} · ${t.minTemperatureRamp} – ${t.maxTemperatureRamp} ºC`,
+                    t.id
+                )
+            )
+        );
+        // sugere a sacarificação: a rampa cuja faixa inclui 65 ºC
+        const sacarificacao = rampas.find(
+            (t) => t.minTemperatureRamp <= 65 && 65 <= t.maxTemperatureRamp
+        );
+        if (sacarificacao) seletor.value = String(sacarificacao.id);
+
+        form.addEventListener('input', () => desenharPrevia(form, rampas));
+        desenharPrevia(form, rampas);
+    }
+
+    iniciarTesteIodoReceita();
+
     // ------------------------------------------------------------ ações ainda indisponíveis
 
-    // Ações dessas telas ainda não têm rota na API: avisam em vez de fingir que salvaram
+    // shortcut: ação sem rota na API só não envia nada e não mostra aviso (decisão de 22/10/2026); trocar pela chamada real quando a issue de data-sem-api sair
     function avisarSemApi(event) {
         event.preventDefault();
-        const issue = event.currentTarget.dataset.semApi;
-        qa('.js-modal').forEach((modal) => {
-            if (!modal.classList.contains('hidden')) fecharModal(modal.id);
-        });
-        mostrarAlerta(
-            'info',
-            'Ainda sem rota na API',
-            `Nada foi alterado. Esta ação entra com a ${issue}.`
-        );
     }
 
     qa('form[data-sem-api]').forEach((form) => form.addEventListener('submit', avisarSemApi));

@@ -4,7 +4,7 @@
 
 | Path | Purpose | Evidence |
 |------|---------|----------|
-| `index.js` | Ponto de entrada: Express, view engine EJS, estáticos e as 16 rotas GET | `index.js` |
+| `index.js` | Ponto de entrada: Express, view engine EJS, estáticos e as 26 rotas GET | `index.js` |
 | `public/js/app.js` | Cliente da API: login, token, perfil, receitas, temperatura | `public/js/app.js` |
 | `public/js/script.js` | Shell da interface: sidebar, modais, senha, prévia de foto | `public/js/script.js` |
 | `views/` | Templates EJS das telas, sem dados | `views/*.ejs` |
@@ -29,14 +29,19 @@ Rotas registradas em `index.js` (somente GET):
 |---|---|
 | `/` | redirect para `/recipes` |
 | `/login` | `views/login.ejs` |
-| `/cadastro` | `views/cadastro.ejs` |
+| `/signup` | `views/signup.ejs` |
 | `/logout` | redirect para `/login` |
-| `/usuario` | `views/usuario.ejs` |
-| `/configuracao`, `/configuracao/seguranca` | `views/configuracao.ejs` (salvar sem rota na API) |
+| `/profile` | `views/profile.ejs` |
+| `/settings`, `/settings/security` | `views/settings.ejs` (salvar sem rota na API) |
 | `/recipes` | `views/recipes.ejs` |
 | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
+| `/recipes/:id/iodine` | `views/recipeIodine.ejs` (salvar sem rota na API) |
 | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` |
-| `/lots`, `/lots/:id` | `views/lots.ejs`, `views/lot.ejs` (indisponível) |
+| `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `views/forgotPassword.ejs` (sem rota na API) |
+| `/dashboard` | `views/dashboard.ejs` (estado vazio) |
+| `/lots`, `/lots/:id`, `/lots/:id/monitoring` | `views/lots.ejs`, `views/lot.ejs`, `views/lotMonitoring.ejs` (estado vazio) |
+| `/lots/new`, `/lots/:id/edit` | `views/lots.ejs` / `views/lot.ejs` com o modal `partials/modalLote.ejs` aberto (salvar sem rota na API) |
+| `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `views/iodineSession.ejs` (câmera desconectada, estado vazio) |
 | `/analyses/new`, `/analyses/:id` | `views/iodineDemo.ejs` (teste simulado no frontend, sem rótulo na cena), `views/analysis.ejs` (indisponível) |
 
 ## 3) Module Boundaries

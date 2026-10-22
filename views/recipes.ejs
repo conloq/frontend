@@ -1,18 +1,19 @@
 <%- include('partials/shellInicio.ejs', { titulo: 'Receitas', trilha: ['Receitas', 'Todas as receitas'] }) %>
 <div class="flex flex-wrap items-end justify-between gap-4">
-  <h1 class="text-[30px] font-semibold">Receitas</h1>
-  <button type="button" class="btn-primario" data-modal-open="modalReceita"><i class="ph ph-plus" aria-hidden="true"></i>Nova receita</button>
+  <h1 class="text-[30px] font-semibold max-md:sr-only">Receitas</h1>
+  <button type="button" class="btn-primario max-md:hidden" data-modal-open="modalReceita"><i class="ph ph-plus" aria-hidden="true"></i>Nova receita</button>
 </div>
 
 <section class="card overflow-hidden" aria-labelledby="tituloTabelaReceitas">
   <h2 id="tituloTabelaReceitas" class="sr-only">Lista de receitas</h2>
   <div class="flex flex-wrap items-center gap-3 border-b border-linha px-5 py-4">
-    <label class="campo-caixa min-h-11 w-full sm:w-[360px]">
+    <label class="campo-caixa min-h-11 flex-1 sm:w-[360px] sm:flex-none">
       <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
       <span class="sr-only">Buscar receita</span>
       <input id="buscaReceitas" type="search" placeholder="Buscar por nome da receita" autocomplete="off">
     </label>
-    <span id="contagemReceitas" class="ml-auto text-sm text-texto-2"></span>
+    <button type="button" class="grid size-12 shrink-0 place-items-center rounded-[10px] bg-acao text-2xl text-white hover:bg-acao-hover md:hidden" data-modal-open="modalReceita" aria-label="Nova receita"><i class="ph ph-plus" aria-hidden="true"></i></button>
+    <span id="contagemReceitas" class="ml-auto text-sm text-texto-2 max-md:hidden"></span>
   </div>
   <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px]" aria-hidden="true">
     <span>Receita</span><span>Rampas</span><span>Faixa das rampas</span><span>Criada em</span><span class="text-right">Ações</span>
@@ -22,12 +23,17 @@
 
 <%# Linha da tabela; app.js clona e preenche os data-slot %>
 <template id="tplLinhaReceita">
-  <div class="tabela-linha grid gap-x-4 gap-y-1 px-5 py-4 md:min-h-[68px] md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px] md:items-center md:py-0">
-    <a class="truncate font-semibold hover:text-acao hover:underline" data-slot="nome"></a>
-    <span class="text-sm text-texto-2 md:text-[15px] md:text-texto"><span class="md:hidden">Rampas: </span><span data-slot="rampas"></span></span>
-    <span class="text-sm font-medium md:text-[15px]" data-slot="faixa"></span>
-    <span class="text-sm text-texto-2 md:text-[15px] md:text-texto"><span class="md:hidden">Criada em </span><span data-slot="criadaEm"></span></span>
-    <span class="-mr-2 flex justify-start gap-1 md:justify-end">
+  <%# Mobile: card com nome, "rampas · faixa" e seta; a linha inteira abre a receita. Desktop: linha da tabela com ações %>
+  <div class="tabela-linha relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-3.5 max-md:hover:bg-hover-neutro md:min-h-[68px] md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px] md:px-5 md:py-0">
+    <a class="truncate font-semibold max-md:text-[17px] max-md:after:absolute max-md:after:inset-0 hover:text-acao md:hover:underline" data-slot="nome"></a>
+    <span class="flex gap-1 text-sm text-texto-2 max-md:col-start-1 md:contents md:text-[15px]">
+      <span class="md:text-texto" data-slot="rampas"></span>
+      <span class="md:hidden" aria-hidden="true" data-slot="separador">·</span>
+      <span class="md:font-medium md:text-texto" data-slot="faixa"></span>
+    </span>
+    <span class="text-[15px] max-md:hidden"><span data-slot="criadaEm"></span></span>
+    <i class="ph ph-caret-right col-start-2 row-span-2 row-start-1 text-xl text-texto-2 md:hidden" aria-hidden="true"></i>
+    <span class="-mr-2 flex justify-end gap-1 max-md:hidden">
       <a class="btn-icone" data-slot="novaRampa" title="Adicionar rampa"><i class="ph ph-thermometer-simple" aria-hidden="true"></i></a>
       <a class="btn-icone" data-slot="renomear" title="Editar"><i class="ph ph-pencil-simple" aria-hidden="true"></i></a>
       <button type="button" class="btn-icone-perigo" data-slot="excluir" title="Excluir"><i class="ph ph-trash" aria-hidden="true"></i></button>
@@ -35,7 +41,7 @@
   </div>
 </template>
 
-<div id="modalReceita" class="js-modal fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true">
+<div id="modalReceita" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true">
   <div class="flex min-h-full items-center justify-center">
     <div class="w-full max-w-[520px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="dialog" aria-modal="true" aria-labelledby="modalReceitaTitulo">
       <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
@@ -53,7 +59,7 @@
             <span class="campo-ajuda" data-erro>Até 255 caracteres.</span>
           </div>
         </div>
-        <div class="flex justify-end gap-3 border-t border-linha bg-[#faf8f6] px-6 py-4">
+        <div class="acoes border-t border-linha bg-[#faf8f6] px-6 py-4">
           <button type="button" class="btn-secundario" data-modal-close>Cancelar</button>
           <button type="submit" class="btn-primario">Criar receita</button>
         </div>

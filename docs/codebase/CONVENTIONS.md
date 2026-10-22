@@ -9,7 +9,7 @@
 | Files (CSS) | kebab-case | `tailwind.css`, `style.css` | `public/css/` |
 | Functions | camelCase, verbo + alvo; helpers de DOM de uma letra | `carregarUsuario`, `carregarReceitas`, `mostrarMensagem`, `irPara`, `sair`, `clonar`, `confirmar`, `q`, `qa` | `public/js/app.js` |
 | Constants/env vars | `UPPER_SNAKE` para constantes de módulo; `PORT`/`API_URL` do ambiente | `TOKEN_KEY`, `FLASH_KEY`, `ESTILOS` | `public/js/app.js`, `index.js` |
-| Rotas | inglês, minúsculas, plural nas coleções; login/cadastro/perfil migram na #73 | `/recipes`, `/recipes/:id/temperatures/new`, `/logout` | `index.js` |
+| Rotas | inglês, minúsculas, plural nas coleções; todas as telas em inglês (`/signup`, `/profile`, `/settings`, `/dashboard`, `/forgot-password`) | `/recipes`, `/recipes/:id/temperatures/new`, `/logout` | `index.js` |
 | Campos de formulário | inglês; os que vão para a API seguem o nome da API: camelCase (decisão de 08/10/2026, aplicada na #86); ids em pt-BR/camelCase | `name="minTemperatureRamp"` com `id="senha"` | `views/temperatureForm.ejs`, `views/login.ejs` |
 | Atributos de ligação | `data-*` em kebab-case, valor em camelCase | `data-user="urlImage"`, `data-excluir` | `views/partials/topBar.ejs`, `public/js/app.js` |
 | Tokens de tema | `--color-*` em pt-BR por função; prefixo `mash-` só nas cores de marca | `--color-acao`, `--color-texto-2`, `--color-perigo-suave`, `--color-mash-brown` | `public/css/tailwind.css` |

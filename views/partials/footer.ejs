@@ -2,7 +2,7 @@
 <div id="toasts" class="pointer-events-none fixed inset-x-3 top-20 z-[60] flex flex-col items-end gap-2 sm:left-auto sm:right-6 sm:top-24" role="status" aria-live="polite"></div>
 
 <%# Diálogo de confirmação: substitui o confirm() do navegador. app.js chama confirmar({...}). %>
-<div id="dialogoConfirmar" class="fixed inset-0 z-[70] hidden items-center justify-center bg-texto/60 p-4" aria-hidden="true">
+<div id="dialogoConfirmar" class="folha fixed inset-0 z-[70] hidden items-center justify-center bg-texto/60 p-4" aria-hidden="true">
   <div class="w-full max-w-[440px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="alertdialog" aria-modal="true" aria-labelledby="dialogoConfirmarTitulo" aria-describedby="dialogoConfirmarMensagem">
     <div class="flex flex-col gap-4 p-6 pb-5">
       <div class="flex flex-col gap-1.5">
@@ -10,7 +10,7 @@
         <p id="dialogoConfirmarMensagem" class="leading-relaxed text-texto-2"></p>
       </div>
     </div>
-    <div class="flex justify-end gap-3 border-t border-linha bg-[#faf8f6] px-6 py-4">
+    <div class="acoes border-t border-linha bg-[#faf8f6] px-6 py-4">
       <button type="button" class="btn-secundario" data-confirmar="nao">Cancelar</button>
       <button type="button" class="btn-perigo" data-confirmar="sim"><i class="ph ph-trash" aria-hidden="true"></i><span id="dialogoConfirmarBotao">Excluir</span></button>
     </div>

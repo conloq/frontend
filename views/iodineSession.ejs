@@ -1,0 +1,81 @@
+<%# Sessão do teste de iodo do lote (recebe etapa: preparar ou leitura). Ainda não há câmera nem rota na API: a tela mostra a câmera desconectada e as listas vazias. %>
+<% const preparar = locals.etapa !== 'leitura'; const titulo = preparar ? 'Preparar a leitura do iodo' : 'Leitura automática'; %>
+<%- include('partials/shellInicio.ejs', { titulo, trilha: ['Teste de iodo', preparar ? 'Preparar sessão' : 'Leitura automática'], voltar: `/lots/${locals.id}` }) %>
+<div class="flex flex-col gap-2">
+  <a href="/lots/<%= locals.id %>" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Voltar para o lote</a>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div class="flex flex-col gap-1.5">
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-[30px] font-semibold"><%= titulo %></h1>
+        <span class="selo-perigo">Câmera desconectada</span>
+      </div>
+      <p class="text-texto-2"><%= preparar ? 'A câmera fica fixa na bancada e as configurações travam até o fim da sessão.' : 'Cada captura é classificada sozinha e registrada no lote com hora e temperatura.' %></p>
+    </div>
+    <% if (!preparar) { %>
+      <a href="/lots/<%= locals.id %>/iodine" class="max-sm:w-full btn-secundario"><i class="ph ph-crosshair" aria-hidden="true"></i>Refazer calibração</a>
+    <% } %>
+  </div>
+</div>
+
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px] xl:items-start">
+  <section class="card overflow-hidden" aria-labelledby="tituloCamera">
+    <h2 id="tituloCamera" class="sr-only">Câmera da bancada</h2>
+    <div class="flex min-h-80 flex-col items-center justify-center gap-3 bg-mash-brown-dark px-6 py-12 text-center">
+      <i class="ph ph-video-camera-slash text-4xl text-header-texto-2" aria-hidden="true"></i>
+      <p class="font-display text-xl font-semibold text-white">Sem imagem da câmera</p>
+      <p class="max-w-sm text-header-texto-2">Confira o cabo USB e a energia da bancada. A imagem aparece aqui quando a câmera responder.</p>
+    </div>
+    <% if (preparar) { %>
+      <div class="flex flex-wrap items-center gap-4 border-t border-linha px-6 py-4">
+        <p class="flex-1 text-texto-2">Com a câmera ligada, a calibração começa pelo padrão branco.</p>
+        <button type="button" class="btn-primario max-sm:w-full" disabled><i class="ph ph-camera" aria-hidden="true"></i>Capturar padrão branco</button>
+      </div>
+    <% } else { %>
+      <div class="flex flex-col gap-1 border-t border-linha px-6 py-5">
+        <span class="text-sm text-texto-2">Última captura</span>
+        <p class="font-display text-[26px] font-semibold">Nenhuma captura ainda</p>
+      </div>
+    <% } %>
+  </section>
+
+  <% if (preparar) { %>
+    <section class="card flex flex-col gap-3 p-5" aria-labelledby="tituloCalibracao">
+      <h2 id="tituloCalibracao" class="text-lg font-semibold">Calibração da sessão</h2>
+      <p class="text-sm leading-relaxed text-texto-2">A luz muda de um dia para outro. Os controles desta sessão definem onde fica cada classe.</p>
+      <ol class="flex flex-col gap-2.5">
+        <% [['Padrão branco', 'Corrige o balanço de cor da câmera.'],
+            ['Controle positivo', 'Mosto cru com iodo. Esperado: violeta ou azul-escuro.'],
+            ['Controle negativo', 'Esperado: amarelo ou âmbar.']].forEach(([nome, detalhe]) => { %>
+          <li class="flex items-center gap-3.5 rounded-xl border border-linha px-4 py-3.5">
+            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-fundo"><i class="ph ph-circle text-texto-2" aria-hidden="true"></i></span>
+            <span class="flex flex-col"><span class="font-semibold"><%= nome %></span><span class="text-[13px] text-texto-2"><%= detalhe %></span></span>
+            <span class="sr-only">Pendente</span>
+          </li>
+        <% }) %>
+      </ol>
+      <div class="flex flex-col gap-2 border-t border-linha pt-4">
+        <button type="button" class="btn-primario w-full" disabled><i class="ph ph-play" aria-hidden="true"></i>Iniciar leitura automática</button>
+        <p class="text-center text-[13px] text-texto-2">Libera depois das três etapas da calibração.</p>
+      </div>
+    </section>
+  <% } else { %>
+    <section class="card overflow-hidden" aria-labelledby="tituloCapturas">
+      <div class="flex flex-col gap-0.5 border-b border-linha px-5 py-5">
+        <h2 id="tituloCapturas" class="text-lg font-semibold">Capturas da sessão</h2>
+        <p class="text-sm text-texto-2">Da mais recente para a mais antiga.</p>
+      </div>
+      <%- include('partials/estadoVazio.ejs', { icone: 'ph-camera', titulo: 'Nenhuma captura', texto: 'Uma captura inconclusiva por reflexo ou foco é repetida sozinha e não conta.', compacto: true }) %>
+    </section>
+  <% } %>
+</div>
+
+<% if (!preparar) { %>
+  <section class="card overflow-hidden" aria-labelledby="tituloTempCapturas">
+    <div class="flex flex-col gap-0.5 border-b border-linha px-6 py-5">
+      <h2 id="tituloTempCapturas" class="text-lg font-semibold">Temperatura e capturas</h2>
+      <p class="text-sm text-texto-2">Cada captura aparece sobre a curva da mosturação, na cor da classe.</p>
+    </div>
+    <%- include('partials/estadoVazio.ejs', { icone: 'ph-chart-line', titulo: 'Sem leituras', compacto: true }) %>
+  </section>
+<% } %>
+<%- include('partials/shellFim.ejs') %>

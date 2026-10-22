@@ -1,9 +1,16 @@
+<%# Lotes: a API ainda não lista lotes; a tabela mostra o estado vazio. %>
 <%- include('partials/shellInicio.ejs', { titulo: 'Lotes', trilha: ['Lotes', 'Todos os lotes'] }) %>
-<h1 class="text-[30px] font-semibold">Lotes</h1>
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <h1 class="text-[30px] font-semibold max-md:sr-only">Lotes</h1>
+  <a href="/lots/new" class="btn-primario max-sm:w-full" data-modal-open="modalLote"><i class="ph ph-plus" aria-hidden="true"></i>Novo lote</a>
+</div>
 
-<section class="card flex flex-col items-center gap-3 px-6 py-16 text-center" aria-labelledby="tituloIndisponivel">
-  <i class="ph ph-clock text-4xl text-texto-2" aria-hidden="true"></i>
-  <h2 id="tituloIndisponivel" class="text-xl font-semibold">Consulta de lotes indisponível</h2>
-  <p class="max-w-md text-texto-2">Os lotes poderão ser consultados quando a funcionalidade estiver disponível.</p>
+<section class="card overflow-hidden" aria-labelledby="tituloTabelaLotes">
+  <h2 id="tituloTabelaLotes" class="sr-only">Lista de lotes</h2>
+  <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_220px_160px_150px]" aria-hidden="true">
+    <span>Lote</span><span>Receita</span><span>Início</span><span>Status</span>
+  </div>
+  <%- include('partials/estadoVazio.ejs', { icone: 'ph-cube', titulo: 'Nenhum lote ainda', texto: 'Um lote liga uma receita a uma mosturação, com as leituras de temperatura e do teste de iodo.', acao: { href: '/lots/new', icone: 'ph-plus', texto: 'Criar primeiro lote' } }) %>
 </section>
+<%- include('partials/modalLote.ejs', { editando: false, abrir: locals.abrirLote, voltar: '/lots' }) %>
 <%- include('partials/shellFim.ejs') %>

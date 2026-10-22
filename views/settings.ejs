@@ -1,4 +1,4 @@
-<%# Configuração: abas Acessibilidade e Segurança (recebe aba). Salvar ainda não tem rota na API. %>
+<%# Configuração: abas Acessibilidade e Segurança (recebe aba). Salvar ainda não tem rota na API (data-sem-api, sem aviso). %>
 <% const seguranca = locals.aba === 'seguranca'; %>
 <%- include('partials/shellInicio.ejs', { titulo: 'Configuração', trilha: ['Configuração', seguranca ? 'Segurança' : 'Acessibilidade'] }) %>
 <div class="flex flex-col gap-1.5">
@@ -6,21 +6,22 @@
   <p class="text-texto-2">Preferências de exibição, som e alertas do sistema.</p>
 </div>
 
-<nav class="flex gap-1" aria-label="Seções da configuração">
-  <a href="/configuracao" class="flex min-h-11 items-center gap-2 rounded-[10px] px-4 font-medium transition-colors <%= seguranca ? 'hover:bg-hover-neutro' : 'menu-link-active' %>"<%- seguranca ? '' : ' aria-current="page"' %>>
+<%# Desktop: abas na lateral; mobile: abas no topo %>
+<div class="grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start">
+<nav class="flex gap-1 lg:flex-col lg:rounded-xl lg:border lg:border-linha lg:bg-superficie lg:p-2" aria-label="Seções da configuração">
+  <a href="/settings" class="flex min-h-11 items-center gap-2 rounded-[10px] border border-linha bg-superficie px-4 font-medium max-lg:flex-1 max-lg:justify-center lg:min-h-12 lg:border-transparent transition-colors <%= seguranca ? 'hover:bg-hover-neutro' : 'menu-link-active' %>"<%- seguranca ? '' : ' aria-current="page"' %>>
     <i class="<%= seguranca ? 'ph' : 'ph-fill' %> ph-person text-lg text-texto-2" aria-hidden="true"></i>Acessibilidade
   </a>
-  <a href="/configuracao/seguranca" class="flex min-h-11 items-center gap-2 rounded-[10px] px-4 font-medium transition-colors <%= seguranca ? 'menu-link-active' : 'hover:bg-hover-neutro' %>"<%- seguranca ? ' aria-current="page"' : '' %>>
+  <a href="/settings/security" class="flex min-h-11 items-center gap-2 rounded-[10px] border border-linha bg-superficie px-4 font-medium max-lg:flex-1 max-lg:justify-center lg:min-h-12 lg:border-transparent transition-colors <%= seguranca ? 'menu-link-active' : 'hover:bg-hover-neutro' %>"<%- seguranca ? ' aria-current="page"' : '' %>>
     <i class="<%= seguranca ? 'ph-fill' : 'ph' %> ph-shield-check text-lg text-texto-2" aria-hidden="true"></i>Segurança
   </a>
 </nav>
 
-<form id="formConfiguracao" class="flex max-w-240 flex-col gap-5" data-sem-api="próxima entrega" novalidate>
+<form id="formConfiguracao" class="flex min-w-0 flex-col gap-5" data-sem-api="próxima entrega" novalidate>
   <% if (!seguranca) { %>
     <section class="card px-6 py-5" aria-labelledby="tituloAparencia">
       <div class="pb-2">
         <h2 id="tituloAparencia" class="text-[17px] font-semibold">Aparência e leitura</h2>
-        <p class="text-sm text-texto-2">Ainda não é salvo.</p>
       </div>
       <label class="flex items-center gap-4 py-4">
         <span class="grid size-10 shrink-0 place-items-center rounded-[10px] bg-fundo"><i class="ph ph-moon text-xl text-texto-2" aria-hidden="true"></i></span>
@@ -97,9 +98,10 @@
     </section>
   <% } %>
 
-  <div class="flex flex-wrap justify-end gap-3">
-    <a href="<%= seguranca ? '/configuracao/seguranca' : '/configuracao' %>" class="btn-secundario">Cancelar</a>
+  <div class="acoes barra-mobile sm:self-end">
+    <a href="<%= seguranca ? '/settings/security' : '/settings' %>" class="btn-secundario">Cancelar</a>
     <button type="submit" class="btn-primario">Salvar alterações</button>
   </div>
 </form>
+</div>
 <%- include('partials/shellFim.ejs') %>

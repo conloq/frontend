@@ -26,31 +26,44 @@ app.use(
 
 // Telas: o index.js só entrega as páginas. Login, token, dados e erros
 // ficam em public/js/app.js, que consome a API do Back-End.
+// Os parâmetros da URL (ex.: id do lote) vão para a view só para montar links.
 const tela =
     (view, dados = {}) =>
     (req, res) =>
-        res.render(view, dados);
+        res.render(view, { ...dados, ...req.params });
 
-app.get('/', (req, res) => res.redirect('/recipes'));
+app.get('/', (req, res) => res.redirect('/dashboard'));
 app.get('/login', tela('login'));
-app.get('/cadastro', tela('cadastro'));
+app.get('/signup', tela('signup'));
+// Recuperar senha: sem rota na API; os formulários usam data-sem-api
+app.get('/forgot-password', tela('forgotPassword', { etapa: 'email' }));
+app.get('/forgot-password/code', tela('forgotPassword', { etapa: 'codigo' }));
+app.get('/forgot-password/reset', tela('forgotPassword', { etapa: 'redefinir' }));
 app.get('/logout', (req, res) => res.redirect('/login')); // o app.js limpa o token
-app.get('/usuario', tela('usuario'));
+app.get('/dashboard', tela('dashboard')); // sem rota na API: estados vazios
+app.get('/profile', tela('profile'));
 // Configuração: salvar ainda não tem rota na API (o formulário usa data-sem-api)
-app.get('/configuracao', tela('configuracao', { aba: 'acessibilidade' }));
-app.get('/configuracao/seguranca', tela('configuracao', { aba: 'seguranca' }));
+app.get('/settings', tela('settings', { aba: 'acessibilidade' }));
+app.get('/settings/security', tela('settings', { aba: 'seguranca' }));
 app.get('/recipes', tela('recipes'));
 app.get('/recipes/:id', tela('recipe'));
-app.get('/recipes/:id/edit', tela('recipe')); // mesma tela: renomear e editar/excluir rampas
+app.get('/recipes/:id/edit', tela('recipe'));
+// Teste de iodo da receita: salvar sem rota na API (conloq/mash#101)
+app.get('/recipes/:id/iodine', tela('recipeIodine')); // mesma tela: renomear e editar/excluir rampas
 app.get('/recipes/:id/temperatures/new', tela('temperatureForm', { editando: false }));
 // Editar e excluir rampa ainda não têm rota na API (conloq/mash#97): a tela carrega a rampa e avisa ao salvar
 app.get(
     '/recipes/:id/temperatures/:temperatureId/edit',
     tela('temperatureForm', { editando: true })
 );
-// Lotes e análises: estados de indisponibilidade até a API ter as rotas.
+// Lotes e sessão do iodo: sem rota na API; telas com estados vazios e formulários data-sem-api
 app.get('/lots', tela('lots'));
+app.get('/lots/new', tela('lots', { abrirLote: true })); // lista com o modal de novo lote aberto
 app.get('/lots/:id', tela('lot'));
+app.get('/lots/:id/edit', tela('lot', { abrirLote: true })); // detalhe com o modal de edição aberto
+app.get('/lots/:id/monitoring', tela('lotMonitoring'));
+app.get('/lots/:id/iodine', tela('iodineSession', { etapa: 'preparar' }));
+app.get('/lots/:id/iodine/reading', tela('iodineSession', { etapa: 'leitura' }));
 app.get('/analyses/new', tela('iodineDemo')); // demonstração simulada; leitura real ainda indisponível (#34)
 app.get('/analyses/:id', tela('analysis'));
 

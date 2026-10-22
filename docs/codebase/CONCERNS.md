@@ -47,7 +47,7 @@ Formulários com senha usam `method="post"`; um 401 atrasado não remove outro t
 
 | Area | Why fragile | Churn signal | Safe change strategy |
 |------|-------------|-------------|----------------------|
-| `views/usuario.ejs` | Maior template: perfil, edição, modal de foto e prévia | Maior template do scan | Alterar em blocos e reabrir `/usuario` |
+| `views/profile.ejs` | Maior template: perfil, edição, modal de foto e prévia | Maior template do scan | Alterar em blocos e reabrir `/profile` |
 | `public/css/tailwind.css` | Contém o shell inteiro em `@layer components`, com media query de 1024px | Fonte do CSS servido | Rebuild obrigatório; conferir sidebar expandida/recolhida |
 | `docs/` | Prosa histórica que descrevia o monólito antigo | `docs/superpowers/**` e `docs/frontend-*.md` | Tratar como histórico, não como estado atual |
 
@@ -63,7 +63,7 @@ Formulários com senha usam `method="post"`; um 401 atrasado não remove outro t
 
 - `docs/codebase/.codebase-scan.txt` (CODE METRICS, HIGH-CHURN FILES, CI/CD)
 - `public/js/app.js`
-- `views/login.ejs`, `views/cadastro.ejs`
+- `views/login.ejs`, `views/signup.ejs`
 - `views/lots.ejs`, `views/lot.ejs`, `views/iodineDemo.ejs`, `views/analysis.ejs`
 - `views/partials/footer.ejs`
 - `index.js`, `.env.example`, `.gitignore`

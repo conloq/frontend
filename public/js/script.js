@@ -50,9 +50,15 @@ collapseButton?.addEventListener('click', (event) => {
 
 function setSidebar(open) {
     if (!sidebar) return;
+    const estavaAberto = !sidebar.classList.contains('-translate-x-full');
     sidebar.classList.toggle('-translate-x-full', !open);
-    overlay?.classList.toggle('hidden', !open);
+    overlay?.classList.toggle('opacity-0', !open);
+    overlay?.classList.toggle('pointer-events-none', !open);
+    // trava a rolagem da página só enquanto a gaveta mobile está aberta
+    document.body.classList.toggle('max-lg:overflow-hidden', open);
     openButton?.setAttribute('aria-expanded', String(open));
+    if (open) closeButton?.focus({ preventScroll: true });
+    else if (estavaAberto) openButton?.focus({ preventScroll: true });
 }
 
 openButton?.addEventListener('click', () => setSidebar(true));
@@ -164,6 +170,8 @@ function openModal(modal) {
 
 function closeModal(modal) {
     if (!modal) return;
+    // aberto pela URL (/lots/new): ao fechar, a barra de endereço volta para a tela de baixo
+    if (modal.dataset.voltar) history.replaceState(null, '', modal.dataset.voltar);
     modal.classList.add('hidden');
     modal.setAttribute('aria-hidden', 'true');
     liberarModal.get(modal)?.();
@@ -172,9 +180,14 @@ function closeModal(modal) {
         document.body.classList.remove('overflow-hidden');
 }
 
+// Links com data-modal-open (ex.: /lots/new) abrem o modal sem sair da página; sem JS, o href abre a tela com o modal aberto
 $$('[data-modal-open]').forEach((button) =>
-    button.addEventListener('click', () => openModal($('#' + button.dataset.modalOpen)))
+    button.addEventListener('click', (event) => {
+        event.preventDefault();
+        openModal($('#' + button.dataset.modalOpen));
+    })
 );
+$$('.js-modal[data-abrir]').forEach((modal) => openModal(modal));
 $$('[data-modal-close]').forEach((button) =>
     button.addEventListener('click', () => closeModal(button.closest('.js-modal')))
 );

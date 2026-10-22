@@ -72,12 +72,17 @@ assert.match((await api('GET', '/user')).data.error, /demorou/);
 context.AbortSignal = AbortSignal;
 
 let slots;
-const row = { querySelector: () => ({ classList: { replace() {} }, addEventListener() {} }) };
+const row = {
+    querySelector: () => ({
+        classList: { replace() {}, add() {}, remove() {} },
+        addEventListener() {},
+    }),
+};
 context.document.getElementById = () => ({
     content: { cloneNode: () => ({ firstElementChild: row }) },
 });
 row.querySelector = (selector) => ({
-    classList: { replace() {} },
+    classList: { replace() {}, add() {}, remove() {} },
     addEventListener() {},
     remove() {},
     set textContent(value) {
@@ -169,7 +174,7 @@ assert.equal(alreadyInert.inert, true);
 assert.equal(doc.activeElement, previous);
 assert.equal(listeners.has('keydown'), false);
 
-for (const name of ['login', 'cadastro', 'usuario']) {
+for (const name of ['login', 'signup', 'profile']) {
     assert.match(readFileSync(`views/${name}.ejs`, 'utf8'), /<form[^>]+method="post"/);
 }
 for (const dir of ['views', 'views/partials']) {
