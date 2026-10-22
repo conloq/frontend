@@ -4,7 +4,7 @@
 
 | Path | Purpose | Evidence |
 |------|---------|----------|
-| `index.js` | Ponto de entrada: Express, view engine EJS, estáticos e as 14 rotas GET | `index.js` |
+| `index.js` | Ponto de entrada: Express, view engine EJS, estáticos e as 16 rotas GET | `index.js` |
 | `public/js/app.js` | Cliente da API: login, token, perfil, receitas, temperatura | `public/js/app.js` |
 | `public/js/script.js` | Shell da interface: sidebar, modais, senha, prévia de foto | `public/js/script.js` |
 | `views/` | Templates EJS das telas, sem dados | `views/*.ejs` |
@@ -32,11 +32,12 @@ Rotas registradas em `index.js` (somente GET):
 | `/cadastro` | `views/cadastro.ejs` |
 | `/logout` | redirect para `/login` |
 | `/usuario` | `views/usuario.ejs` |
+| `/configuracao`, `/configuracao/seguranca` | `views/configuracao.ejs` (salvar sem rota na API) |
 | `/recipes` | `views/recipes.ejs` |
 | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
 | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` |
 | `/lots`, `/lots/:id` | `views/lots.ejs`, `views/lot.ejs` (indisponível) |
-| `/analyses/new`, `/analyses/:id` | `views/iodineDemo.ejs` (demonstração simulada), `views/analysis.ejs` (indisponível) |
+| `/analyses/new`, `/analyses/:id` | `views/iodineDemo.ejs` (teste simulado no frontend, sem rótulo na cena), `views/analysis.ejs` (indisponível) |
 
 ## 3) Module Boundaries
 

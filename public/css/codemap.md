@@ -17,7 +17,7 @@ Mantém a fonte Tailwind e o resultado CSS servido pela aplicação.
   - superfícies e texto: `--color-fundo`, `--color-superficie`, `--color-linha`, `--color-texto`, `--color-texto-2`, `--color-header-texto-2`, `--color-hover-neutro`, `--color-desativado` e `--color-texto-desativado`;
   - estados, cada um com a versão `-suave`: `--color-sucesso`, `--color-aviso`, `--color-perigo` e `--color-info`.
 - `@utility btn` e `@utility selo` são as bases que os componentes reutilizam com `@apply`.
-- `@layer components` define as classes de componente que as telas usam em vez de estilos avulsos: `btn-primario`, `btn-secundario`, `btn-perigo`, `btn-fantasma`, `btn-icone`; `campo`, `campo-rotulo`, `campo-caixa`, `campo-unidade`, `campo-ajuda`, `campo-erro`; `card`; `tabela-cabecalho`, `tabela-linha`; `selo-sucesso`, `selo-aviso`, `selo-perigo`, `selo-info`; `esqueleto`; e as do shell (`app-shell-content`, `menu-link-active`, estados da sidebar por `data-sidebar-state`).
+- `@layer components` define as classes de componente que as telas usam em vez de estilos avulsos: `btn-primario`, `btn-secundario`, `btn-perigo`, `btn-fantasma`, `btn-icone`, `btn-icone-perigo` (excluir só com ícone, fundo vermelho); `interruptor`, `segmentado`, `deslizante` (controles da Configuração); `campo`, `campo-rotulo`, `campo-caixa`, `campo-unidade`, `campo-ajuda`, `campo-erro`; `card`; `tabela-cabecalho`, `tabela-linha`; `selo-sucesso`, `selo-aviso`, `selo-perigo`, `selo-info`; `esqueleto`; e as do shell (`app-shell-content`, `menu-link-active`, estados da sidebar por `data-sidebar-state`).
 
 ## Flow
 
