@@ -7,7 +7,7 @@
 - `index.js` is the runtime entrypoint on port 4000. It renders pages and serves static assets: **it never calls the API**. Each screen is a `GET` route that runs `res.render(view)` with no API data; URL params (e.g. the lot id) are passed only to build links.
 - The browser consumes the API directly, in `public/js/app.js`, with `fetch` against the implemented Back-End routes (`/login`, `/user`, `/recipes`...). The Back-End allows CORS for `http://localhost:4000`.
 - The JWT lives in `localStorage` under `mash-token` and is sent as `Authorization: Bearer`. There is no server session and no cookie.
-- Node.js ES modules (`"type": "module"`) with Express 5, EJS 5, Tailwind CSS v4, Nodemon and Phosphor Icons. No database, ORM, session, auth or upload handling here.
+- Contexto global portátil: [conloq/.github/PROJECT_CONTEXT.md](https://github.com/conloq/.github/blob/main/PROJECT_CONTEXT.md). Leia antes de tarefas não triviais; consulte o estado operacional ao vivo no GitHub.
 
 ## Commands and prerequisites
 
@@ -15,7 +15,7 @@
 - Start: `npm start` (`npx nodemon index.js`) on port 4000 (default; override with `PORT`). The API must be running at `API_URL` (default `http://localhost:8080`).
 - Build CSS: `npm run build:css` (`npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css`)
 - Watch CSS: `npm run watch:css`
-- Check syntax: `npm test`: only `node --check index.js`. There is no test or typecheck suite.
+- Check: `npm test` executa `node --check index.js` e `scripts/verify-profile-contract.mjs`, `scripts/verify-upload.mjs` e `scripts/verify-client.mjs`. Não é apenas um check de sintaxe e não é uma suíte de typecheck.
 - Format: `npm run format` (Prettier on `**/*.{js,mjs,css,json,html}`); `npm run format:check` only checks. Config in `.prettierrc.json` (4 spaces, single quotes; JSON and CSS 2 spaces, double quotes) and `.prettierignore` (generated CSS, `package-lock.json`, `docs/`).
 - Pre-commit: `npm install` installs a husky hook (`prepare`). On `git commit`, lint-staged runs `prettier --write` on the staged JS, CSS, JSON and HTML files and adds the result to the commit. `.ejs` and Markdown are not formatted. Use `git commit --no-verify` only to keep a commit free of unrelated formatting.
 - CI: the Super-Linter (`.github/workflows/super-linter.yml`) checks ESLint, Prettier and HTMLHint on changed files in PRs and on `main`; it never commits. CodeQL runs through GitHub default setup.
