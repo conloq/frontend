@@ -901,6 +901,12 @@
         const { status, data } = await api('GET', `/recipes/${receitaId}`);
         if (status !== 200) {
             q('#recipeResumo').textContent = '';
+            // Receita inexistente ou de outra conta: sem ações que só levariam a outro erro
+            [
+                q('#btnExcluirReceita').closest('.acoes'),
+                q('#tituloRampas').closest('section'),
+                q('#newTemperatureLinkMobile').parentElement,
+            ].forEach((el) => el.classList.add('hidden'));
             return mostrarAlerta(
                 'danger',
                 mensagemDaApi(data, 'Não foi possível carregar a receita')
