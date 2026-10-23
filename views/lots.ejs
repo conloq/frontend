@@ -1,15 +1,19 @@
 <%# Lotes: a API ainda não lista lotes; a tabela mostra o estado vazio. %>
 <%- include('partials/shellInicio.ejs', { titulo: 'Lotes', trilha: ['Lotes', 'Todos os lotes'] }) %>
-<div class="flex flex-wrap items-end justify-between gap-4">
-  <h1 class="text-[30px] font-semibold max-md:sr-only">Lotes</h1>
-  <a href="/lots/new" class="btn-primario max-sm:w-full" data-modal-open="modalLote"><i class="ph ph-plus" aria-hidden="true"></i>Novo lote</a>
+<h1 class="text-[30px] font-semibold max-md:sr-only">Lotes</h1>
+
+<div class="card flex items-center gap-4 px-4 py-3 md:hidden">
+  <p class="flex-1 text-texto-2">Nenhum lote</p>
+  <a href="/lots/new" class="btn-primario" data-modal-open="modalLote"><i class="ph ph-plus" aria-hidden="true"></i>Novo lote</a>
+</div>
+
+<div class="tabela-cabecalho card hidden min-h-16 items-center gap-4 bg-superficie! px-5 md:grid md:grid-cols-[minmax(0,1fr)_220px_160px_150px_44px]">
+  <span aria-hidden="true">Nome do lote</span><span aria-hidden="true">Receita</span><span aria-hidden="true">Data de criação</span><span aria-hidden="true">Status</span>
+  <a href="/lots/new" class="btn-primario size-11 min-h-0 p-0" data-modal-open="modalLote" aria-label="Novo lote" title="Novo lote"><i class="ph ph-plus text-lg" aria-hidden="true"></i></a>
 </div>
 
 <section class="card overflow-hidden" aria-labelledby="tituloTabelaLotes">
   <h2 id="tituloTabelaLotes" class="sr-only">Lista de lotes</h2>
-  <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_220px_160px_150px]" aria-hidden="true">
-    <span>Lote</span><span>Receita</span><span>Início</span><span>Status</span>
-  </div>
   <%- include('partials/estadoVazio.ejs', { icone: 'ph-cube', titulo: 'Nenhum lote ainda', texto: 'Um lote liga uma receita a uma mosturação, com as leituras de temperatura e do teste de iodo.', acao: { href: '/lots/new', icone: 'ph-plus', texto: 'Criar primeiro lote' } }) %>
 </section>
 <%- include('partials/modalLote.ejs', { editando: false, abrir: locals.abrirLote, voltar: '/lots' }) %>

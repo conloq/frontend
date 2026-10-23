@@ -3,13 +3,13 @@
   <a href="/recipes" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todas as receitas</a>
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div class="flex min-w-0 flex-col gap-1.5">
-      <h1 id="recipeName" class="truncate text-[30px] font-semibold">Receita</h1>
+      <h1 id="recipeName" class="truncate text-[22px] font-semibold lg:text-[30px]">Receita</h1>
       <p id="recipeResumo" class="text-texto-2">Carregando…</p>
     </div>
     <div class="acoes">
-      <button type="button" id="btnExcluirReceita" class="btn-perigo"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
+      <button type="button" id="btnExcluirReceita" class="btn-perigo max-lg:order-1"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
       <button type="button" class="btn-secundario" data-modal-open="modalRenomear"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Renomear</button>
-      <a id="iodoReceitaLink" href="#" class="btn-secundario max-lg:col-span-2"><i class="ph ph-test-tube" aria-hidden="true"></i>Teste de iodo</a>
+      <a id="iodoReceitaLink" href="#" class="btn-secundario max-lg:order-2 max-lg:col-span-2"><i class="ph ph-test-tube" aria-hidden="true"></i>Teste de iodo</a>
       <a id="newTemperatureLink" href="#" class="btn-primario max-lg:hidden"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
     </div>
   </div>
@@ -76,7 +76,7 @@
   </div>
 </template>
 
-<div id="modalRenomear" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true">
+<div id="modalRenomear" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true"<%- locals.abrirRenomear ? ` data-abrir data-voltar="/recipes/${encodeURIComponent(id)}"` : '' %>>
   <div class="flex min-h-full items-center justify-center">
     <div class="w-full max-w-[520px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="dialog" aria-modal="true" aria-labelledby="modalRenomearTitulo">
       <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">

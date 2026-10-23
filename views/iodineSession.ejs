@@ -1,64 +1,120 @@
-<%# Sessão do teste de iodo do lote (recebe etapa: preparar ou leitura). Ainda não há câmera nem rota na API: a tela mostra a câmera desconectada e as listas vazias. %>
-<% const preparar = locals.etapa !== 'leitura'; const titulo = preparar ? 'Preparar a leitura do iodo' : 'Leitura automática'; %>
-<%- include('partials/shellInicio.ejs', { titulo, trilha: ['Teste de iodo', preparar ? 'Preparar sessão' : 'Leitura automática'], voltar: `/lots/${locals.id}` }) %>
-<div class="flex flex-col gap-2">
-  <a href="/lots/<%= locals.id %>" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Voltar para o lote</a>
-  <div class="flex flex-wrap items-end justify-between gap-4">
-    <div class="flex flex-col gap-1.5">
-      <div class="flex flex-wrap items-center gap-3">
-        <h1 class="text-[30px] font-semibold"><%= titulo %></h1>
-        <span class="selo-perigo">Câmera desconectada</span>
-      </div>
-      <p class="text-texto-2"><%= preparar ? 'A câmera fica fixa na bancada e as configurações travam até o fim da sessão.' : 'Cada captura é classificada sozinha e registrada no lote com hora e temperatura.' %></p>
+<%# Sessão do teste de iodo do lote (recebe etapa: preparar ou leitura). Ainda não há câmera nem rota na API: a tela mostra a câmera desconectada, a calibração pendente e as listas vazias; os valores da sessão aparecem como "—". %>
+<% const preparar = locals.etapa !== 'leitura'; const titulo = preparar ? 'Preparar a leitura do iodo' : 'Leitura automática'; const lote = `/lots/${encodeURIComponent(locals.id)}`; %>
+<%- include('partials/shellInicio.ejs', { titulo: preparar ? 'Preparar leitura' : 'Leitura do iodo', trilha: ['Teste de iodo', preparar ? 'Preparar sessão' : 'Leitura automática'], voltar: lote }) %>
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div class="flex min-w-0 flex-col gap-1.5">
+    <div class="flex flex-wrap items-center gap-3">
+      <h1 class="text-[30px] font-semibold max-lg:sr-only"><%= titulo %></h1>
+      <span class="selo-perigo">Câmera desconectada</span>
     </div>
-    <% if (!preparar) { %>
-      <a href="/lots/<%= locals.id %>/iodine" class="max-sm:w-full btn-secundario"><i class="ph ph-crosshair" aria-hidden="true"></i>Refazer calibração</a>
-    <% } %>
+    <p class="text-texto-2 max-lg:text-sm"><%= preparar ? 'A câmera fica fixa na bancada e as configurações travam até o fim da sessão.' : 'Cada captura é classificada sozinha e registrada no lote com hora e temperatura.' %></p>
   </div>
+  <% if (!preparar) { %>
+    <div class="acoes max-lg:hidden">
+      <a href="<%= lote %>/monitoring" class="btn-secundario"><i class="ph ph-stop" aria-hidden="true"></i>Encerrar leitura</a>
+      <a href="<%= lote %>/iodine/reading" class="btn-primario"><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Tentar reconectar</a>
+    </div>
+  <% } %>
 </div>
 
-<div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px] xl:items-start">
-  <section class="card overflow-hidden" aria-labelledby="tituloCamera">
-    <h2 id="tituloCamera" class="sr-only">Câmera da bancada</h2>
-    <div class="flex min-h-80 flex-col items-center justify-center gap-3 bg-mash-brown-dark px-6 py-12 text-center">
-      <i class="ph ph-video-camera-slash text-4xl text-header-texto-2" aria-hidden="true"></i>
-      <p class="font-display text-xl font-semibold text-white">Sem imagem da câmera</p>
-      <p class="max-w-sm text-header-texto-2">Confira o cabo USB e a energia da bancada. A imagem aparece aqui quando a câmera responder.</p>
+<% if (!preparar) { %>
+  <div class="flex items-start gap-3 rounded-[10px] bg-perigo-suave py-3 pl-4 pr-4" role="status">
+    <i class="ph-fill ph-x-circle text-[22px] text-perigo" aria-hidden="true"></i>
+    <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+      <p class="font-semibold">A câmera não está respondendo</p>
+      <p class="text-sm">As capturas anteriores continuam salvas no lote. Nenhuma classe nova é registrada até a câmera voltar.</p>
     </div>
-    <% if (preparar) { %>
-      <div class="flex flex-wrap items-center gap-4 border-t border-linha px-6 py-4">
-        <p class="flex-1 text-texto-2">Com a câmera ligada, a calibração começa pelo padrão branco.</p>
-        <button type="button" class="btn-primario max-sm:w-full" disabled><i class="ph ph-camera" aria-hidden="true"></i>Capturar padrão branco</button>
-      </div>
-    <% } else { %>
-      <div class="flex flex-col gap-1 border-t border-linha px-6 py-5">
-        <span class="text-sm text-texto-2">Última captura</span>
-        <p class="font-display text-[26px] font-semibold">Nenhuma captura ainda</p>
-      </div>
-    <% } %>
-  </section>
+  </div>
+<% } %>
 
-  <% if (preparar) { %>
-    <section class="card flex flex-col gap-3 p-5" aria-labelledby="tituloCalibracao">
-      <h2 id="tituloCalibracao" class="text-lg font-semibold">Calibração da sessão</h2>
-      <p class="text-sm leading-relaxed text-texto-2">A luz muda de um dia para outro. Os controles desta sessão definem onde fica cada classe.</p>
-      <ol class="flex flex-col gap-2.5">
-        <% [['Padrão branco', 'Corrige o balanço de cor da câmera.'],
-            ['Controle positivo', 'Mosto cru com iodo. Esperado: violeta ou azul-escuro.'],
-            ['Controle negativo', 'Esperado: amarelo ou âmbar.']].forEach(([nome, detalhe]) => { %>
-          <li class="flex items-center gap-3.5 rounded-xl border border-linha px-4 py-3.5">
-            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-fundo"><i class="ph ph-circle text-texto-2" aria-hidden="true"></i></span>
-            <span class="flex flex-col"><span class="font-semibold"><%= nome %></span><span class="text-[13px] text-texto-2"><%= detalhe %></span></span>
-            <span class="sr-only">Pendente</span>
-          </li>
-        <% }) %>
-      </ol>
-      <div class="flex flex-col gap-2 border-t border-linha pt-4">
-        <button type="button" class="btn-primario w-full" disabled><i class="ph ph-play" aria-hidden="true"></i>Iniciar leitura automática</button>
-        <p class="text-center text-[13px] text-texto-2">Libera depois das três etapas da calibração.</p>
+<% const semCamera = (alto, rotulo) => { %>
+  <div class="relative flex flex-1 flex-col items-center justify-center gap-3 bg-mash-brown-dark px-6 py-12 text-center <%= alto %>">
+    <% if (rotulo) { %><span class="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-md bg-black/40 px-2 py-1 text-xs font-semibold text-white max-lg:hidden"><i class="ph ph-video-camera" aria-hidden="true"></i>Câmera da bancada</span><% } %>
+    <i class="ph ph-video-camera-slash text-4xl text-header-texto-2" aria-hidden="true"></i>
+    <p class="font-display text-xl font-semibold text-white">Sem imagem da câmera</p>
+    <p class="max-w-sm text-sm text-header-texto-2">Confira o cabo USB e a energia da bancada. A imagem aparece aqui quando a câmera responder.</p>
+  </div>
+<% } %>
+
+<% if (preparar) { %>
+  <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
+    <section class="card flex flex-col overflow-hidden" aria-labelledby="tituloCamera">
+      <h2 id="tituloCamera" class="sr-only">Câmera da bancada</h2>
+      <% semCamera('min-h-72 lg:min-h-[480px]') %>
+      <div class="flex flex-wrap items-center gap-4 border-t border-linha px-6 py-4">
+        <div class="flex flex-1 flex-col gap-0.5">
+          <p class="font-semibold max-lg:hidden">Câmera desligada</p>
+          <p class="text-sm text-texto-2">Com a câmera ligada, a calibração começa pelo padrão branco.</p>
+        </div>
+        <button type="button" class="btn-primario max-lg:hidden" disabled><i class="ph ph-camera" aria-hidden="true"></i>Capturar padrão branco</button>
       </div>
     </section>
-  <% } else { %>
+
+    <div class="flex flex-col gap-4">
+      <section class="card flex flex-col gap-3 p-5 max-lg:border-0 max-lg:bg-transparent max-lg:p-0" aria-labelledby="tituloCalibracao">
+        <h2 id="tituloCalibracao" class="text-lg font-semibold">Calibração da sessão</h2>
+        <p class="text-sm leading-relaxed text-texto-2 max-lg:hidden">A luz muda de um dia para outro. Os controles desta sessão definem onde fica cada classe.</p>
+        <ol class="flex flex-col gap-2.5">
+          <% [['Padrão branco', 'Corrige o balanço de cor da câmera.'],
+              ['Controle positivo', 'Esperado: violeta ou azul-escuro.'],
+              ['Controle negativo', 'Esperado: amarelo ou âmbar.']].forEach(([nome, detalhe]) => { %>
+            <li class="flex items-center gap-3.5 rounded-xl border border-linha bg-superficie px-4 py-3">
+              <span class="grid size-8 shrink-0 place-items-center rounded-full bg-fundo"><i class="ph ph-circle text-texto-2" aria-hidden="true"></i></span>
+              <span class="flex flex-col"><span class="font-semibold"><%= nome %></span><span class="text-[13px] text-texto-2"><%= detalhe %></span></span>
+              <span class="sr-only">Pendente</span>
+            </li>
+          <% }) %>
+        </ol>
+      </section>
+
+      <section class="card flex flex-col px-5 py-2 max-lg:hidden" aria-label="Configuração da sessão">
+        <dl class="flex flex-col">
+          <% [['ph-timer', 'Intervalo entre capturas'], ['ph-stack', 'Capturas no máximo'], ['ph-thermometer-simple', 'Começa na']].forEach(([icone, rotulo]) => { %>
+            <div class="flex items-center gap-3 border-b border-linha py-3 text-sm">
+              <i class="ph <%= icone %> text-lg text-texto-2" aria-hidden="true"></i>
+              <dt class="flex-1 text-texto-2"><%= rotulo %></dt>
+              <dd class="font-semibold">—</dd>
+            </div>
+          <% }) %>
+        </dl>
+        <a href="/recipes" class="py-3 text-sm font-semibold text-acao hover:underline">Alterar na receita</a>
+      </section>
+
+      <section class="card flex flex-col gap-3 p-5 max-lg:hidden" aria-labelledby="tituloEscala">
+        <h2 id="tituloEscala" class="text-lg font-semibold">Escala desta sessão</h2>
+        <div class="grid grid-cols-2 gap-3">
+          <% [['Controle positivo', 'Pendente'], ['Controle negativo', 'Depois do positivo']].forEach(([nome, estado]) => { %>
+            <div class="flex items-center gap-2.5 rounded-[10px] bg-fundo p-2.5">
+              <span class="size-8 shrink-0 rounded-md border border-linha bg-superficie" aria-hidden="true"></span>
+              <span class="flex flex-col"><span class="text-[13px] font-semibold"><%= nome %></span><span class="text-xs text-texto-2"><%= estado %></span></span>
+            </div>
+          <% }) %>
+        </div>
+        <p class="text-[13px] leading-relaxed text-texto-2">Cada captura é comparada com essas duas cores. Perto do positivo, ainda há amido; perto do negativo, a conversão terminou. O que fica no meio é conversão parcial.</p>
+      </section>
+    </div>
+  </div>
+
+  <div class="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+    <p class="text-sm text-texto-2 max-lg:hidden lg:ml-auto">Faltam 3 etapas da calibração</p>
+    <div class="acoes max-lg:hidden">
+      <a href="<%= lote %>" class="btn-secundario">Cancelar</a>
+      <button type="button" class="btn-primario" disabled><i class="ph ph-play" aria-hidden="true"></i>Iniciar leitura automática</button>
+    </div>
+    <button type="button" class="btn-primario w-full lg:hidden" disabled><i class="ph ph-camera" aria-hidden="true"></i>Capturar padrão branco</button>
+  </div>
+<% } else { %>
+  <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px] xl:items-start">
+    <section class="card grid overflow-hidden lg:grid-cols-2" aria-labelledby="tituloCamera">
+      <h2 id="tituloCamera" class="sr-only">Câmera da bancada</h2>
+      <% semCamera('min-h-64', true) %>
+      <div class="flex flex-col gap-2 px-6 py-5">
+        <span class="text-sm text-texto-2">Última captura</span>
+        <p class="font-display text-[26px] font-semibold">Nenhuma captura ainda</p>
+        <p class="text-sm text-texto-2">A classe da primeira captura aparece aqui, entre o controle positivo e o negativo.</p>
+      </div>
+    </section>
+
     <section class="card overflow-hidden" aria-labelledby="tituloCapturas">
       <div class="flex flex-col gap-0.5 border-b border-linha px-5 py-5">
         <h2 id="tituloCapturas" class="text-lg font-semibold">Capturas da sessão</h2>
@@ -66,16 +122,26 @@
       </div>
       <%- include('partials/estadoVazio.ejs', { icone: 'ph-camera', titulo: 'Nenhuma captura', texto: 'Uma captura inconclusiva por reflexo ou foco é repetida sozinha e não conta.', compacto: true }) %>
     </section>
-  <% } %>
-</div>
+  </div>
 
-<% if (!preparar) { %>
   <section class="card overflow-hidden" aria-labelledby="tituloTempCapturas">
-    <div class="flex flex-col gap-0.5 border-b border-linha px-6 py-5">
-      <h2 id="tituloTempCapturas" class="text-lg font-semibold">Temperatura e capturas</h2>
-      <p class="text-sm text-texto-2">Cada captura aparece sobre a curva da mosturação, na cor da classe.</p>
+    <div class="flex flex-wrap items-start justify-between gap-3 border-b border-linha px-6 py-5">
+      <div class="flex flex-col gap-0.5">
+        <h2 id="tituloTempCapturas" class="text-lg font-semibold">Temperatura e capturas</h2>
+        <p class="text-sm text-texto-2">Cada ponto é uma captura, na cor da classe, sobre a curva da mosturação.</p>
+      </div>
+      <ul class="flex flex-wrap gap-4 text-[13px] text-texto-2 max-lg:hidden">
+        <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-[#2b1a3d]" aria-hidden="true"></span>Presença de amido</li>
+        <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-[#9c3d1e]" aria-hidden="true"></span>Conversão parcial</li>
+        <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-[#e9b949]" aria-hidden="true"></span>Ausência de amido</li>
+      </ul>
     </div>
     <%- include('partials/estadoVazio.ejs', { icone: 'ph-chart-line', titulo: 'Sem leituras', compacto: true }) %>
   </section>
+
+  <div class="acoes barra-mobile lg:hidden">
+    <a href="<%= lote %>/monitoring" class="btn-secundario"><i class="ph ph-stop" aria-hidden="true"></i>Encerrar</a>
+    <a href="<%= lote %>/iodine/reading" class="btn-primario"><i class="ph ph-arrow-clockwise" aria-hidden="true"></i>Reconectar</a>
+  </div>
 <% } %>
 <%- include('partials/shellFim.ejs') %>

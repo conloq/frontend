@@ -74,12 +74,17 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-// Item ativo: a seção do link (data-secao) é prefixo do caminho atual; o ícone fica preenchido
-$$('.menu-link[data-secao]').forEach((link) => {
-    const ativo = link.dataset.secao
-        .split(' ')
-        .some((secao) => window.location.pathname.startsWith(secao));
-    if (!ativo) return;
+// Item ativo: a seção do link (data-secao) é prefixo do caminho atual; "*" vale um trecho
+// (/lots/*/iodine). Vence a seção mais longa, para a sessão do iodo não acender "Lotes".
+const casaSecao = (secao) =>
+    new RegExp(`^${secao.replaceAll('*', '[^/]+')}`).test(window.location.pathname)
+        ? secao.length
+        : 0;
+const melhorSecao = (link) => Math.max(...link.dataset.secao.split(' ').map(casaSecao));
+const linksSecao = [...$$('.menu-link[data-secao]')];
+const maiorSecao = Math.max(0, ...linksSecao.map(melhorSecao));
+linksSecao.forEach((link) => {
+    if (!maiorSecao || melhorSecao(link) !== maiorSecao) return;
     link.classList.add('menu-link-active');
     link.setAttribute('aria-current', 'page');
     const icon = link.querySelector('i');
@@ -113,6 +118,8 @@ inputFoto?.addEventListener('change', () => {
         preview.src = event.target.result;
     });
     reader.readAsDataURL(file);
+    // "Trocar foto" é um passo só: escolher o arquivo já envia (o envio fica no app.js)
+    inputFoto.form?.requestSubmit();
 });
 
 // Torna inativos os irmãos de cada ancestral, sem bloquear o próprio diálogo.
@@ -196,3 +203,39 @@ $$('.js-modal').forEach((modal) =>
         if (event.target === modal) closeModal(modal);
     })
 );
+
+// Código de verificação em 6 caixas: cada dígito avança, Backspace volta e colar preenche todas
+$$('[data-codigo]').forEach((grupo) => {
+    const caixas = [...grupo.querySelectorAll('input')];
+    const preencher = (inicio, digitos) => {
+        digitos.slice(0, caixas.length - inicio).forEach((d, i) => (caixas[inicio + i].value = d));
+        caixas[Math.min(inicio + digitos.length, caixas.length - 1)].focus();
+    };
+    caixas.forEach((caixa, i) => {
+        caixa.addEventListener('input', () => {
+            const digitos = caixa.value.replace(/\D/g, '').split('');
+            caixa.value = '';
+            if (digitos.length) preencher(i, digitos);
+        });
+        caixa.addEventListener('keydown', (event) => {
+            if (event.key === 'Backspace' && !caixa.value && i > 0) caixas[i - 1].focus();
+        });
+        caixa.addEventListener('paste', (event) => {
+            event.preventDefault();
+            preencher(i, event.clipboardData.getData('text').replace(/\D/g, '').split(''));
+        });
+    });
+});
+
+// "Reenviar em 00:45": conta até zero e libera o botão
+$$('[data-reenviar]').forEach((botao) => {
+    let resta = Number(botao.dataset.reenviar);
+    const relogio = setInterval(() => {
+        resta -= 1;
+        botao.textContent = `Reenviar em 00:${String(resta).padStart(2, '0')}`;
+        if (resta > 0) return;
+        clearInterval(relogio);
+        botao.textContent = 'Reenviar código';
+        botao.disabled = false;
+    }, 1000);
+});
