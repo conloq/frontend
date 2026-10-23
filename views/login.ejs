@@ -1,7 +1,7 @@
 <%- include('partials/header.ejs', { titulo: 'Entrar' }) %>
 <div class="flex min-h-screen bg-superficie">
   <%- include('partials/painelMarca.ejs', { chamada: 'Do teste de iodo à fervura' }) %>
-  <main class="flex w-full flex-col items-center justify-between px-6 pb-8 pt-12 lg:w-[864px] lg:shrink-0">
+  <main class="flex w-full flex-col items-center px-6 pb-8 pt-12 lg:w-[864px] lg:shrink-0 lg:justify-between">
     <%- include('partials/marcaMobile.ejs', { chamada: 'Do teste de iodo à fervura' }) %>
     <span class="max-lg:hidden" aria-hidden="true"></span>
     <div class="flex w-full max-w-[440px] flex-col gap-7">
@@ -16,18 +16,19 @@
           </span>
         </label>
         <div class="campo">
-          <span class="flex items-center justify-between"><label class="campo-rotulo" for="senha">Senha</label><a href="/forgot-password" class="text-sm font-semibold text-acao hover:underline">Esqueci a senha</a></span>
+          <label class="campo-rotulo" for="senha">Senha</label>
           <span class="campo-caixa">
             <i class="ph ph-lock-simple" aria-hidden="true"></i>
             <input id="senha" type="password" name="password" autocomplete="current-password" required>
             <button type="button" class="btn-icone -mr-2" data-toggle-senha="senha" aria-label="Mostrar senha"><i class="ph ph-eye" aria-hidden="true"></i></button>
           </span>
+          <a href="/forgot-password" class="mt-1 self-end text-sm font-semibold text-acao hover:underline">Esqueceu a senha?</a>
         </div>
         <button type="submit" class="btn-primario mt-2 w-full">Entrar <i class="ph ph-sign-in" aria-hidden="true"></i></button>
       </form>
       <p class="text-center text-texto-2">Ainda não tem conta? <a href="/signup" class="font-semibold text-acao hover:underline">Criar conta</a></p>
     </div>
-    <p class="text-[13px] text-texto-2">© 2026 Conloq · FATEC Registro</p>
+    <p class="text-[13px] text-texto-2 max-lg:hidden">© 2026 Conloq · FATEC Registro</p>
   </main>
 </div>
 <%- include('partials/footer.ejs') %>

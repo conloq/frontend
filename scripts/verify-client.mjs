@@ -186,8 +186,54 @@ for (const dir of ['views', 'views/partials']) {
 for (const file of readdirSync('views').filter((name) => name.endsWith('.ejs'))) {
     await ejs.renderFile(`views/${file}`, { apiUrl: 'http://localhost:8080', editando: false });
 }
-await ejs.renderFile('views/temperatureForm.ejs', {
+const rampaEditada = await ejs.renderFile('views/temperatureForm.ejs', {
     apiUrl: 'http://localhost:8080',
     editando: true,
 });
-console.log('PASS: sessão, timeout, rampas, perfil, foco, formulários e renderização EJS.');
+assert.match(rampaEditada, /data-sem-api="conloq\/mash#97"[^>]*>[^<]*<i[^>]*><\/i>Excluir rampa/);
+
+// /recipes/:id/edit abre o modal de renomear e volta para o detalhe ao fechar
+const receitaRenomear = await ejs.renderFile('views/recipe.ejs', {
+    apiUrl: 'http://localhost:8080',
+    abrirRenomear: true,
+    id: '7',
+});
+assert.match(receitaRenomear, /id="modalRenomear"[^>]+data-abrir data-voltar="\/recipes\/7"/);
+
+// Menu ativo: vence a seção mais longa (sessão do iodo acende "Teste de iodo", não "Lotes")
+const menuAtivo = (pathname) => {
+    const links = Object.entries({
+        Lotes: '/lots',
+        Iodo: '/analyses /lots/*/iodine',
+        Receitas: '/recipes /temperatures',
+    }).map(([nome, secao]) => ({
+        nome,
+        ativo: false,
+        dataset: { secao },
+        classList: {
+            add() {
+                this.dono.ativo = true;
+            },
+        },
+        setAttribute() {},
+        querySelector: () => null,
+    }));
+    links.forEach((link) => (link.classList.dono = link));
+    const docMenu = {
+        querySelector: () => null,
+        querySelectorAll: (sel) => (sel === '.menu-link[data-secao]' ? links : []),
+        addEventListener() {},
+    };
+    runInNewContext(readFileSync('public/js/script.js', 'utf8'), {
+        document: docMenu,
+        window: { location: { pathname } },
+    });
+    return links.filter((link) => link.ativo).map((link) => link.nome);
+};
+assert.deepEqual(menuAtivo('/lots/3/iodine/reading'), ['Iodo']);
+assert.deepEqual(menuAtivo('/lots/3'), ['Lotes']);
+assert.deepEqual(menuAtivo('/recipes/2/iodine'), ['Receitas']);
+assert.deepEqual(menuAtivo('/login'), []);
+console.log(
+    'PASS: sessão, timeout, rampas, perfil, foco, formulários, menu ativo e renderização EJS.'
+);

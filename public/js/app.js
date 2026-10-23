@@ -495,7 +495,7 @@
             ...acessos.map((acesso) => {
                 const linha = clonar('tplLinhaAcesso', {
                     local: acesso.location,
-                    quando: `${new Date(acesso.loggedAt).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} · ${acesso.ipAddress}`,
+                    quando: `${new Date(acesso.loggedAt).toLocaleDateString('pt-BR')} · ${new Date(acesso.loggedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · ${acesso.ipAddress}`,
                     // status = IP já visto nesta conta (não é sucesso/falha do login)
                     status:
                         acesso.status === null || acesso.status === undefined
@@ -768,7 +768,7 @@
         }
         const receitas = data.recipes ?? [];
         seletor.options[0].textContent = receitas.length
-            ? 'Escolha a receita'
+            ? 'Escolha uma receita'
             : 'Nenhuma receita cadastrada';
         receitas.forEach((r) => seletor.add(new Option(r.name, r.id)));
     }
@@ -1075,6 +1075,10 @@
         [...TEMPERATURAS, ...HORARIOS, 'orderRamp'].forEach((key) => {
             form.elements[key].value = rampa[key] ?? '';
         });
+        if (rampa.orderRamp) {
+            q('#tituloRampa').textContent = `Editar rampa ${rampa.orderRamp}`;
+            nomearPagina(`Editar rampa ${rampa.orderRamp}`);
+        }
     }
 
     iniciarFormRampa();
@@ -1113,7 +1117,11 @@
         const pos = (m) => `${4 + (92 * m) / total}%`;
 
         faixa.style.width = duracao > 0 ? pos(duracao) : '0';
+        // a calibração da sessão acontece antes da primeira captura
+        const calibracao = clonar('tplCalibracaoPrevia', {});
+        calibracao.style.left = pos(Math.max(0, primeira - intervalo / 2));
         capturas.replaceChildren(
+            calibracao,
             ...minutosCaptura.map((m, i) => {
                 const marcador = clonar('tplCapturaPrevia', {
                     numero: String(i + 1),
@@ -1136,6 +1144,9 @@
         if (!form || !receitaIodo) return;
 
         const seletor = form.elements.rampa;
+        api('GET', `/recipes/${receitaIodo}`).then(({ status, data }) => {
+            if (status === 200) q('#voltarReceitaIodo').textContent = data.recipe.name;
+        });
         const { status, data } = await api('GET', `/recipes/${receitaIodo}/temperatures`);
         const rampas = status === 200 ? (data.temperatures ?? []) : [];
         if (status !== 200)
@@ -1146,7 +1157,7 @@
         rampas.forEach((t, i) =>
             seletor.add(
                 new Option(
-                    `Rampa ${t.orderRamp ?? i + 1} · ${t.minTemperatureRamp} – ${t.maxTemperatureRamp} ºC`,
+                    `Rampa ${t.orderRamp ?? i + 1} · ${t.minTemperatureRamp} a ${t.maxTemperatureRamp} ºC`,
                     t.id
                 )
             )

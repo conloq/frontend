@@ -48,7 +48,7 @@ app.get('/settings', tela('settings', { aba: 'acessibilidade' }));
 app.get('/settings/security', tela('settings', { aba: 'seguranca' }));
 app.get('/recipes', tela('recipes'));
 app.get('/recipes/:id', tela('recipe'));
-app.get('/recipes/:id/edit', tela('recipe'));
+app.get('/recipes/:id/edit', tela('recipe', { abrirRenomear: true })); // detalhe com o modal de renomear aberto
 // Teste de iodo da receita: salvar sem rota na API (conloq/mash#101)
 app.get('/recipes/:id/iodine', tela('recipeIodine')); // mesma tela: renomear e editar/excluir rampas
 app.get('/recipes/:id/temperatures/new', tela('temperatureForm', { editando: false }));

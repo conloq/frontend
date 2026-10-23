@@ -34,7 +34,7 @@ Rotas registradas em `index.js` (somente GET):
 | `/profile` | `views/profile.ejs` |
 | `/settings`, `/settings/security` | `views/settings.ejs` (salvar sem rota na API) |
 | `/recipes` | `views/recipes.ejs` |
-| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` |
+| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` (`/edit` abre o modal de renomear) |
 | `/recipes/:id/iodine` | `views/recipeIodine.ejs` (salvar sem rota na API) |
 | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` |
 | `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `views/forgotPassword.ejs` (sem rota na API) |

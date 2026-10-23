@@ -1,12 +1,12 @@
 <%- include('partials/shellInicio.ejs', { titulo: 'Receitas', trilha: ['Receitas', 'Todas as receitas'] }) %>
-<div class="flex flex-wrap items-end justify-between gap-4">
+<div class="flex flex-wrap items-end justify-between gap-4 max-md:contents">
   <h1 class="text-[30px] font-semibold max-md:sr-only">Receitas</h1>
   <button type="button" class="btn-primario max-md:hidden" data-modal-open="modalReceita"><i class="ph ph-plus" aria-hidden="true"></i>Nova receita</button>
 </div>
 
-<section class="card overflow-hidden" aria-labelledby="tituloTabelaReceitas">
+<section class="card overflow-hidden max-md:overflow-visible max-md:border-0 max-md:bg-transparent" aria-labelledby="tituloTabelaReceitas">
   <h2 id="tituloTabelaReceitas" class="sr-only">Lista de receitas</h2>
-  <div class="flex flex-wrap items-center gap-3 border-b border-linha px-5 py-4">
+  <div class="flex flex-wrap items-center gap-3 border-b border-linha px-5 py-4 max-md:border-0 max-md:px-0 max-md:pt-0">
     <label class="campo-caixa min-h-11 flex-1 sm:w-[360px] sm:flex-none">
       <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
       <span class="sr-only">Buscar receita</span>
@@ -18,7 +18,7 @@
   <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px]" aria-hidden="true">
     <span>Receita</span><span>Rampas</span><span>Faixa das rampas</span><span>Criada em</span><span class="text-right">Ações</span>
   </div>
-  <div id="listaReceitas" aria-live="polite"></div>
+  <div id="listaReceitas" class="max-md:overflow-hidden max-md:rounded-xl max-md:border max-md:border-linha max-md:bg-superficie" aria-live="polite"></div>
 </section>
 
 <%# Linha da tabela; app.js clona e preenche os data-slot %>

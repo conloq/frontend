@@ -5,7 +5,7 @@
       <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
         <div class="flex flex-1 flex-col gap-1">
           <h2 id="modalLoteTitulo" class="text-[22px] font-semibold"><%= editando ? 'Editar lote' : 'Novo lote' %></h2>
-          <p class="text-sm text-texto-2">Um lote é uma brassagem feita com uma das suas receitas.</p>
+          <% if (!editando) { %><p class="text-sm text-texto-2">Um lote é uma brassagem feita com uma das suas receitas.</p><% } %>
         </div>
         <button type="button" class="btn-icone" data-modal-close aria-label="Fechar"><i class="ph ph-x" aria-hidden="true"></i></button>
       </div>
@@ -23,12 +23,19 @@
               </select>
               <i class="ph ph-caret-down pointer-events-none absolute right-3.5 text-lg!" aria-hidden="true"></i>
             </span>
-            <span class="campo-ajuda" data-erro>As rampas de temperatura vêm da receita escolhida.</span>
+            <span class="campo-ajuda" data-erro></span>
           </div>
           <div class="campo">
             <label class="campo-rotulo" for="loteInicio">Início da mosturação (opcional)</label>
             <span class="campo-caixa"><input id="loteInicio" name="startedAt" type="datetime-local"></span>
             <span class="campo-ajuda">Em branco, o MASH usa a data e a hora do cadastro.</span>
+          </div>
+          <div class="campo" role="radiogroup" aria-labelledby="loteStatusRotulo">
+            <span id="loteStatusRotulo" class="campo-rotulo">Status</span>
+            <div class="segmentado w-full">
+              <label><input type="radio" name="status" value="andamento" class="sr-only" checked>Em andamento</label>
+              <label><input type="radio" name="status" value="concluido" class="sr-only">Concluído</label>
+            </div>
           </div>
         </div>
         <div class="acoes border-t border-linha bg-[#faf8f6] px-6 py-4">

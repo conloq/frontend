@@ -27,11 +27,11 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 | `/profile/access-history` | `accessHistory.ejs` | `GET /user/login-history` (tela mobile de últimos acessos, aberta pelo Perfil) |
 | `/settings`, `/settings/security` | `settings.ejs` (`aba`) | nenhuma; salvar usa `data-sem-api` |
 | `/recipes` | `recipes.ejs` | `GET /user`, `GET /recipes`, `GET /recipes/:id/temperatures` (uma por receita), `POST /recipes`, `DELETE /recipes/:id` |
-| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela; cada rampa oferece ações para editar e excluir, ambas com `data-sem-api`: não fazem nada e não mostram aviso, #97) |
+| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela com o modal de renomear aberto; cada rampa oferece ações para editar e excluir, ambas com `data-sem-api`: não fazem nada e não mostram aviso, #97) |
 | `/recipes/:id/iodine` | `recipeIodine.ejs` | `GET /user`, `GET /recipes/:id/temperatures` (seletor de rampa); salvar é `data-sem-api` (#101); a prévia da sessão é desenhada com os valores do formulário |
 | `/recipes/:id/temperatures/new` | `temperatureForm.ejs` | `GET /user`, `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
 | `/recipes/:id/temperatures/:temperatureId/edit` | `temperatureForm.ejs` (`editando`) | `GET /user`, `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar é `data-sem-api` (#97) |
-| `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `forgotPassword.ejs` (`etapa`) | nenhuma; páginas públicas; formulários `data-sem-api` (conloq/mash#73) |
+| `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `forgotPassword.ejs` (`etapa`) | nenhuma; páginas públicas (barra da marca, espuma `img/espuma.png` e card central no desktop; código em 6 caixas e contagem do "Reenviar"); formulários `data-sem-api` (conloq/mash#73) |
 | `/dashboard` | `dashboard.ejs` | `GET /user`; indicadores e cards em estado vazio (sem rota na API) |
 | `/lots`, `/lots/:id` | `lots.ejs`, `lot.ejs` | `GET /user`; lista e detalhe em estado vazio; excluir é `data-sem-api` (API de lotes na #31/#92) |
 | `/lots/new`, `/lots/:id/edit` | `lots.ejs` / `lot.ejs` com `partials/modalLote.ejs` aberto | `GET /user`, `GET /recipes` (seletor de receita); salvar é `data-sem-api` |

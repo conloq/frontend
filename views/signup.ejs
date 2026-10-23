@@ -1,11 +1,11 @@
 <%- include('partials/header.ejs', { titulo: 'Criar conta' }) %>
 <div class="flex min-h-screen bg-superficie">
   <%- include('partials/painelMarca.ejs', { chamada: 'Do teste de iodo à fervura' }) %>
-  <main class="flex w-full flex-col items-center justify-between px-6 pb-8 pt-12 lg:w-[864px] lg:shrink-0">
+  <main class="flex w-full flex-col items-center px-6 pb-8 pt-12 lg:w-[864px] lg:shrink-0 lg:justify-between">
     <%- include('partials/marcaMobile.ejs', { chamada: 'Do teste de iodo à fervura' }) %>
     <span class="max-lg:hidden" aria-hidden="true"></span>
     <div class="flex w-full max-w-[440px] flex-col gap-7">
-      <h1 class="text-[32px] font-bold">Criar conta</h1>
+      <h1 class="text-[32px] font-bold max-lg:sr-only">Criar conta</h1>
       <%- include('partials/mensagens.ejs') %>
       <form id="formCadastro" method="post" class="flex flex-col gap-[18px]" novalidate>
         <label class="campo" for="nome">
@@ -44,7 +44,7 @@
       </form>
       <p class="text-center text-texto-2">Já tem conta? <a href="/login" class="font-semibold text-acao hover:underline">Entrar</a></p>
     </div>
-    <p class="text-[13px] text-texto-2">© 2026 Conloq · FATEC Registro</p>
+    <p class="text-[13px] text-texto-2 max-lg:hidden">© 2026 Conloq · FATEC Registro</p>
   </main>
 </div>
 <%- include('partials/footer.ejs') %>

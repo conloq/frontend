@@ -13,7 +13,9 @@ Implementa interações de navegação e formulários no navegador sem framework
 - Persiste o estado recolhido da sidebar em `localStorage` usando `mash-sidebar-collapsed`.
 - Controla sidebar desktop/mobile e fecha overlays com `Escape` ou clique.
 - Marca o link de navegação correspondente à URL atual.
-- Marca o item ativo do menu pela seção (`data-secao`) e troca o ícone para o peso Fill.
+- Marca o item ativo do menu pela seção (`data-secao`, `*` vale um trecho; vence a seção mais longa) e troca o ícone para o peso Fill.
+- Recuperar senha: as 6 caixas `[data-codigo]` avançam, voltam no Backspace e aceitam colar; `[data-reenviar]` conta até zero e libera o botão.
+- Perfil: escolher o arquivo em `#inputFoto` mostra a prévia e já envia `#formFoto` ("Trocar foto" em um passo).
 - Alterna visibilidade da senha (`data-toggle-senha`).
 - Gera preview local de foto com `FileReader`.
 - Abre/fecha modais; `prenderFoco()` mantém Tab no diálogo, aplica `inert` ao fundo e restaura o foco ao fechar. `app.js` usa o mesmo controle na confirmação.
