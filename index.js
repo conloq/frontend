@@ -42,6 +42,7 @@ app.get('/forgot-password/reset', tela('forgotPassword', { etapa: 'redefinir' })
 app.get('/logout', (req, res) => res.redirect('/login')); // o app.js limpa o token
 app.get('/dashboard', tela('dashboard')); // sem rota na API: estados vazios
 app.get('/profile', tela('profile'));
+app.get('/profile/access-history', tela('accessHistory')); // mobile: lista própria, aberta pelo Perfil
 // Configuração: salvar ainda não tem rota na API (o formulário usa data-sem-api)
 app.get('/settings', tela('settings', { aba: 'acessibilidade' }));
 app.get('/settings/security', tela('settings', { aba: 'seguranca' }));

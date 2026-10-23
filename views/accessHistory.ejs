@@ -1,0 +1,4 @@
+<%- include('partials/shellInicio.ejs', { titulo: 'Últimos acessos', trilha: ['Perfil', 'Últimos acessos'], voltar: '/profile' }) %>
+<a href="/profile" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Perfil</a>
+<%- include('partials/cardAcessos.ejs', { classe: 'max-w-2xl' }) %>
+<%- include('partials/shellFim.ejs') %>

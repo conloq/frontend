@@ -95,11 +95,6 @@
     @apply inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-perigo text-xl text-white transition-colors hover:bg-[#962015] active:bg-[#7a1a12] disabled:bg-desativado disabled:text-texto-desativado;
   }
 
-  /* Barra de ação fixa no rodapé do mobile (a partir de lg volta ao fluxo normal) */
-  .barra-mobile {
-    @apply max-lg:sticky max-lg:bottom-0 max-lg:z-20 max-lg:-mx-4 max-lg:-mb-6 max-lg:mt-auto max-lg:border-t max-lg:border-linha max-lg:bg-superficie max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-lg:-mx-6 sm:max-lg:px-6;
-  }
-
   /* Grupo de ações: no mobile, duas colunas iguais (o último botão de um grupo ímpar ocupa a linha);
      a partir de sm, em linha e à direita */
   .acoes {
@@ -107,6 +102,12 @@
   }
   .acoes > :last-child:nth-child(odd) {
     @apply col-span-2;
+  }
+
+  /* Barra de ação fixa no rodapé do mobile (a partir de lg volta ao fluxo normal).
+     Fica depois de .acoes para a largura toda vencer o w-full do grupo */
+  .barra-mobile {
+    @apply max-lg:sticky max-lg:w-auto max-lg:self-stretch max-lg:bottom-0 max-lg:z-20 max-lg:-mx-4 max-lg:-mb-6 max-lg:mt-auto max-lg:border-t max-lg:border-linha max-lg:bg-superficie max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-lg:-mx-6 sm:max-lg:px-6;
   }
 
   /* Controles de preferência: interruptor (checkbox role="switch"), segmentado (rádios) e deslizante */

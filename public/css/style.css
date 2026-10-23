@@ -1142,6 +1142,9 @@
     .hover\:bg-acao-hover:hover {
       background-color: var(--color-acao-hover);
     }
+    .hover\:bg-fundo:hover {
+      background-color: var(--color-fundo);
+    }
     .hover\:bg-hover-neutro:hover {
       background-color: var(--color-hover-neutro);
     }
@@ -1510,6 +1513,9 @@
     .lg\:gap-x-4 {
       column-gap: calc(var(--spacing) * 4);
     }
+    .lg\:self-end {
+      align-self: flex-end;
+    }
     .lg\:rounded-xl {
       border-radius: var(--radius-xl);
     }
@@ -1800,31 +1806,6 @@
       color: var(--color-texto-desativado);
     }
   }
-  @media (width < 64rem) {
-    .barra-mobile {
-      position: sticky;
-      bottom: 0px;
-      z-index: 20;
-      margin-inline: calc(var(--spacing) * -4);
-      margin-top: auto;
-      margin-bottom: calc(var(--spacing) * -6);
-      border-top-style: var(--tw-border-style);
-      border-top-width: 1px;
-      border-color: var(--color-linha);
-      background-color: var(--color-superficie);
-      padding-inline: calc(var(--spacing) * 4);
-      padding-top: calc(var(--spacing) * 3);
-      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-    }
-  }
-  @media (width >= 40rem) {
-    @media (width < 64rem) {
-      .barra-mobile {
-        margin-inline: calc(var(--spacing) * -6);
-        padding-inline: calc(var(--spacing) * 6);
-      }
-    }
-  }
   .acoes {
     display: grid;
     width: 100%;
@@ -1845,6 +1826,33 @@
   }
   .acoes > :last-child:nth-child(odd) {
     grid-column: span 2 / span 2;
+  }
+  @media (width < 64rem) {
+    .barra-mobile {
+      position: sticky;
+      bottom: 0px;
+      z-index: 20;
+      margin-inline: calc(var(--spacing) * -4);
+      margin-top: auto;
+      margin-bottom: calc(var(--spacing) * -6);
+      width: auto;
+      align-self: stretch;
+      border-top-style: var(--tw-border-style);
+      border-top-width: 1px;
+      border-color: var(--color-linha);
+      background-color: var(--color-superficie);
+      padding-inline: calc(var(--spacing) * 4);
+      padding-top: calc(var(--spacing) * 3);
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    }
+  }
+  @media (width >= 40rem) {
+    @media (width < 64rem) {
+      .barra-mobile {
+        margin-inline: calc(var(--spacing) * -6);
+        padding-inline: calc(var(--spacing) * 6);
+      }
+    }
   }
   .interruptor {
     position: relative;

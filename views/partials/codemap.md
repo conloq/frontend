@@ -11,6 +11,7 @@ Componentes EJS reutilizáveis: o shell das telas (header, sidebar, topo e mensa
 - `header.ejs`: doctype, `lang="pt-BR"`, viewport, Google Fonts (Poppins e Roboto), Phosphor regular e fill (`/vendor/phosphor/src/regular/style.css` e `/fill/style.css`), `/css/style.css`, favicon e `<title>` (`<titulo> · MASH`, recebe `titulo`). Abre o `<body>`.
 - `footer.ejs`: `#toasts`, o diálogo `#dialogoConfirmar` (substitui o `confirm()`), os moldes `tplToast`, `tplAlerta`, `tplEstado` e `tplCarregando`, `window.API_URL` (com `<` escapado) e os scripts `/js/script.js?v=6` e `/js/app.js?v=8`. Fecha `body`/`html`.
 - `shellInicio.ejs` / `shellFim.ejs`: abrem e fecham o shell das telas logadas. O início inclui `header`, `sidebar`, `topBar` e `mensagens` e abre o `<main>`; recebe `titulo` e `trilha`. O fim fecha o `<main>` e inclui o `footer`.
+- `cardAcessos.ejs`: card "Últimos acessos" (`#listaAcessos` + `tplLinhaAcesso`), usado em `profile.ejs` e `accessHistory.ejs`; recebe `classe`.
 - `sidebar.ejs`: `<aside id="appSidebar">` com logo, `.sidebar-collapse` (desktop) e `.sidebar-close` (mobile), os `.menu-link` Receitas, Lotes, Teste de iodo, Perfil e Configuração (`data-secao` marca o item ativo) e Sair (`a[href="/logout"]`), mais o `#sidebarOverlay`.
 - `topBar.ejs`: header marrom com `.sidebar-open` (mobile), trilha (recebe `trilha = [seção, página]`) e link para o perfil com foto, nome e e-mail em `data-user`.
 - `mensagens.ejs`: só a área `#mensagens` (alertas `danger`, `warning` e `info`; sucesso vira toast).
@@ -22,7 +23,7 @@ Telas públicas (`login`, `signup`) incluem `header`, `painelMarca`, `mensagens`
 
 ## Integration
 
-- `shellInicio`/`shellFim`: `profile`, `settings`, `recipes`, `recipe`, `temperatureForm`, `lots`, `lot`, `analysis` e `iodineDemo`.
+- `shellInicio`/`shellFim`: `profile`, `accessHistory`, `settings`, `recipes`, `recipe`, `temperatureForm`, `lots`, `lot`, `analysis` e `iodineDemo`.
 - `header`, `painelMarca`, `mensagens` e `footer` direto: `login` e `signup`.
 - `iodineDemo` não exibe aviso de simulação (decisão de 21/10/2026, conloq/mash#9).
 - IDs e classes consumidos por `public/js/script.js`: `#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `.js-modal`, `[data-modal-open]` e `[data-modal-close]`.
