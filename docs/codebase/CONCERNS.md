@@ -23,7 +23,6 @@ Formulários com senha usam `method="post"`; um 401 atrasado não remove outro t
 | Contrato HTML↔JS por string de seletor | Um script para todas as telas | `public/js/app.js` ↔ `views/**/*.ejs` | Renomear um `id` quebra o comportamento sem erro (`?.` engole a falha) | Comentar o contrato no topo do script ou testar presença de seletores |
 | Linhas e mensagens vêm de `<template>` nas views | `clonar()` preenche `[data-slot]` com `textContent`/`setAttribute`, sem montar HTML com dados da API | `public/js/app.js`, `views/*.ejs` | Reintroduzir `innerHTML` com dados da API reabriria XSS | Manter dados só via `textContent`/`setAttribute` |
 | Cache-busting manual | Forçar recarga do shell | `views/partials/footer.ejs` (`?v=5`) | Esquecer de incrementar faz o navegador servir JS antigo | Incrementar a cada mudança em `script.js` ou `app.js` |
-| 20 PNGs em `public/icons/` sem referência | Ícones anteriores à adoção do Phosphor | `public/icons/` | Peso morto no repositório | Remover ou documentar quem usa |
 
 ## 3) Security Concerns
 
@@ -56,7 +55,7 @@ Formulários com senha usam `method="post"`; um 401 atrasado não remove outro t
 1. Resolvido em 12/10/2026 (decisão do Haimon, registrada na conloq/mash#66 e na #6): o token fica em `localStorage`; o risco de XSS foi aceito.
 2. Decidido em 15/10/2026: sim, entra na conloq/mash#73. Pergunta original: os formulários de login e cadastro devem ganhar `method="post"` para não vazar credenciais na URL se o JS falhar?
 3. Resolvido: o CORS entrou na `main` do Back-End em 13/10/2026 (conloq/Back-End#8); `FRONTEND_URL` é definida no deploy da API (conloq/mash#68).
-4. Decidido em 15/10/2026: sim, a remoção dos PNGs órfãos de `public/icons/` e do `views/index.ejs` entra na conloq/mash#73.
+4. Decidido em 15/10/2026: sim, a remoção dos PNGs órfãos de `public/icons/` e do `views/index.ejs` entra na conloq/mash#73. Feito: os dois foram removidos.
 5. Decidido em 15/10/2026: ainda não; fica na conloq/mash#94, como Could, para depois do depósito. Pergunta original: deve existir algum pipeline (GitHub Actions) rodando `npm test` + `build:css` em PR, ou a revisão continua apenas com o CodeRabbit?
 
 ## 7) Evidence

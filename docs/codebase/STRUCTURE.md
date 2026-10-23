@@ -10,7 +10,7 @@
 | `views/` | Templates EJS das telas, sem dados | `views/*.ejs` |
 | `views/partials/` | Shell compartilhado: header, footer, sidebar, topBar, mensagens | `views/partials/*.ejs` |
 | `public/css/` | Fonte Tailwind v4 (`tailwind.css`) e CSS compilado (`style.css`) | `public/css/` |
-| `public/img/`, `public/icons/` | Imagens usadas pelos templates e PNGs de apoio | `public/img/`, `public/icons/` |
+| `public/img/` | Imagens usadas pelos templates | `public/img/` |
 | `scripts/` | Verificações executadas por `npm test`, sem dependências adicionais | `scripts/codemap.md` |
 | `docs/` | Documentação, planos, specs, export Figma e `docs/codebase/` | `scripts/` | Verificações executadas por `npm test`, sem dependências adicionais | `scripts/codemap.md` |
 | `docs/` |
@@ -61,7 +61,7 @@ Rotas registradas em `index.js` (somente GET):
 ## 4) Naming and Organization Rules
 
 - File naming pattern: templates em camelCase com `.ejs` (`temperatureForm.ejs`, `topBar.ejs`); JavaScript em camelCase (`index.js`, `app.js`, `script.js`); CSS em kebab-case.
-- Directory organization pattern: por camada de apresentação (`views/`, `views/partials/`, `public/css/`, `public/js/`, `public/img/`, `public/icons/`).
+- Directory organization pattern: por camada de apresentação (`views/`, `views/partials/`, `public/css/`, `public/js/`, `public/img/`).
 - Import aliasing or path conventions: `index.js` usa `node:` para builtins e caminhos relativos; `public/js/*.js` são scripts clássicos carregados por `<script src>` (sem `import`), na ordem definida em `views/partials/footer.ejs`: `script.js` e depois `app.js`.
 - Contrato HTML↔JS por string: o cliente encontra elementos por `id`/atributo (`#formLogin`, `#listaReceitas`, `[data-user]`). Renomear um deles quebra o comportamento sem erro.
 
