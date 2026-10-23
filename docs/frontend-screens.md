@@ -12,6 +12,7 @@
 | Tela | Rota | Template | Composição visual |
 |---|---|---|---|
 | Perfil | `/profile` | `views/profile.ejs` | Shell autenticado, dados do perfil, edição, foto com preview e exclusão da conta com diálogo de confirmação. |
+| Últimos acessos | `/profile/access-history` | `views/accessHistory.ejs` | Tela mobile com o histórico de logins (`GET /user/login-history`), aberta pela linha "Últimos acessos" do Perfil. |
 | Receitas | `/recipes` | `views/recipes.ejs` | Shell autenticado, título, botão "Nova receita", listagem tabular e modal de criação. |
 | Receita | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` | Shell autenticado, rampas da receita, modal de renomear, exclusão e ações de editar/excluir rampa. |
 | Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` | Shell autenticado, formulário de rampas, limites e temporização, com erro por campo; na edição, salvar não envia nada e não mostra aviso, porque a API ainda não tem rota (#97). |

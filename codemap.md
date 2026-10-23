@@ -24,6 +24,7 @@ Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-
 | `/signup` | `signup.ejs` | `POST /user` |
 | `/logout` | - | redireciona para `/login`; o `app.js` apaga o token |
 | `/profile` | `profile.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` e `GET /user/login-history` no card "Últimos acessos" (rota prevista na conloq/mash#102; enquanto a API responde 404, o card mostra a lista vazia) |
+| `/profile/access-history` | `accessHistory.ejs` | `GET /user/login-history` (tela mobile de últimos acessos, aberta pelo Perfil) |
 | `/settings`, `/settings/security` | `settings.ejs` (`aba`) | nenhuma; salvar usa `data-sem-api` |
 | `/recipes` | `recipes.ejs` | `GET /user`, `GET /recipes`, `GET /recipes/:id/temperatures` (uma por receita), `POST /recipes`, `DELETE /recipes/:id` |
 | `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela; cada rampa oferece ações para editar e excluir, ambas com `data-sem-api`: não fazem nada e não mostram aviso, #97) |

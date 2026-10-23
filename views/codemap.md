@@ -7,7 +7,8 @@ Templates EJS das telas do Sistema MASH: apresentação, navegação e formulár
 ## Design
 
 - `login.ejs` e `signup.ejs` formam o fluxo público de autenticação (`#formLogin`, `#formCadastro`), com o painel da marca de `partials/painelMarca.ejs`.
-- `profile.ejs` é o Perfil: dados (`#formPerfil`, `PUT /user`), foto (`#formFoto`, `PUT /user/upload`) exclusão da conta (`#btnExcluir`, `DELETE /user`, com diálogo de confirmação) e o card "Últimos acessos" (`#listaAcessos`, linhas de `tplLinhaAcesso`, preenchido com `GET /user/login-history`).
+- `profile.ejs` é o Perfil: dados (`#formPerfil`, `PUT /user`), foto (`#formFoto`, `PUT /user/upload`) exclusão da conta (`#btnExcluir`, `DELETE /user`, com diálogo de confirmação) e o card "Últimos acessos" (`partials/cardAcessos.ejs`: `#listaAcessos`, linhas de `tplLinhaAcesso`, preenchido com `GET /user/login-history`); no mobile o card vira uma linha que abre `/profile/access-history`.
+- `accessHistory.ejs` é a tela mobile de últimos acessos (`/profile/access-history`), com o mesmo `cardAcessos.ejs`.
 - `settings.ejs` é a Configuração, com abas (na lateral a partir de `lg`, no topo no mobile) Acessibilidade (`/settings`) e Segurança (`/settings/security`), escolhidas pelo local `aba`. O `#formConfiguracao` usa `data-sem-api`: a API ainda não guarda preferências.
 - `recipes.ejs` lista as receitas (`#listaReceitas`, molde `tplLinhaReceita`) e cria receita no modal `#modalReceita` (`#formReceita`).
 - `recipe.ejs` detalha a receita: rampas (`#detalheRampas`, molde `tplLinhaRampa`), perfil das rampas (`#perfilRampas`/`#perfilGrafico`, molde `tplFaixaRampa`, desenhado com o início e a duração do timer de cada rampa), renomear no modal `#modalRenomear` (`#formEditarReceita`) e excluir. `/recipes/:id/edit` usa a mesma tela; cada rampa tem editar e excluir (#97, `data-sem-api`).
