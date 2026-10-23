@@ -10,7 +10,7 @@ Fornece os recursos estáticos do navegador servidos por `index.js`: CSS fonte e
 - `css/style.css` é o CSS compilado e não é fonte de edição manual.
 - `js/script.js` usa JavaScript vanilla com helpers `$`/`$$`; `js/app.js` consome a API do Back-End.
 - `img/` contém `mash.png` (usada em `login.ejs` e `signup.ejs`), `foto-perfil.png` (usada em `profile.ejs` e `topBar.ejs`), `logo-mash.png` e `mash-emblema.png` (marca das telas de acesso) e `espuma.png` (fundo de `forgotPassword.ejs`, vinda de `docs/design/mash-assets`).
-- `icons/` reúne PNGs de apoio que **nenhum template referencia** hoje; os ícones de interface vêm da fonte Phosphor.
+- Os ícones de interface vêm da fonte Phosphor (`/vendor/phosphor`); os PNGs antigos de `icons/` foram removidos na conloq/mash#73.
 
 ## Flow
 
@@ -28,5 +28,4 @@ Fornece os recursos estáticos do navegador servidos por `index.js`: CSS fonte e
 - `public/css/style.css`
 - `public/js/script.js`
 - `public/img/`
-- `public/icons/`
 - `index.js`

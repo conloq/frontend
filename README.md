@@ -56,17 +56,24 @@ Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da A
 
 | Rota GET | Tela |
 |---|---|
-| `/` | redireciona para `/recipes` |
+| `/` | redireciona para `/dashboard` |
 | `/login` | `views/login.ejs` |
 | `/signup` | `views/signup.ejs` |
+| `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `views/forgotPassword.ejs` (e-mail, código e nova senha; sem rota na API) |
 | `/logout` | redireciona para `/login` (o cliente limpa o token) |
+| `/dashboard` | `views/dashboard.ejs` (painel; estados vazios, sem rota na API) |
 | `/profile` | `views/profile.ejs` (perfil) |
+| `/profile/access-history` | `views/accessHistory.ejs` (últimos acessos no mobile) |
+| `/settings`, `/settings/security` | `views/settings.ejs` (abas Acessibilidade e Segurança; salvar sem rota na API) |
 | `/recipes` | `views/recipes.ejs` |
-| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` (mesma tela: renomear e editar/excluir rampas) |
+| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` (`/edit` abre o modal de renomear) |
+| `/recipes/:id/iodine` | `views/recipeIodine.ejs` (configuração do teste de iodo da receita; salvar sem rota na API) |
 | `/recipes/:id/temperatures/new` | `views/temperatureForm.ejs` (nova rampa) |
 | `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` (editar rampa) |
-| `/lots` | `views/lots.ejs` |
-| `/lots/:id` | `views/lot.ejs` |
+| `/lots`, `/lots/new` | `views/lots.ejs` (`/new` abre o modal de novo lote) |
+| `/lots/:id`, `/lots/:id/edit` | `views/lot.ejs` (`/edit` abre o modal de edição) |
+| `/lots/:id/monitoring` | `views/lotMonitoring.ejs` |
+| `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `views/iodineSession.ejs` (preparar a sessão e leitura) |
 | `/analyses/new` | `views/iodineDemo.ejs` (demonstração simulada do teste de iodo) |
 | `/analyses/:id` | `views/analysis.ejs` |
 
@@ -76,7 +83,7 @@ Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da A
 |---|---|
 | Login | `POST /login` |
 | Cadastro | `POST /user` |
-| Perfil | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` |
+| Perfil | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user`; `GET /user/login-history` ainda não existe na API (#102), e o 404 vira lista vazia |
 | Receitas | `GET/POST /recipes`, `GET /recipes/:id/temperatures` (contagem e faixa de cada receita), `DELETE /recipes/:id` |
 | Receita | `GET/PUT/DELETE /recipes/:id`, `GET /recipes/:id/temperatures` |
 | Nova rampa | `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
@@ -97,4 +104,4 @@ O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes
 
 Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` e `/recipes/:id/temperatures/:temperatureId/edit` (`temperatureForm.ejs`). Edição e exclusão de rampas permanecem na #97.
 
-Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.
+Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE de receita seguem o contrato da #93 (409 para nome repetido no PUT); o 409 de receita com lotes entra com a #31. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.
