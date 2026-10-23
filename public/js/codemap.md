@@ -23,7 +23,7 @@ Implementa interações de navegação e formulários no navegador sem framework
 
 ## Integration
 
-- Carregados por todas as páginas através de `views/partials/footer.ejs` (`/js/script.js?v=6` e `/js/app.js?v=8`, depois de `window.API_URL`).
+- Carregados por todas as páginas através de `views/partials/footer.ejs` (`/js/script.js?v=6` e `/js/app.js?v=9`, depois de `window.API_URL`).
 - `app.js` chama a API do Back-End direto do navegador (CORS liberado lá) e guarda `mash-token` e `mash-flash` no `localStorage`.
 - Depende de IDs/classes e atributos `data-*` definidos em `views/*.ejs` e `views/partials/*.ejs`.
 - Suas classes são incluídas na compilação por `public/css/tailwind.css`.
