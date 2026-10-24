@@ -18,6 +18,17 @@ npm start
 
 O frontend roda em `http://localhost:4000`. Primeiro aplique a migration do Back-End; depois configure no frontend uma conta MySQL com acesso somente a `sessions`. A API precisa estar disponível em `API_URL` para login e páginas que exibem dados reais. Copie `.env.example` para `.env` e configure as credenciais locais.
 
+## Deploy publicado
+
+| Serviço | URL |
+|---|---|
+| Frontend | <https://frontend-a6u4.onrender.com> |
+| API do Back-End | <https://back-end-xxq5.onrender.com> |
+
+No serviço do frontend no Render, `API_URL` aponta para `https://back-end-xxq5.onrender.com`. Build Command: `npm install --include=dev && npm run build:css`. Start Command: `npm start`. Não versionar os valores de `SESSION_DB_*` nem `SESSION_SECRET`.
+
+Para voltar a uma versão anterior da aplicação, use **Rollback** no histórico de deploys do serviço no Render. Isso não desfaz migrations do banco; alterações de schema exigem avaliação e procedimento próprios no Back-End.
+
 ## Verificações
 
 `npm test` verifica sintaxe, contrato EJS do perfil, upload e regressões do cliente. Não requer API nem banco. `npm run format:check` verifica os arquivos formatados pelo Prettier.
