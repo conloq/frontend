@@ -8,7 +8,7 @@ Fornece os recursos estáticos do navegador servidos por `index.js`: CSS fonte e
 
 - `css/tailwind.css` é a fonte Tailwind v4 e referencia `views` e `public/js` com `@source`.
 - `css/style.css` é o CSS compilado e não é fonte de edição manual.
-- `js/script.js` usa JavaScript vanilla com helpers `$`/`$$`; `js/app.js` consome a API do Back-End.
+- `js/script.js` usa JavaScript vanilla com helpers `$`/`$$`; `js/app.js` cuida de validação e interações. Os dados chegam renderizados por EJS e os formulários vão ao controller de páginas; o navegador não chama a API nem guarda o JWT.
 - `img/` contém `mash.png` (usada em `login.ejs` e `signup.ejs`), `foto-perfil.png` (usada em `profile.ejs` e `topBar.ejs`), `logo-mash.png` e `mash-emblema.png` (marca das telas de acesso) e `espuma.png` (fundo de `forgotPassword.ejs`, vinda de `docs/design/mash-assets`).
 - Os ícones de interface vêm da fonte Phosphor (`/vendor/phosphor`); os PNGs antigos de `icons/` foram removidos na conloq/mash#73.
 

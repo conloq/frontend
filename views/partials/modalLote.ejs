@@ -1,5 +1,5 @@
 <%# Novo lote / editar lote em modal (folha no mobile). Recebe editando, voltar (URL da tela por baixo) e abrir (abre ao carregar). A API não tem rota de lotes: o formulário usa data-sem-api; as receitas vêm de GET /recipes. %>
-<div id="modalLote" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true"<%- locals.abrir ? ` data-abrir data-voltar="${voltar}"` : '' %>>
+<div id="modalLote" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true"<% if (locals.abrir) { %> data-abrir data-voltar="<%= voltar %>"<% } %>>
   <div class="flex min-h-full items-center justify-center">
     <div class="w-full max-w-[560px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="dialog" aria-modal="true" aria-labelledby="modalLoteTitulo">
       <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
@@ -19,7 +19,10 @@
             <label class="campo-rotulo" for="loteReceita">Receita</label>
             <span class="campo-caixa relative">
               <select id="loteReceita" name="recipeId" required>
-                <option value="">Carregando receitas…</option>
+                <% if (locals.erroReceitas) { %><option value="">Não foi possível carregar as receitas</option><% } else if (!(locals.receitas ?? []).length) { %><option value="">Nenhuma receita cadastrada</option><% } else { %>
+                  <option value="">Escolha uma receita</option>
+                  <% receitas.forEach((receita) => { %><option value="<%= receita.id %>"><%= receita.name %></option><% }) %>
+                <% } %>
               </select>
               <i class="ph ph-caret-down pointer-events-none absolute right-3.5 text-lg!" aria-hidden="true"></i>
             </span>

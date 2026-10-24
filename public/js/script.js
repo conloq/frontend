@@ -1,3 +1,12 @@
+// code-wiki:start
+// Summary: Control the responsive sidebar, dialogs, and shared browser interactions.
+// Description: Desktop sidebar collapse state persists in local storage, while the mobile drawer controls its overlay and page scrolling.
+// Navigation highlights the most specific section matching the current URL, including nested iodine paths.
+// Password buttons toggle their associated input and the selected profile image is previewed before form submission.
+// Dialogs make outside content inert, trap keyboard focus, close on Escape, and restore focus when dismissed.
+// Six-box verification codes support digit entry, backspace navigation, and paste across inputs.
+// Resend controls count down each second before restoring the action button.
+// code-wiki:end
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 

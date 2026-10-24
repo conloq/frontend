@@ -7,7 +7,7 @@
     <div class="flex w-full max-w-[440px] flex-col gap-7">
       <h1 class="text-[32px] font-bold max-lg:sr-only">Entrar</h1>
       <%- include('partials/mensagens.ejs') %>
-      <form id="formLogin" method="post" class="flex flex-col gap-5" novalidate>
+      <form id="formLogin" action="/login" method="post" class="flex flex-col gap-5">
         <label class="campo" for="email">
           <span class="campo-rotulo">E-mail</span>
           <span class="campo-caixa">
@@ -19,7 +19,7 @@
           <label class="campo-rotulo" for="senha">Senha</label>
           <span class="campo-caixa">
             <i class="ph ph-lock-simple" aria-hidden="true"></i>
-            <input id="senha" type="password" name="password" autocomplete="current-password" required>
+            <input id="senha" type="password" name="password" autocomplete="current-password" placeholder="Sua senha" required>
             <button type="button" class="btn-icone -mr-2" data-toggle-senha="senha" aria-label="Mostrar senha"><i class="ph ph-eye" aria-hidden="true"></i></button>
           </span>
           <a href="/forgot-password" class="mt-1 self-end text-sm font-semibold text-acao hover:underline">Esqueceu a senha?</a>

@@ -2,116 +2,88 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { runInNewContext } from 'node:vm';
 import ejs from 'ejs';
+import pageController from '../controllers/pageController.js';
 
-const source = readFileSync('public/js/app.js', 'utf8').replace(
-    '    // ------------------------------------------------------------ guarda de rota',
-    '    globalThis.audit = { api, linhaReceita, carregarUsuario };\n    // ------------------------------------------------------------ guarda de rota'
+const client = readFileSync('public/js/app.js', 'utf8');
+const controller = readFileSync('controllers/pageController.js', 'utf8');
+const runtime = readFileSync('index.js', 'utf8');
+const dependencies = JSON.parse(readFileSync('package.json', 'utf8')).dependencies;
+assert.doesNotMatch(client, /\bfetch\s*\(/);
+assert.doesNotMatch(client, /mash-token|Authorization:\s*`Bearer|\/_api/);
+assert.ok(dependencies['express-mysql-session']);
+assert.match(runtime, /createDatabaseTable: false/);
+assert.match(runtime, /mysql\.createPool/);
+assert.match(runtime, /SESSION_DB_SSL_CA/);
+assert.match(runtime, /endConnectionOnClose: true/);
+assert.match(runtime, /await sessionStore\.length\(\)/);
+assert.match(runtime, /store: sessionStore/);
+for (const route of [
+    /router\.post\(\s*'\/profile'/,
+    /router\.post\(\s*'\/recipes'/,
+    /router\.post\(\s*'\/recipes\/:id'/,
+    /router\.post\(\s*'\/recipes\/:id\/temperatures'/,
+])
+    assert.match(controller, route);
+assert.match(readFileSync('views/recipes.ejs', 'utf8'), /action="\/recipes" method="post"/);
+assert.match(readFileSync('views/temperatureForm.ejs', 'utf8'), /method="post"/);
+const sidebarView = readFileSync('views/partials/sidebar.ejs', 'utf8');
+assert.match(
+    sidebarView,
+    /localStorage\.getItem\('mash-sidebar-collapsed'\)[\s\S]*?<\/script>\s*<aside id="appSidebar"/
 );
-const storage = new Map();
-let fetch;
-let select = () => null;
-let each = () => [];
-const context = {
-    window: { API_URL: 'http://api.test' },
-    FormData: class {},
-    AbortSignal,
-    location: { pathname: '/login', href: '', replace() {} },
-    localStorage: {
-        getItem: (key) => storage.get(key),
-        setItem: (key, value) => storage.set(key, value),
-        removeItem: (key) => storage.delete(key),
-    },
-    document: {
-        querySelector: (...args) => select(...args),
-        querySelectorAll: (...args) => each(...args),
-    },
-    fetch: (...args) => fetch(...args),
-};
-runInNewContext(source, context);
-const { api, linhaReceita, carregarUsuario } = context.audit;
-let respond;
-fetch = () =>
-    new Promise((resolve) => {
-        respond = resolve;
-    });
-storage.set('mash-token', 'old-token');
-const pending = api('GET', '/user');
-storage.set('mash-token', 'new-token');
-respond({ status: 401, json: async () => ({}) });
-await pending;
-assert.equal(storage.get('mash-token'), 'new-token');
-assert.equal(context.location.href, '');
-fetch = async () => ({ status: 401, json: async () => ({}) });
-await api('GET', '/user');
-assert.equal(storage.has('mash-token'), false);
-assert.equal(context.location.href, '/login');
-
-const controller = new AbortController();
-context.AbortSignal = {
-    timeout(ms) {
-        assert.equal(ms, 15000);
-        return controller.signal;
-    },
-};
-fetch = (_url, { signal }) =>
-    new Promise((_resolve, reject) => {
-        signal.addEventListener('abort', () => reject(signal.reason), { once: true });
-    });
-const timedOut = api('POST', '/recipes', { name: 'Test' });
-controller.abort(new DOMException('timeout', 'TimeoutError'));
-const result = await timedOut;
-assert.equal(result.status, 503);
-assert.match(result.data.error, /pode ter sido salva/);
-fetch = async () => ({
-    status: 200,
-    json: async () => {
-        throw controller.signal.reason;
-    },
-});
-assert.match((await api('GET', '/user')).data.error, /demorou/);
-context.AbortSignal = AbortSignal;
-
-let slots;
-const row = {
-    querySelector: () => ({
-        classList: { replace() {}, add() {}, remove() {} },
-        addEventListener() {},
-    }),
-};
-context.document.getElementById = () => ({
-    content: { cloneNode: () => ({ firstElementChild: row }) },
-});
-row.querySelector = (selector) => ({
-    classList: { replace() {}, add() {}, remove() {} },
-    addEventListener() {},
-    remove() {},
-    set textContent(value) {
-        if (selector === '[data-slot="faixa"]') slots = value;
-    },
-    setAttribute() {},
-});
-linhaReceita({ receita: { id: 1, name: 'Test' }, rampas: null });
-assert.equal(slots, 'Não foi possível carregar');
-linhaReceita({ receita: { id: 1, name: 'Test' }, rampas: [] });
-assert.equal(slots, 'Sem rampas');
-
-const save = { disabled: false };
-const fields = Object.fromEntries(
-    ['name', 'email', 'phone', 'password', 'confirmarSenha'].map((key) => [key, { value: '' }])
+assert.match(
+    readFileSync('public/css/tailwind.css', 'utf8'),
+    /body\.sidebar-collapsed #appSidebar/
 );
-const profile = { elements: fields, querySelectorAll: () => [] };
-select = (selector) =>
-    selector === '#btnSalvar' ? save : selector === '#formPerfil' ? profile : null;
-fetch = async () => ({ status: 503, json: async () => ({ error: 'offline' }) });
-await carregarUsuario();
-assert.equal(save.disabled, true);
-fetch = async () => ({
-    status: 200,
-    json: async () => ({ user: { name: 'Saved', email: 'a@b.test' } }),
+let classeSidebarInicial;
+runInNewContext(sidebarView.match(/<script>([\s\S]*?)<\/script>/)[1], {
+    localStorage: { getItem: () => 'true' },
+    document: { body: { classList: { add: (classe) => (classeSidebarInicial = classe) } } },
 });
-await carregarUsuario();
-assert.equal(save.disabled, false);
-assert.equal(fields.name.value, 'Saved');
+assert.equal(classeSidebarInicial, 'sidebar-collapsed');
+
+// API_URL is read after the controller import, like .env loaded by index.js.
+const signup = pageController.stack.find(
+    (layer) => layer.route?.path === '/signup' && layer.route.methods.post
+).route.stack[0].handle;
+const apiUrlAnterior = process.env.API_URL;
+const fetchAnterior = globalThis.fetch;
+let urlChamado;
+try {
+    process.env.API_URL = 'http://api.example.test';
+    globalThis.fetch = async (url) => {
+        urlChamado = url;
+        return { status: 201, json: async () => ({}) };
+    };
+    await signup(
+        {
+            body: {
+                name: 'Teste',
+                email: 'teste@example.test',
+                password: 'senha',
+                confirmarSenha: 'senha',
+            },
+            session: {},
+        },
+        { redirect() {} }
+    );
+    assert.equal(urlChamado, 'http://api.example.test/user');
+} finally {
+    globalThis.fetch = fetchAnterior;
+    if (apiUrlAnterior === undefined) delete process.env.API_URL;
+    else process.env.API_URL = apiUrlAnterior;
+}
+
+const logout = pageController.stack.find(
+    (layer) => layer.route?.path === '/logout' && layer.route.methods.get
+).route.stack[0].handle;
+await assert.rejects(
+    logout(
+        { session: { destroy: (callback) => callback(new Error('session store failed')) } },
+        { clearCookie() {}, redirect() {} }
+    ),
+    /session store failed/
+);
 
 // Exercita o mesmo controle de foco usado pelos modais e pela confirmação.
 const listeners = new Map();
@@ -180,25 +152,47 @@ for (const name of ['login', 'signup', 'profile']) {
 for (const dir of ['views', 'views/partials']) {
     for (const file of readdirSync(dir).filter((name) => name.endsWith('.ejs'))) {
         const filename = `${dir}/${file}`;
-        ejs.compile(readFileSync(filename, 'utf8'), { filename });
+        const source = readFileSync(filename, 'utf8');
+        ejs.compile(source, { filename });
+        const markup = source.replace(/<%[\s\S]*?%>/g, 'x');
+        for (const [input] of markup.matchAll(/<input\b[^>]*>/gi)) {
+            const type = input.match(/\btype="([^"]+)"/i)?.[1] ?? 'text';
+            if (['email', 'number', 'password', 'search', 'tel', 'text', 'url'].includes(type))
+                assert.match(
+                    input,
+                    /\bplaceholder="[^"]+"/i,
+                    `${filename}: ${type} input precisa de placeholder`
+                );
+        }
     }
 }
-for (const file of readdirSync('views').filter((name) => name.endsWith('.ejs'))) {
-    await ejs.renderFile(`views/${file}`, { apiUrl: 'http://localhost:8080', editando: false });
-}
 const rampaEditada = await ejs.renderFile('views/temperatureForm.ejs', {
-    apiUrl: 'http://localhost:8080',
+    user: { name: 'Teste', email: 'teste@example.test' },
+    recipe: { id: 7, name: 'Receita' },
+    temperatura: {},
+    id: '7',
     editando: true,
 });
 assert.match(rampaEditada, /data-sem-api="conloq\/mash#97"[^>]*>[^<]*<i[^>]*><\/i>Excluir rampa/);
 
 // /recipes/:id/edit abre o modal de renomear e volta para o detalhe ao fechar
 const receitaRenomear = await ejs.renderFile('views/recipe.ejs', {
-    apiUrl: 'http://localhost:8080',
+    user: { name: 'Teste', email: 'teste@example.test' },
     abrirRenomear: true,
     id: '7',
+    recipe: { id: '7', name: 'Receita' },
+    rampas: [],
 });
 assert.match(receitaRenomear, /id="modalRenomear"[^>]+data-abrir data-voltar="\/recipes\/7"/);
+
+const voltarLoteMalicioso = await ejs.renderFile('views/partials/modalLote.ejs', {
+    editando: true,
+    abrir: true,
+    voltar: '/lots/" onmouseover="alert(1)',
+    receitas: [],
+});
+assert.match(voltarLoteMalicioso, /data-voltar="\/lots\/&#34; onmouseover=&#34;alert\(1\)"/);
+assert.doesNotMatch(voltarLoteMalicioso, /data-voltar="[^"]*" onmouseover=/);
 
 // Menu ativo: vence a seção mais longa (sessão do iodo acende "Teste de iodo", não "Lotes")
 const menuAtivo = (pathname) => {
@@ -234,6 +228,4 @@ assert.deepEqual(menuAtivo('/lots/3/iodine/reading'), ['Iodo']);
 assert.deepEqual(menuAtivo('/lots/3'), ['Lotes']);
 assert.deepEqual(menuAtivo('/recipes/2/iodine'), ['Receitas']);
 assert.deepEqual(menuAtivo('/login'), []);
-console.log(
-    'PASS: sessão, timeout, rampas, perfil, foco, formulários, menu ativo e renderização EJS.'
-);
+console.log('PASS: API_URL, sessão, POST, perfil, foco, formulários, menu ativo e EJS escapado.');

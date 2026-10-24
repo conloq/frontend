@@ -1,6 +1,3 @@
-<%# Toasts de sucesso (região status) %>
-<div id="toasts" class="pointer-events-none fixed inset-x-3 top-20 z-[60] flex flex-col items-end gap-2 sm:left-auto sm:right-6 sm:top-24" role="status" aria-live="polite"></div>
-
 <%# Diálogo de confirmação: substitui o confirm() do navegador. app.js chama confirmar({...}). %>
 <div id="dialogoConfirmar" class="folha fixed inset-0 z-[70] hidden items-center justify-center bg-texto/60 p-4" aria-hidden="true">
   <div class="w-full max-w-[440px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="alertdialog" aria-modal="true" aria-labelledby="dialogoConfirmarTitulo" aria-describedby="dialogoConfirmarMensagem">
@@ -17,18 +14,6 @@
   </div>
 </div>
 
-<%# Moldes que o app.js clona e preenche com textContent (data-slot) %>
-<template id="tplToast">
-  <div class="pointer-events-auto flex w-full max-w-[400px] gap-3 rounded-xl border border-linha bg-superficie py-3.5 pl-4 pr-2 shadow-[0_12px_32px_rgba(31,26,23,0.16)]">
-    <i class="ph-fill ph-check-circle shrink-0 pt-0.5 text-2xl text-sucesso" aria-hidden="true"></i>
-    <div class="flex min-w-0 flex-1 flex-col gap-0.5 pt-0.5">
-      <p class="font-semibold" data-slot="titulo"></p>
-      <p class="text-sm text-texto-2" data-slot="texto"></p>
-    </div>
-    <button type="button" class="btn-icone" data-fechar aria-label="Fechar aviso"><i class="ph ph-x text-lg" aria-hidden="true"></i></button>
-  </div>
-</template>
-
 <template id="tplAlerta">
   <div class="flex items-center gap-3 rounded-[10px] py-3 pl-4 pr-2">
     <i class="ph-fill text-[22px]" data-slot="icone" aria-hidden="true"></i>
@@ -40,27 +25,7 @@
   </div>
 </template>
 
-<template id="tplEstado">
-  <div class="flex flex-col items-center gap-3 px-6 py-16 text-center">
-    <span class="text-4xl text-texto-2" data-slot="marcador"><i class="ph" data-slot="icone" aria-hidden="true"></i></span>
-    <p class="font-display text-xl font-semibold" data-slot="titulo"></p>
-    <p class="max-w-md leading-relaxed text-texto-2" data-slot="texto"></p>
-    <div class="pt-2" data-slot="acao">
-      <a class="btn-primario" data-slot="acaoLink"><i class="ph" aria-hidden="true"></i><span></span></a>
-      <button type="button" class="btn-primario" data-slot="acaoBotao"><i class="ph" aria-hidden="true"></i><span></span></button>
-    </div>
-  </div>
-</template>
-
-<template id="tplCarregando">
-  <div class="tabela-linha flex items-center gap-4 px-5 py-5" aria-hidden="true">
-    <span class="flex flex-1 flex-col gap-2"><span class="esqueleto h-3 w-44"></span><span class="esqueleto h-2.5 w-28"></span></span>
-    <span class="esqueleto hidden h-3 w-24 md:block"></span><span class="esqueleto hidden h-3 w-24 md:block"></span><span class="esqueleto h-3 w-20"></span>
-  </div>
-</template>
-
-<script>window.API_URL = <%- JSON.stringify(apiUrl).replace(/</g, "\\u003c") %>;</script>
 <script src="/js/script.js?v=6"></script>
-<script src="/js/app.js?v=9"></script>
+<script src="/js/app.js?v=10"></script>
 </body>
 </html>

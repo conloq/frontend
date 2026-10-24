@@ -1,6 +1,19 @@
-import express from 'express';
+// code-wiki:start
+// Summary: Start the EJS frontend with MySQL-backed sessions and page routes.
+// Description: Session database connection settings come from environment variables, with optional TLS configuration.
+// Production startup requires a session secret and enables secure proxy-aware cookies.
+// The MySQL session store is checked for readiness and readability before the server accepts traffic.
+// Express serves public assets and Phosphor files, parses form and JSON bodies, and configures EJS views.
+// The DW2 example renders a view with sample locals, then page routes are mounted on the application.
+// The listener logs successful startup and reports bind failures through the server error event.
+// code-wiki:end
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import express from 'express';
+import MySQLStoreFactory from 'express-mysql-session';
+import session from 'express-session';
+import mysql from 'mysql2/promise';
+import pageController from './controllers/pageController.js';
 
 try {
     process.loadEnvFile();
@@ -10,63 +23,76 @@ try {
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET é obrigatório em produção.');
+}
+const MySQLStore = MySQLStoreFactory(session);
+const sessionDb = {
+    host: process.env.SESSION_DB_HOST,
+    port: Number(process.env.SESSION_DB_PORT) || 3306,
+    user: process.env.SESSION_DB_USER,
+    password: process.env.SESSION_DB_PASSWORD,
+    database: process.env.SESSION_DB_NAME,
+};
+if (Object.values(sessionDb).some((value) => !value)) {
+    throw new Error(
+        'Configure SESSION_DB_HOST, SESSION_DB_USER, SESSION_DB_PASSWORD e SESSION_DB_NAME.'
+    );
+}
+const sessionSsl = process.env.SESSION_DB_SSL_CA
+    ? { ca: process.env.SESSION_DB_SSL_CA.replace(/\\n/g, '\n') }
+    : process.env.SESSION_DB_SSL === 'true' || process.env.NODE_ENV === 'production'
+      ? {}
+      : undefined;
+const sessionPool = mysql.createPool({ ...sessionDb, ...(sessionSsl && { ssl: sessionSsl }) });
+const sessionStore = new MySQLStore(
+    { createDatabaseTable: false, endConnectionOnClose: true },
+    sessionPool
+);
+try {
+    await sessionStore.onReady();
+    // Confere conexão, leitura e existência da tabela antes de aceitar tráfego.
+    await sessionStore.length();
+} catch (erro) {
+    await sessionStore.close();
+    throw new Error('Não foi possível conectar à tabela de sessões no MySQL.', { cause: erro });
+}
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
 // Define o EJS como renderizador de páginas
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-// Endereço da API: o navegador (public/js/app.js) é quem chama
-app.locals.apiUrl = process.env.API_URL ?? 'http://localhost:8080';
-
-// Arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(
     '/vendor/phosphor',
     express.static(path.join(__dirname, 'node_modules/@phosphor-icons/web'))
 );
-
-// Telas: o index.js só entrega as páginas. Login, token, dados e erros
-// ficam em public/js/app.js, que consome a API do Back-End.
-// Os parâmetros da URL (ex.: id do lote) vão para a view só para montar links.
-const tela =
-    (view, dados = {}) =>
-    (req, res) =>
-        res.render(view, { ...dados, ...req.params });
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(
+    session({
+        name: 'mash.sid',
+        store: sessionStore,
+        secret: process.env.SESSION_SECRET ?? 'mash-development-session-secret',
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 24 * 60 * 60 * 1000,
+        },
+    })
+);
 
 app.get('/', (req, res) => res.redirect('/dashboard'));
-app.get('/login', tela('login'));
-app.get('/signup', tela('signup'));
-// Recuperar senha: sem rota na API; os formulários usam data-sem-api
-app.get('/forgot-password', tela('forgotPassword', { etapa: 'email' }));
-app.get('/forgot-password/code', tela('forgotPassword', { etapa: 'codigo' }));
-app.get('/forgot-password/reset', tela('forgotPassword', { etapa: 'redefinir' }));
-app.get('/logout', (req, res) => res.redirect('/login')); // o app.js limpa o token
-app.get('/dashboard', tela('dashboard')); // sem rota na API: estados vazios
-app.get('/profile', tela('profile'));
-app.get('/profile/access-history', tela('accessHistory')); // mobile: lista própria, aberta pelo Perfil
-// Configuração: salvar ainda não tem rota na API (o formulário usa data-sem-api)
-app.get('/settings', tela('settings', { aba: 'acessibilidade' }));
-app.get('/settings/security', tela('settings', { aba: 'seguranca' }));
-app.get('/recipes', tela('recipes'));
-app.get('/recipes/:id', tela('recipe'));
-app.get('/recipes/:id/edit', tela('recipe', { abrirRenomear: true })); // detalhe com o modal de renomear aberto
-// Teste de iodo da receita: salvar sem rota na API (conloq/mash#101)
-app.get('/recipes/:id/iodine', tela('recipeIodine')); // mesma tela: renomear e editar/excluir rampas
-app.get('/recipes/:id/temperatures/new', tela('temperatureForm', { editando: false }));
-// Editar e excluir rampa ainda não têm rota na API (conloq/mash#97): a tela carrega a rampa e avisa ao salvar
-app.get(
-    '/recipes/:id/temperatures/:temperatureId/edit',
-    tela('temperatureForm', { editando: true })
-);
-// Lotes e sessão do iodo: sem rota na API; telas com estados vazios e formulários data-sem-api
-app.get('/lots', tela('lots'));
-app.get('/lots/new', tela('lots', { abrirLote: true })); // lista com o modal de novo lote aberto
-app.get('/lots/:id', tela('lot'));
-app.get('/lots/:id/edit', tela('lot', { abrirLote: true })); // detalhe com o modal de edição aberto
-app.get('/lots/:id/monitoring', tela('lotMonitoring'));
-app.get('/lots/:id/iodine', tela('iodineSession', { etapa: 'preparar' }));
-app.get('/lots/:id/iodine/reading', tela('iodineSession', { etapa: 'leitura' }));
-app.get('/analyses/new', tela('iodineDemo')); // demonstração simulada; leitura real ainda indisponível (#34)
-app.get('/analyses/:id', tela('analysis'));
+app.get('/dw2-example', (req, res) => {
+    res.render('dw2Example', {
+        titulo: 'Exemplo de DW2',
+        listaClientes: ['Maria', 'João', 'Kevin'],
+    });
+});
+app.use('/', pageController);
 
 // Inicia o servidor.
 // Sem callback no listen: o Express 5 liga o callback ao evento 'error'

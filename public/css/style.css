@@ -11,6 +11,7 @@
     --spacing: 0.25rem;
     --container-sm: 24rem;
     --container-md: 28rem;
+    --container-xl: 36rem;
     --container-2xl: 42rem;
     --container-3xl: 48rem;
     --text-xs: 0.75rem;
@@ -25,8 +26,12 @@
     --text-xl--line-height: calc(1.75 / 1.25);
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
+    --text-3xl: 1.875rem;
+    --text-3xl--line-height: calc(2.25 / 1.875);
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
+    --text-5xl: 3rem;
+    --text-5xl--line-height: 1;
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
@@ -220,11 +225,11 @@
   }
 }
 @layer utilities {
-  .pointer-events-auto {
-    pointer-events: auto;
-  }
   .pointer-events-none {
     pointer-events: none;
+  }
+  .collapse {
+    visibility: collapse;
   }
   .sr-only {
     position: absolute;
@@ -255,9 +260,6 @@
   .inset-x-0 {
     inset-inline: 0px;
   }
-  .inset-x-3 {
-    inset-inline: calc(var(--spacing) * 3);
-  }
   .inset-y-0 {
     inset-block: 0px;
   }
@@ -275,9 +277,6 @@
   }
   .top-3 {
     top: calc(var(--spacing) * 3);
-  }
-  .top-20 {
-    top: calc(var(--spacing) * 20);
   }
   .top-24 {
     top: calc(var(--spacing) * 24);
@@ -320,9 +319,6 @@
   }
   .z-50 {
     z-index: 50;
-  }
-  .z-\[60\] {
-    z-index: 60;
   }
   .z-\[70\] {
     z-index: 70;
@@ -439,9 +435,6 @@
     width: 72px;
     height: 72px;
   }
-  .h-2\.5 {
-    height: calc(var(--spacing) * 2.5);
-  }
   .h-3 {
     height: calc(var(--spacing) * 3);
   }
@@ -490,17 +483,11 @@
   .w-4 {
     width: calc(var(--spacing) * 4);
   }
-  .w-20 {
-    width: calc(var(--spacing) * 20);
-  }
   .w-24 {
     width: calc(var(--spacing) * 24);
   }
   .w-28 {
     width: calc(var(--spacing) * 28);
-  }
-  .w-44 {
-    width: calc(var(--spacing) * 44);
   }
   .w-\[260px\] {
     width: 260px;
@@ -523,9 +510,6 @@
   .max-w-\[260px\] {
     max-width: 260px;
   }
-  .max-w-\[400px\] {
-    max-width: 400px;
-  }
   .max-w-\[440px\] {
     max-width: 440px;
   }
@@ -540,6 +524,9 @@
   }
   .max-w-sm {
     max-width: var(--container-sm);
+  }
+  .max-w-xl {
+    max-width: var(--container-xl);
   }
   .min-w-0 {
     min-width: 0px;
@@ -653,6 +640,16 @@
   }
   .gap-y-1\.5 {
     row-gap: calc(var(--spacing) * 1.5);
+  }
+  :where(.divide-y > :not(:last-child)) {
+    --tw-divide-y-reverse: 0;
+    border-bottom-style: var(--tw-border-style);
+    border-top-style: var(--tw-border-style);
+    border-top-width: calc(1px * var(--tw-divide-y-reverse));
+    border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  }
+  :where(.divide-linha > :not(:last-child)) {
+    border-color: var(--color-linha);
   }
   .self-end {
     align-self: flex-end;
@@ -944,9 +941,6 @@
   .py-16 {
     padding-block: calc(var(--spacing) * 16);
   }
-  .pt-0\.5 {
-    padding-top: calc(var(--spacing) * 0.5);
-  }
   .pt-2 {
     padding-top: calc(var(--spacing) * 2);
   }
@@ -1005,9 +999,17 @@
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
   }
+  .text-3xl {
+    font-size: var(--text-3xl);
+    line-height: var(--tw-leading, var(--text-3xl--line-height));
+  }
   .text-4xl {
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
+  }
+  .text-5xl {
+    font-size: var(--text-5xl);
+    line-height: var(--tw-leading, var(--text-5xl--line-height));
   }
   .text-lg {
     font-size: var(--text-lg);
@@ -1124,6 +1126,9 @@
   .text-white {
     color: var(--color-white);
   }
+  .uppercase {
+    text-transform: uppercase;
+  }
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
     font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
@@ -1145,16 +1150,16 @@
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-  .shadow-\[0_12px_32px_rgba\(31\,26\,23\,0\.16\)\] {
-    --tw-shadow: 0 12px 32px var(--tw-shadow-color, rgba(31,26,23,0.16));
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
   .shadow-\[0_24px_48px_rgba\(31\,26\,23\,0\.25\)\] {
     --tw-shadow: 0 24px 48px var(--tw-shadow-color, rgba(31,26,23,0.25));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .shadow-\[inset_0_-12px_24px_rgba\(0\,0\,0\,0\.35\)\] {
     --tw-shadow: inset 0 -12px 24px var(--tw-shadow-color, rgba(0,0,0,0.35));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .shadow-sm {
+    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .transition-\[left\] {
@@ -1493,15 +1498,6 @@
     }
   }
   @media (width >= 40rem) {
-    .sm\:top-24 {
-      top: calc(var(--spacing) * 24);
-    }
-    .sm\:right-6 {
-      right: calc(var(--spacing) * 6);
-    }
-    .sm\:left-auto {
-      left: auto;
-    }
     .sm\:-mx-6 {
       margin-inline: calc(var(--spacing) * -6);
     }
@@ -2487,19 +2483,19 @@
       width: 18rem;
       min-width: 18rem;
     }
-    #appSidebar[data-sidebar-state="collapsed"] {
+    #appSidebar[data-sidebar-state="collapsed"], body.sidebar-collapsed #appSidebar {
       width: 5rem;
       min-width: 5rem;
       overflow-x: hidden;
     }
-    #appSidebar[data-sidebar-state="collapsed"] .sidebar-label {
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-label, body.sidebar-collapsed #appSidebar .sidebar-label {
       display: none;
     }
-    #appSidebar[data-sidebar-state="collapsed"] .menu-link {
+    #appSidebar[data-sidebar-state="collapsed"] .menu-link, body.sidebar-collapsed #appSidebar .menu-link {
       justify-content: center;
       padding-inline: 0;
     }
-    #appSidebar[data-sidebar-state="collapsed"] .sidebar-marca {
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-marca, body.sidebar-collapsed #appSidebar .sidebar-marca {
       height: auto;
       flex-direction: column;
       gap: 0.5rem;
@@ -2585,6 +2581,11 @@
   initial-value: 0;
 }
 @property --tw-translate-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-divide-y-reverse {
   syntax: "*";
   inherits: false;
   initial-value: 0;
@@ -2767,6 +2768,7 @@
       --tw-translate-x: 0;
       --tw-translate-y: 0;
       --tw-translate-z: 0;
+      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-gradient-position: initial;
       --tw-gradient-from: #0000;

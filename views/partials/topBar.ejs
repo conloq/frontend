@@ -17,10 +17,10 @@
     </ol>
   </nav>
   <a href="/profile" class="flex min-h-11 items-center gap-3 rounded-[10px] p-1 transition-colors hover:bg-white/10" aria-label="Abrir perfil">
-    <img data-user="urlImage" class="size-9 rounded-full border-2 border-white object-cover lg:size-10" src="/img/foto-perfil.png" alt="">
+    <img class="size-9 rounded-full border-2 border-white object-cover lg:size-10" src="<%= user.urlImage || '/img/foto-perfil.png' %>" alt="">
     <span class="hidden text-right md:block">
-      <span data-user="name" class="block text-[15px] font-semibold leading-tight"></span>
-      <span data-user="email" class="block text-[13px] text-header-texto-2"></span>
+      <span class="block text-[15px] font-semibold leading-tight"><%= user.name %></span>
+      <span class="block text-[13px] text-header-texto-2"><%= user.email %></span>
     </span>
   </a>
 </header>

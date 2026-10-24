@@ -8,7 +8,7 @@
 | Runtime + version | Node.js; versão não declarada (sem `engines`, sem `.nvmrc`) | `package.json` |
 | Package manager | npm | `package-lock.json` |
 | Module/build system | ES modules; Tailwind CSS v4 via CLI (`@tailwindcss/cli`) | `package.json`, `public/css/tailwind.css` |
-| Tipo de aplicação | Servidor EJS que entrega páginas; o navegador consome a API | `index.js`, `public/js/app.js` |
+| Tipo de aplicação | Servidor EJS com sessão; controller busca dados da API no servidor | `index.js`, `controllers/pageController.js` |
 
 ## 2) Production Frameworks and Dependencies
 
@@ -16,10 +16,12 @@
 |------------|---------|----------------|----------|
 | `express` | `^5.3.0` | Servidor HTTP, estáticos, roteamento das 26 rotas GET | `package.json`, `index.js` |
 | `ejs` | `^7.0.2` | View engine dos templates em `views/` | `package.json`, `index.js` |
+| `express-session` | `^1.19.0` | Sessão server-side para guardar o JWT fora do navegador | `package.json`, `index.js` |
+| `express-mysql-session` | `^3.0.3` | Store persistente para a sessão Express na tabela `sessions` do MySQL existente | `package.json`, `index.js` |
 | `@phosphor-icons/web` | `^2.1.2` | Fonte de ícones servida em `/vendor/phosphor` | `package.json`, `index.js`, `views/partials/header.ejs` |
 | `nodemon` | `^3.1.14` | Execução de desenvolvimento (`npm start`); declarado em `dependencies` | `package.json` |
 
-O cliente HTTP é o `fetch` nativo do navegador: não há axios, ky ou similar. Não há dependência de banco, ORM, sessão, autenticação, upload, cookie ou framework de UI neste repositório.
+O cliente HTTP do servidor usa `fetch` nativo do Node; o browser envia formulários HTML same-origin ao controller. O frontend não acessa dados de domínio, mas conecta ao MySQL existente para ler e gravar sua tabela técnica de sessões.
 
 ## 3) Development Toolchain
 
@@ -39,9 +41,9 @@ O cliente HTTP é o `fetch` nativo do navegador: não há axios, ky ou similar. 
 
 ```bash
 npm install
-npm run build:css          # npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css
+npm run build:css          # tailwindcss -i public/css/tailwind.css -o public/css/style.css
 npm run watch:css
-npm start                  # npx nodemon index.js  (porta 4000)
+npm start                  # nodemon index.js  (porta 4000)
 npm test                   # sintaxe + scripts/verify-{profile-contract,upload,client}.mjs
 npm run format             # Prettier em **/*.{js,mjs,css,json,html}
 npm run format:check       # só confere a formatação
@@ -51,9 +53,9 @@ node --check public/js/app.js
 ## 5) Environment and Config
 
 - Config sources: `package.json`, `index.js`, `public/css/tailwind.css`, `.env`, `.coderabbit.yaml`, `.prettierrc.json`, `.github/`.
-- Required env vars: `API_URL` (opcional; padrão `http://localhost:8080`) e `PORT` (opcional; padrão `4000`). `.env` é opcional: `index.js` chama `process.loadEnvFile()` dentro de `try/catch`.
-- `.env.example` versionado com `PORT` e `API_URL`; `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
-- Deployment/runtime constraints: **a API precisa estar rodando** em `API_URL`, senão todas as telas carregam mas o cliente devolve 503. O Back-End precisa liberar CORS para a origem do frontend (`FRONTEND_URL`, padrão `http://localhost:4000`). Não há deploy nem container configurado; o CI verifica com Super-Linter e CodeQL. O Super-Linter usa `statuses: write` para os resultados e `pull-requests: write` para comentar o resumo no PR.
+- Required env vars: `SESSION_DB_HOST`, `SESSION_DB_USER`, `SESSION_DB_PASSWORD`, `SESSION_DB_NAME`; `SESSION_DB_PORT` opcional (padrão `3306`), `SESSION_DB_SSL` opcional no desenvolvimento, `SESSION_DB_SSL_CA` opcional para CA privada, `API_URL` opcional (padrão `http://localhost:8080`), `PORT` opcional (padrão `4000`) e `SESSION_SECRET` obrigatório em produção. `.env` é opcional.
+- `.env.example` versionado com `PORT`, `API_URL`, `SESSION_SECRET` e `SESSION_DB_*`; `.gitignore` cobre `.env` e `.env.*` com exceção `!.env.example`.
+- Deployment/runtime constraints: a tabela `sessions` precisa ser migrada no MySQL e a API precisa estar acessível pelo servidor frontend. Use credenciais restritas a essa tabela, TLS para MySQL e `SESSION_SECRET` forte. Não há deploy nem container configurado; o CI verifica com Super-Linter e CodeQL.
 
 ## 6) Evidence
 

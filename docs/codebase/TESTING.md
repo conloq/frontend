@@ -1,12 +1,14 @@
 # Testing Patterns
 
-`npm test` verifica a sintaxe de `index.js` e executa três scripts com `node:assert/strict` e `node:vm`, sem API, banco ou framework de testes:
+`npm test` verifica a sintaxe de `index.js` e executa três scripts com `node:assert/strict`, `node:vm` e EJS, sem API, banco ou framework de testes:
 
-- `scripts/verify-profile-contract.mjs`: leitura de foto/telefone, atualização com Bearer, confirmação de senha no fixture e recarga do perfil sem redirecionar.
-- `scripts/verify-upload.mjs`: multipart com campo `image`, Bearer, Content-Type definido pelo navegador e foto atualizada sem redirecionar.
-- `scripts/verify-client.mjs`: 401 atrasado preserva token novo, 401 atual remove sessão, timeout de 15 s inclusive na leitura do corpo, aviso de gravação incerta, erro versus ausência de rampas, bloqueio do perfil sem dados, foco e restauração de `inert`, method POST nos formulários com senha e compilação/renderização EJS.
+- `scripts/verify-profile-contract.mjs`: valores do usuário chegam escapados ao HTML EJS e a gravação usa POST para o controller do frontend.
+- `scripts/verify-upload.mjs`: contrato de multipart do browser e encaminhamento pela sessão server-side.
+- `scripts/verify-client.mjs`: `API_URL` carregada após importar o controller, configuração da sessão MySQL, formulários POST, foco/restauração de `inert`, placeholders em inputs compatíveis, compilação dos templates e escape de atributo no modal.
 
-Os testes usam respostas e DOM simulados. Não substituem verificação em navegador desktop/mobile com a API real, especialmente para foco, layout, autenticação e persistência.
+O store MySQL exige tabela e credenciais para iniciar o servidor; os checks locais não conectam ao banco. Para validar esse caminho, iniciar o frontend com a migration aplicada e as variáveis `SESSION_DB_*` configuradas.
+
+Os testes não substituem verificação em navegador desktop/mobile com a API real, especialmente para layout, autenticação, armazenamento de sessão e upload multipart.
 
 Outras verificações: `node --check public/js/app.js`, `node --check public/js/script.js`, `npm run format:check` e `npm run build:css`. O CSS gerado é versionado; regenere após mudanças de classes ou da fonte Tailwind.
 
