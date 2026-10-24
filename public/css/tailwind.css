@@ -1,3 +1,12 @@
+/* code-wiki:start
+ * Summary: Define MASH design tokens and reusable responsive components for Tailwind CSS.
+ * Description: Tailwind scans the EJS views and browser scripts as the sources of utility classes.
+ * Theme variables define the MASH palette, typography, focus color, and semantic status colors.
+ * Reusable button, badge, form, card, table, action-group, and loading styles apply shared visual rules.
+ * The desktop shell supports expanded and collapsed sidebar widths with matching content offsets and labels.
+ * Mobile rules animate drawer links and present dialogs as bottom sheets while respecting reduced-motion preferences.
+ * Base styles set page colors, heading fonts, text selection, and visible keyboard focus.
+ * code-wiki:end */
 @import "tailwindcss" source(none);
 @source "../../views";
 @source "../js";
@@ -207,22 +216,26 @@
       min-width: 18rem;
     }
 
-    #appSidebar[data-sidebar-state="collapsed"] {
+    #appSidebar[data-sidebar-state="collapsed"],
+    body.sidebar-collapsed #appSidebar {
       width: 5rem;
       min-width: 5rem;
       overflow-x: hidden;
     }
 
-    #appSidebar[data-sidebar-state="collapsed"] .sidebar-label {
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-label,
+    body.sidebar-collapsed #appSidebar .sidebar-label {
       display: none;
     }
 
-    #appSidebar[data-sidebar-state="collapsed"] .menu-link {
+    #appSidebar[data-sidebar-state="collapsed"] .menu-link,
+    body.sidebar-collapsed #appSidebar .menu-link {
       justify-content: center;
       padding-inline: 0;
     }
 
-    #appSidebar[data-sidebar-state="collapsed"] .sidebar-marca {
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-marca,
+    body.sidebar-collapsed #appSidebar .sidebar-marca {
       height: auto;
       flex-direction: column;
       gap: 0.5rem;

@@ -1,0 +1,8 @@
+<%- include('partials/header.ejs', { titulo: 'Não foi possível carregar' }) %>
+<main class="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-4 p-6 text-center">
+  <i class="ph ph-cloud-slash text-5xl text-perigo" aria-hidden="true"></i>
+  <h1 class="font-display text-2xl font-semibold">Não foi possível carregar esta página</h1>
+  <p class="text-texto-2"><%= mensagem %></p>
+  <a href="/dashboard" class="btn-primario">Voltar ao painel</a>
+</main>
+<%- include('partials/footer.ejs') %>

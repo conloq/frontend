@@ -1,3 +1,8 @@
+# code-wiki:start
+# Summary: Schedule dependency update pull requests for npm packages and GitHub Actions.
+# Description: Checks npm dependencies weekly and opens at most five related pull requests.
+# Checks GitHub Actions references weekly with a separate limit of five pull requests.
+# code-wiki:end
 version: 2
 
 updates:

@@ -1,8 +1,8 @@
-<%# Teste de iodo da receita: rampa, primeira coleta, intervalo e máximo de coletas. Salvar usa data-sem-api (conloq/mash#101); as rampas vêm de GET /recipes/:id/temperatures e a prévia é desenhada pelo app.js com os valores do formulário. %>
+<%# Teste de iodo da receita: rampa, primeira coleta, intervalo e máximo de coletas. Salvar usa data-sem-api (conloq/mash#101); os dados da receita e rampas chegam pelo res.render. %>
 <%- include('partials/shellInicio.ejs', { titulo: 'Teste de iodo', trilha: ['Receitas', 'Teste de iodo'], voltar: `/recipes/${locals.id}` }) %>
-<form id="formIodoReceita" class="flex flex-1 flex-col gap-6" data-sem-api="conloq/mash#101" novalidate>
+<form id="formIodoReceita" class="flex flex-1 flex-col gap-6" data-sem-api="conloq/mash#101" data-rampas="<%= JSON.stringify(rampas) %>" novalidate>
   <div class="flex flex-col gap-1 max-lg:contents">
-    <a href="/recipes/<%= locals.id %>" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i><span id="voltarReceitaIodo">Voltar para a receita</span></a>
+    <a href="/recipes/<%= locals.id %>" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i><span><%= recipe?.name ?? 'Voltar para a receita' %></span></a>
     <h1 class="text-[30px] font-semibold max-lg:sr-only">Teste de iodo</h1>
   </div>
 
@@ -18,7 +18,10 @@
             <label class="campo-rotulo" for="iodoRampa">Rampa do teste</label>
             <span class="campo-caixa relative">
               <select id="iodoRampa" name="rampa" required>
-                <option value="">Carregando rampas…</option>
+                <% if (!rampas.length) { %><option value="">Nenhuma rampa nesta receita</option><% } else { %>
+                  <option value="">Escolha a rampa</option>
+                  <% rampas.forEach((rampa, i) => { %><option value="<%= rampa.id %>"<%= rampa.minTemperatureRamp <= 65 && 65 <= rampa.maxTemperatureRamp ? ' selected' : '' %>>Rampa <%= rampa.orderRamp ?? i + 1 %> · <%= rampa.minTemperatureRamp %> a <%= rampa.maxTemperatureRamp %> ºC</option><% }) %>
+                <% } %>
               </select>
               <i class="ph ph-caret-down pointer-events-none absolute right-3.5 text-lg!" aria-hidden="true"></i>
             </span>
@@ -26,7 +29,7 @@
           </div>
           <div class="campo" data-campo="primeiraColeta">
             <label class="campo-rotulo" for="iodoPrimeira">Primeira coleta</label>
-            <span class="campo-caixa"><input id="iodoPrimeira" name="primeiraColeta" type="number" min="0" max="240" value="30" inputmode="numeric" required><span class="campo-unidade">min</span></span>
+            <span class="campo-caixa"><input id="iodoPrimeira" name="primeiraColeta" type="number" min="0" max="240" value="30" inputmode="numeric" placeholder="Ex.: 30" required><span class="campo-unidade">min</span></span>
             <span class="campo-ajuda" data-erro>Contado depois que a rampa atinge a temperatura.</span>
           </div>
         </div>
@@ -40,12 +43,12 @@
         <div class="grid gap-5 sm:grid-cols-2">
           <div class="campo" data-campo="intervalo">
             <label class="campo-rotulo" for="iodoIntervalo">Intervalo entre coletas</label>
-            <span class="campo-caixa"><input id="iodoIntervalo" name="intervalo" type="number" min="1" max="120" value="10" inputmode="numeric" required><span class="campo-unidade">min</span></span>
+            <span class="campo-caixa"><input id="iodoIntervalo" name="intervalo" type="number" min="1" max="120" value="10" inputmode="numeric" placeholder="Ex.: 10" required><span class="campo-unidade">min</span></span>
             <span class="campo-ajuda">Tempo até a próxima coleta.</span>
           </div>
           <div class="campo" data-campo="maximoColetas">
             <label class="campo-rotulo" for="iodoMaximo">Máximo de coletas</label>
-            <span class="campo-caixa"><input id="iodoMaximo" name="maximoColetas" type="number" min="1" max="20" value="6" inputmode="numeric" required><span class="campo-unidade">coletas</span></span>
+            <span class="campo-caixa"><input id="iodoMaximo" name="maximoColetas" type="number" min="1" max="20" value="6" inputmode="numeric" placeholder="Ex.: 6" required><span class="campo-unidade">coletas</span></span>
             <span class="campo-ajuda">Limite de testes por lote.</span>
           </div>
         </div>

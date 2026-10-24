@@ -1,3 +1,9 @@
+# code-wiki:start
+# Summary: Run Super-Linter on pull requests and changes pushed to the main branch.
+# Description: Checks out full Git history so linting can compare changed files.
+# Validates JavaScript, CSS, HTML, and JSON changes while excluding generated styles.
+# Grants read-only workflow permissions for repository metadata and pull request status.
+# code-wiki:end
 name: Super-Linter
 
 on:

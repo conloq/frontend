@@ -1,67 +1,34 @@
-# Architecture
+# Arquitetura
 
-## 1) Architectural Style
-
-- Primary style: servidor de páginas + cliente SPA-lite (navegação por documento, dados por `fetch`).
-- Why this classification: `index.js` só renderiza telas e serve estáticos: nenhuma rota sua chama a API; todo o estado de dados (token, listas, mensagens) vive em `public/js/app.js`, que fala direto com o Back-End.
-- Primary constraints: (a) o Back-End precisa liberar CORS para a origem do frontend; (b) o token fica em `localStorage`, portanto legível por JavaScript; (c) o `index.js` não tem sessão, cookie ou estado: cada tela é um documento novo.
-
-## 2) System Flow
+## Fluxo
 
 ```text
-Navegador → GET /recipes
-  → index.js: res.render("recipes")            (sem dados)
-  → views/partials/header.ejs                  (Phosphor + /css/style.css)
-  → HTML com contêineres vazios (#listaReceitas, #mensagens, [data-user])
-  → views/partials/footer.ejs                  (window.API_URL, script.js, app.js)
-  → app.js: guarda de rota (tem token?)
-  → app.js: fetch {API_URL}/recipes + /user com Bearer
-  → app.js: preenche #listaReceitas e [data-user]; erro → #mensagens
+navegador --cookie HttpOnly--> frontend Express/EJS (:4000)
+                                  |-- GET página: sessão JWT -> Back-End REST (:8080)
+                                  |                     -> res.render(view, locals)
+                                  |-- POST /login: recebe JWT -> sessão
+                                  |-- POST formulário: controller -> Back-End com Bearer -> redirect 303
 ```
 
-1. `npm start` executa `index.js`, que resolve `views/` e `public/` a partir de `import.meta.url`.
-2. `express.static` publica `public/` e `/vendor/phosphor`.
-3. Cada rota GET chama `res.render(view, { receitaId: req.params.id })`: o único dado passado é o `:id` da URL.
-4. `footer.ejs` injeta `window.API_URL` e carrega `script.js` (shell) e `app.js` (dados), nessa ordem.
-5. `app.js` roda a guarda de rota e então dispara as chamadas conforme a tela.
-6. Erros e mensagens da API aparecem em `#mensagens`; `401` com token presente descarta o token e volta para `/login`.
+O frontend e o Back-End continuam em repositórios separados. `index.js` configura Express, EJS e `express-session`, serve arquivos estáticos e monta `controllers/pageController.js`. Esse módulo valida a sessão, busca os dados e entrega as views com locals. O EJS escapa valores com `<%= ... %>`.
 
-## 3) Layer/Module Responsibilities
+`public/js/app.js` trata validações e interações do navegador. Formulários enviam POST para rotas same-origin do `pageController`, que chama a API, usa flash de sessão e redireciona após o envio. O navegador não recebe `API_URL` nem o JWT e não depende de CORS para acessar a API.
 
-| Layer or module | Owns | Must not own | Evidence |
-|-----------------|------|--------------|----------|
-| `index.js` | Bootstrap do Express, estáticos, rotas GET, `window.API_URL` | Dados, autenticação, chamadas à API | `index.js` |
-| `views/*.ejs` | Marcação, classes Tailwind, contêineres e âncoras para o cliente | Dados, `fetch`, decisões de acesso | `views/recipes.ejs`, `views/profile.ejs` |
-| `views/partials/footer.ejs` | `window.API_URL`, ordem de carregamento dos scripts | Lógica de tela | `views/partials/footer.ejs` |
-| `public/js/app.js` | Chamadas à API, token, guarda de rota, mensagens, render de listas | Regra de negócio, autorização real | `public/js/app.js` |
-| `public/js/script.js` | Shell: sidebar, drawer, modais, senha, prévia de foto | Chamadas à API | `public/js/script.js` |
-| `public/css/tailwind.css` | Tema, `@source` e estilos do shell em `@layer components` | CSS de página isolada | `public/css/tailwind.css` |
+## Limites atuais
 
-## 4) Reused Patterns
+- Dados disponíveis são buscados no servidor antes do render, incluindo usuário global do shell, perfil, acessos, receitas e rampas.
+- Rotas sem dados correspondentes no Back-End seguem em estados vazios honestos; o exemplo `/dw2-example` demonstra dados passados diretamente a `res.render`.
+- JWT fica em sessão Express com cookie `HttpOnly`, `SameSite=Strict` e `Secure` em produção.
+- A sessão usa `express-mysql-session` na tabela `sessions` do banco MySQL existente. A tabela é criada por migration do Back-End; o adaptador do frontend não a cria.
+- O frontend usa credenciais separadas, limitadas à tabela de sessões. A disponibilidade do MySQL passa a ser requisito de inicialização do servidor de páginas.
+- O token não é revogado no logout pela API; destruir a sessão do frontend impede que o navegador continue usando aquele token.
 
-| Pattern | Where found | Why it exists |
-|---------|-------------|---------------|
-| `api()` que nunca lança, devolvendo `{ status, data }` | `public/js/app.js` | Um só ponto para Bearer, JSON, 401 e falha de rede (503) |
-| Guarda de rota no load | `public/js/app.js` | Redireciona quem não tem token e quem já está logado |
-| Mensagens lidas como `data.error ?? data.message` | `public/js/app.js` | A API responde `message` no 400 do login e `error` nos demais |
-| Flash por `localStorage` | `public/js/app.js` (`mash-flash`) | Mensagem sobrevive a um redirecionamento |
-| Preenchimento por atributo (`data-user`) | `views/partials/topBar.ejs`, `views/profile.ejs` | Um seletor preenche vários lugares |
-| Partial composition | `views/*.ejs` | Não duplicar `<head>` e carregamento de assets |
-| Shell em `@layer components` | `public/css/tailwind.css` | Estado expandido/recolhido da sidebar sem utilitários repetidos |
+## Camadas
 
-## 5) Known Architectural Risks
-
-- Token em `localStorage`: qualquer XSS no domínio lê o JWT e assume a sessão. Risco aceito pelo time em 12/10/2026, quando o cookie `HttpOnly` foi trocado pelo `localStorage` (`conloq/mash#6`).
-- Formulários sem `action`/`method`: `#formLogin` e `#formCadastro` dependem do JS. Sem `app.js`, o submit nativo vira `GET` para a própria URL e coloca e-mail e senha na query string. Impacto alto, mitigação inexistente.
-- Dependência de CORS não versionada aqui: o Back-End libera `FRONTEND_URL` desde 13/10/2026 (conloq/Back-End#8); no deploy, a variável precisa ter a URL publicada deste frontend (conloq/mash#68), senão o navegador bloqueia as chamadas.
-- Sem sessão de servidor: a guarda de rota é apenas cosmética; a autorização real é da API. Impacto baixo (aceitável), desde que não se confie nela.
-- Contrato HTML↔JS por seletor, sem teste: renomear um `id` quebra silenciosamente. Impacto médio.
-
-## 6) Evidence
-
-- `index.js`
-- `public/js/app.js`
-- `views/partials/footer.ejs`
-- `views/partials/topBar.ejs`
-- `public/css/tailwind.css`
-- `docs/codebase/.codebase-scan.txt`
+| Camada | Responsabilidade |
+|---|---|
+| `index.js` | Configuração do Express, sessão persistida em MySQL, estáticos e montagem do controller de páginas |
+| `controllers/pageController.js` | Rotas de tela, autenticação, chamadas à API e adaptação dos POSTs de formulário |
+| `views/` | HTML EJS das telas, formulários e estado inicial renderizado |
+| `public/js/app.js` | Validação de formulários, interações e visuais derivados dos dados renderizados |
+| `public/js/script.js` | Sidebar, modais, foco e interações do shell |

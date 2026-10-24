@@ -1,10 +1,14 @@
 # Sistema MASH
 
-Frontend EJS do Sistema MASH: telas de login, cadastro, perfil, receitas, temperaturas e testes de iodo.
+Frontend EJS do Sistema MASH. O Back-End (`conloq/Back-End`, porta 8080) mantém as regras, os dados de domínio e emite o JWT; este repositório mantém as telas, a camada de apresentação e a sessão web. Os repositórios seguem separados.
 
-Este repositório tem **somente as telas**. A regra de negócio, o banco e o JWT ficam na API (`conloq/Back-End`, porta 8080). O `index.js` só entrega as páginas; quem consome a API é o navegador, em `public/js/app.js`.
+## Fluxo das páginas
 
-## Execução
+`index.js` configura Express, EJS e sessão, e monta `controllers/pageController.js`. Nas páginas autenticadas, o controller envia o JWT da sessão à API, recebe os dados e chama `res.render('profile', { user })`, por exemplo. A view imprime com EJS (`<%= user.name %>`), escapando o conteúdo.
+
+O navegador recebe um cookie de sessão `HttpOnly`; o JWT fica no servidor, persistido na tabela `sessions` do MySQL existente. A migration dessa tabela fica no Back-End; a conta do frontend acessa somente essa tabela. Os formulários enviam POST ao `pageController`, que chama as rotas da API e redireciona para a página EJS. O JavaScript fica com interações do navegador. Configure `SESSION_DB_*`, `API_URL` e `SESSION_SECRET` no `.env`; em produção, a conexão com MySQL usa TLS (`SESSION_DB_SSL_CA` para uma CA privada).
+
+## Executar
 
 ```bash
 npm install
@@ -12,96 +16,14 @@ npm run build:css
 npm start
 ```
 
-O frontend sobe na **4000** e a API na **8080**, portas diferentes, nunca as mesmas. As duas precisam estar de pé:
-
-```bash
-# na API
-npm start
-
-# aqui
-npm start
-```
-
-Acesse `http://localhost:4000`. A URL da API vem de `API_URL` (padrão `http://localhost:8080`); copie `.env.example` para `.env` para trocar.
+O frontend roda em `http://localhost:4000`. Primeiro aplique a migration do Back-End; depois configure no frontend uma conta MySQL com acesso somente a `sessions`. A API precisa estar disponível em `API_URL` para login e páginas que exibem dados reais. Copie `.env.example` para `.env` e configure as credenciais locais.
 
 ## Verificações
 
-`npm test` verifica a sintaxe do servidor e executa os scripts de perfil, upload e regressão do cliente, incluindo renderização EJS. Não requer API nem banco.
+`npm test` verifica sintaxe, contrato EJS do perfil, upload e regressões do cliente. Não requer API nem banco. `npm run format:check` verifica os arquivos formatados pelo Prettier.
 
-## Formatação e commits
+## Telas
 
-O código segue o Prettier (`.prettierrc.json`: 4 espaços e aspas simples; JSON e CSS com 2 espaços e aspas duplas). Você não precisa formatar à mão: o `npm install` instala um hook do Git que formata no commit.
+As rotas de página estão em `controllers/pageController.js`. Login, cadastro, perfil, histórico de acessos, receitas e rampas recebem dados do backend antes de renderizar. Dashboard, lotes, recuperação de senha e análise detalhada mantêm estados vazios quando a API ainda não oferece esses dados. `/dw2-example` é um exemplo didático isolado de `res.render` com dados EJS.
 
-1. `git add` dos arquivos.
-2. `git commit`: antes de criar o commit, o hook roda o Prettier nos arquivos **que estão no staging** (JS, CSS, JSON e HTML) e coloca a versão formatada no próprio commit.
-
-- Rode `npm install` depois de clonar e depois de puxar mudanças no `package.json`. Sem isso o hook não existe e o commit sai sem formatar.
-- As views `.ejs` e o Markdown não são formatados.
-- Se o Prettier achar um erro de sintaxe, o commit não é criado: corrija e commite de novo.
-- `npm run format` formata o projeto inteiro; `npm run format:check` só confere.
-
-No PR, o Super-Linter confere ESLint e Prettier nos arquivos alterados. Ele só aponta o erro; não faz commit no seu branch.
-
-## Como funciona
-
-- `index.js` (Express 5 + EJS) registra uma rota `GET` por tela, serve `public/` e `/vendor/phosphor`, e publica `API_URL` para o navegador como `window.API_URL`.
-- `public/js/app.js` é o cliente: faz login, guarda o token em `localStorage` (`mash-token`), envia `Authorization: Bearer` e exibe as mensagens da API em pt-BR como vieram.
-- `public/js/script.js` cuida do shell (sidebar, modais, mostrar/ocultar senha, prévia da foto).
-- Sem token, as telas internas redirecionam para `/login`; com `401`, o token é descartado e o usuário volta ao login.
-- O Back-End libera CORS para `http://localhost:4000` (`FRONTEND_URL`).
-
-## Rotas do frontend
-
-Cada rota é um `GET` em `index.js` que só renderiza a tela; os dados vêm da API pelo navegador.
-
-| Rota GET | Tela |
-|---|---|
-| `/` | redireciona para `/dashboard` |
-| `/login` | `views/login.ejs` |
-| `/signup` | `views/signup.ejs` |
-| `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `views/forgotPassword.ejs` (e-mail, código e nova senha; sem rota na API) |
-| `/logout` | redireciona para `/login` (o cliente limpa o token) |
-| `/dashboard` | `views/dashboard.ejs` (painel; estados vazios, sem rota na API) |
-| `/profile` | `views/profile.ejs` (perfil) |
-| `/profile/access-history` | `views/accessHistory.ejs` (últimos acessos no mobile) |
-| `/settings`, `/settings/security` | `views/settings.ejs` (abas Acessibilidade e Segurança; salvar sem rota na API) |
-| `/recipes` | `views/recipes.ejs` |
-| `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` (`/edit` abre o modal de renomear) |
-| `/recipes/:id/iodine` | `views/recipeIodine.ejs` (configuração do teste de iodo da receita; salvar sem rota na API) |
-| `/recipes/:id/temperatures/new` | `views/temperatureForm.ejs` (nova rampa) |
-| `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` (editar rampa) |
-| `/lots`, `/lots/new` | `views/lots.ejs` (`/new` abre o modal de novo lote) |
-| `/lots/:id`, `/lots/:id/edit` | `views/lot.ejs` (`/edit` abre o modal de edição) |
-| `/lots/:id/monitoring` | `views/lotMonitoring.ejs` |
-| `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `views/iodineSession.ejs` (preparar a sessão e leitura) |
-| `/analyses/new` | `views/iodineDemo.ejs` (demonstração simulada do teste de iodo) |
-| `/analyses/:id` | `views/analysis.ejs` |
-
-## Rotas da API usadas pelo navegador
-
-| Tela | Chamadas |
-|---|---|
-| Login | `POST /login` |
-| Cadastro | `POST /user` |
-| Perfil | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user`; `GET /user/login-history` ainda não existe na API (#102), e o 404 vira lista vazia |
-| Receitas | `GET/POST /recipes`, `GET /recipes/:id/temperatures` (contagem e faixa de cada receita), `DELETE /recipes/:id` |
-| Receita | `GET/PUT/DELETE /recipes/:id`, `GET /recipes/:id/temperatures` |
-| Nova rampa | `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
-| Editar rampa | `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar ainda não tem rota na API (#97) |
-
-As telas internas também chamam `GET /user` para preencher o topo. Lotes e análises ainda não têm rota na API e mostram estados de indisponibilidade (#31, #92, #1, #3). O teste de iodo é uma simulação no frontend com dados locais, sem salvar nada e sem etiqueta de simulação na tela, para a cena do pitch (decisão de 21/10/2026, conloq/mash#9). A leitura do iodo será feita pelo Back-End com Python e OpenCV (#34); o usuário não envia foto.
-
-## Documentação
-
-- `codemap.md`: atlas do repositório e mapas por diretório.
-- `AGENTS.md`: regras de trabalho no repositório.
-- `docs/codebase/`: stack, estrutura, arquitetura, convenções, integrações, testes e riscos.
-- `docs/frontend-screens.md` e `docs/frontend-components.md`: inventário de telas e componentes.
-
-## Receitas e rampas: integração da #86
-
-O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista em `recipes`, detalhe em `recipe` e rampas em `temperatures`. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
-
-Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`), `/recipes/:id/temperatures/new` e `/recipes/:id/temperatures/:temperatureId/edit` (`temperatureForm.ejs`). Edição e exclusão de rampas permanecem na #97.
-
-Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE de receita seguem o contrato da #93 (409 para nome repetido no PUT); o 409 de receita com lotes entra com a #31. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.
+Consulte `codemap.md`, `AGENTS.md` e `docs/codebase/` para os mapas e convenções do projeto.

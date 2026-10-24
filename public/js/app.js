@@ -1,45 +1,19 @@
-/* global prenderFoco, closeModal */
-// Consumo da API do Back-End direto do navegador (CORS liberado no Back-End).
-// O token JWT fica no localStorage e vai como Bearer em cada chamada.
-// O HTML de linhas, toasts, alertas e estados fica em <template> nas views;
-// aqui só clonamos e preenchemos com textContent.
+// code-wiki:start
+// Summary: Handle browser-side form feedback, recipe visuals, and the iodine demonstration.
+// Description: Template clones fill slots through text and attributes, while alerts and field errors update existing markup.
+// Profile and recipe forms validate required names, password confirmation, ramp temperatures, and clock values before submission.
+// Ramp data is converted into a proportional timeline with temperature bands and accessible summary text.
+// The recipe iodine form previews capture timing from the selected ramp without sending a session request.
+// The demonstration schedules sample iodine results, honors reduced-motion timing, and allows the sequence to restart.
+// Actions marked without an API route are prevented from submitting, and user-facing feedback remains in the page.
+// code-wiki:end
+/* global prenderFoco */
+// Páginas e dados chegam renderizados pelo EJS; este arquivo cuida das interações do navegador.
 (() => {
-    const API = window.API_URL;
-    const TOKEN_KEY = 'mash-token';
-    const FLASH_KEY = 'mash-flash';
-
     const q = (selector, raiz = document) => raiz.querySelector(selector);
     const qa = (selector, raiz = document) => raiz.querySelectorAll(selector);
     const caminho = location.pathname;
-    const paginaPublica =
-        ['/login', '/signup'].includes(caminho) || caminho.startsWith('/forgot-password');
     const rota = (regex) => caminho.match(regex)?.[1];
-
-    // ------------------------------------------------------------ storage
-
-    const guardar = {
-        get: (key) => {
-            try {
-                return localStorage.getItem(key);
-            } catch {
-                return null;
-            }
-        },
-        set: (key, value) => {
-            try {
-                localStorage.setItem(key, value);
-            } catch {
-                /* sem storage */
-            }
-        },
-        del: (key) => {
-            try {
-                localStorage.removeItem(key);
-            } catch {
-                /* sem storage */
-            }
-        },
-    };
 
     // ------------------------------------------------------------ templates
 
@@ -65,7 +39,6 @@
 
     // ------------------------------------------------------------ datas
 
-    const dataBR = (iso) => (iso ? new Date(iso).toLocaleDateString('pt-BR') : '—');
     const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
 
     // ------------------------------------------------------------ mensagens
@@ -96,55 +69,9 @@
         alerta.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
-    const limparAlerta = () => q('#mensagens')?.replaceChildren();
-
-    // Confirmação passageira: some em 5 s, um por vez
-    function mostrarToast(titulo, texto) {
-        const area = q('#toasts');
-        if (!area) return;
-
-        const toast = clonar('tplToast', { titulo, texto: texto || null });
-        q('[data-fechar]', toast).addEventListener('click', () => toast.remove());
-        area.replaceChildren(toast);
-        setTimeout(() => toast.remove(), 5000);
-    }
-
-    // Sucesso vira toast; erro e aviso ficam como alerta
-    function mostrarMensagem(tipo, texto) {
-        if (tipo === 'success') return mostrarToast(texto);
-        mostrarAlerta(tipo, texto);
-    }
-
-    // Mensagem que precisa sobreviver a um redirecionamento (flash)
-    function irPara(url, tipo, texto) {
-        if (texto) guardar.set(FLASH_KEY, JSON.stringify({ tipo, texto }));
-        location.href = url;
-    }
-
-    function mostrarFlash() {
-        const salvo = guardar.get(FLASH_KEY);
-        if (!salvo) return;
-
-        guardar.del(FLASH_KEY);
-        try {
-            const { tipo, texto } = JSON.parse(salvo);
-            mostrarMensagem(tipo, texto);
-        } catch {
-            /* flash inválido */
-        }
-    }
-
     // ------------------------------------------------------------ diálogo de confirmação
 
-    // Substitui o confirm(): resolve true só no botão de confirmar
-    // Com aoConfirmar, o diálogo fica aberto com o botão em "Excluindo…" até a API responder
-    function confirmar({
-        titulo,
-        mensagem,
-        botao = 'Excluir',
-        carregandoTexto = 'Excluindo…',
-        aoConfirmar,
-    }) {
+    function confirmar({ titulo, mensagem, botao = 'Excluir' }) {
         const dialogo = q('#dialogoConfirmar');
         if (!dialogo) return Promise.resolve(false);
 
@@ -162,26 +89,14 @@
                 liberarFoco();
                 resolve(resposta);
             };
-            let ocupado = false;
             const teclado = (event) => {
-                if (event.key === 'Escape' && !ocupado) fechar(false);
+                if (event.key === 'Escape') fechar(false);
             };
-            const clique = async (event) => {
-                if (ocupado) return;
+            const clique = (event) => {
                 if (event.target === dialogo) return fechar(false);
                 const escolha = event.target.closest('[data-confirmar]');
                 if (!escolha) return;
-                if (escolha.dataset.confirmar !== 'sim') return fechar(false);
-                if (!aoConfirmar) return fechar(true);
-
-                ocupado = true;
-                const cancelar = q('[data-confirmar="nao"]', dialogo);
-                cancelar.disabled = true;
-                carregando(escolha, true, carregandoTexto);
-                const resultado = await aoConfirmar();
-                carregando(escolha, false);
-                cancelar.disabled = false;
-                fechar(resultado);
+                fechar(escolha.dataset.confirmar === 'sim');
             };
 
             dialogo.classList.replace('hidden', 'flex');
@@ -218,314 +133,30 @@
 
     const focarPrimeiroErro = (form) => q('.campo-erro input, .campo-erro select', form)?.focus();
 
-    // Botão em carregamento: desativado, ícone girando e texto no gerúndio
-    const conteudoOriginal = new WeakMap();
-    function carregando(botao, ativo, texto = 'Salvando…') {
-        if (!botao) return;
-        if (ativo) {
-            conteudoOriginal.set(botao, [...botao.childNodes]);
-            botao.disabled = true;
-            const icone = document.createElement('i');
-            icone.className = 'ph ph-circle-notch animate-spin';
-            icone.setAttribute('aria-hidden', 'true');
-            botao.replaceChildren(icone, texto);
-        } else if (conteudoOriginal.has(botao)) {
-            botao.disabled = false;
-            botao.replaceChildren(...conteudoOriginal.get(botao));
-            conteudoOriginal.delete(botao);
-        }
-    }
-
     const formData = (form) => Object.fromEntries(new FormData(form));
-    const botaoEnviar = (form) => q('button[type="submit"]', form);
-
-    function fecharModal(id) {
-        const modal = document.getElementById(id);
-        if (!modal) return;
-        closeModal(modal);
-    }
-
-    const abrirModal = (id) => q(`[data-modal-open="${id}"]`)?.click();
-
-    // ------------------------------------------------------------ estados de lista
-
-    function listaCarregando(lista, linhas = 3) {
-        lista.replaceChildren(...Array.from({ length: linhas }, () => clonar('tplCarregando')));
-        lista.setAttribute('aria-busy', 'true');
-    }
-
-    // Vazio ou erro dentro do card da lista; acao = { texto, icone, href? ou aoClicar? }
-    function listaEstado(lista, { icone, erro = false, titulo, texto, acao }) {
-        const estado = clonar('tplEstado', {
-            titulo,
-            texto: texto || null,
-            acao: acao ? {} : null,
-            acaoLink: acao?.href ? { href: acao.href } : null,
-            acaoBotao: acao && !acao.href ? {} : null,
-        });
-        q('[data-slot="icone"]', estado).classList.add(icone);
-        if (erro)
-            q('[data-slot="marcador"]', estado).classList.replace('text-texto-2', 'text-perigo');
-        if (acao) {
-            const botao = q('[data-slot="acaoLink"], [data-slot="acaoBotao"]', estado);
-            q('i', botao).classList.add(acao.icone);
-            q('span', botao).textContent = acao.texto;
-            if (erro) botao.classList.replace('btn-primario', 'btn-secundario');
-            if (acao.aoClicar) botao.addEventListener('click', acao.aoClicar);
-        }
-        lista.removeAttribute('aria-busy');
-        lista.replaceChildren(estado);
-    }
-
-    function listaErro(lista, titulo, data, recarregar) {
-        listaEstado(lista, {
-            icone: 'ph-cloud-slash',
-            erro: true,
-            titulo,
-            texto: mensagemDaApi(data, 'Tente de novo em alguns segundos.'),
-            acao: { texto: 'Tentar de novo', icone: 'ph-arrow-clockwise', aoClicar: recarregar },
-        });
-    }
-
-    // ------------------------------------------------------------ API
-
-    const mensagemDaApi = (data, padrao) => data?.error ?? data?.message ?? padrao;
-
-    // Nunca lança: devolve { status, data }
-    async function api(metodo, caminhoApi, corpo) {
-        const token = guardar.get(TOKEN_KEY);
-
-        try {
-            // FormData (upload de foto): o navegador define o Content-Type com o boundary
-            const multipart = corpo instanceof FormData;
-            const signal = AbortSignal.timeout(15000);
-            const resposta = await fetch(API + caminhoApi, {
-                method: metodo,
-                signal,
-                headers: {
-                    ...(!multipart && { 'Content-Type': 'application/json' }),
-                    ...(token && { Authorization: `Bearer ${token}` }),
-                },
-                ...(corpo && { body: multipart ? corpo : JSON.stringify(corpo) }),
-            });
-            const data = await resposta.json().catch(() => {
-                signal.throwIfAborted();
-                return {};
-            });
-
-            // Token ausente, inválido ou expirado: volta ao login
-            if (resposta.status === 401 && token && guardar.get(TOKEN_KEY) === token) {
-                guardar.del(TOKEN_KEY);
-                irPara(
-                    '/login',
-                    'warning',
-                    mensagemDaApi(data, 'Sessão expirada. Entre novamente.')
-                );
-            }
-
-            return { status: resposta.status, data };
-        } catch (erro) {
-            return {
-                status: 503,
-                data: {
-                    error:
-                        erro.name === 'TimeoutError'
-                            ? metodo === 'GET'
-                                ? 'O servidor demorou para responder. Tente novamente.'
-                                : 'O servidor demorou para responder. A alteração pode ter sido salva; confira os dados antes de tentar novamente.'
-                            : 'Não foi possível conectar ao servidor',
-                },
-            };
-        }
-    }
-
-    function sair(texto) {
-        guardar.del(TOKEN_KEY);
-        irPara('/login', 'success', texto);
-    }
-
-    // ------------------------------------------------------------ guarda de rota
-
-    if (!paginaPublica && !guardar.get(TOKEN_KEY)) {
-        location.replace('/login');
-        return;
-    }
-    if (paginaPublica && guardar.get(TOKEN_KEY)) {
-        location.replace('/dashboard');
-        return;
-    }
-
-    mostrarFlash();
-
-    // Atualiza o título da aba e o último item da trilha do header
-    function nomearPagina(nome) {
-        const atual = q('[data-trilha-atual]');
-        if (atual) atual.textContent = nome;
-        document.title = `${nome} · MASH`;
-    }
-
-    // ------------------------------------------------------------ login e cadastro
-
-    q('#formLogin')?.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const form = event.target;
-        const { email, password } = formData(form);
-        limparAlerta();
-
-        if (!email.trim() || !password) {
-            return mostrarAlerta('danger', 'E-mail e senha não podem estar vazios');
-        }
-
-        carregando(botaoEnviar(form), true, 'Entrando…');
-        const { status, data } = await api('POST', '/login', { email: email.trim(), password });
-        carregando(botaoEnviar(form), false);
-
-        if (status !== 200 || !data.token) {
-            return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível entrar'));
-        }
-
-        guardar.set(TOKEN_KEY, data.token);
-        location.href = '/dashboard';
-    });
-
-    q('#formCadastro')?.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const form = event.target;
-        const { name, email, password, confirmarSenha } = formData(form);
-        limparErros(form);
-        limparAlerta();
-
-        if (password !== confirmarSenha) {
-            erroCampo(form, 'confirmarSenha', 'As senhas não conferem');
-            return focarPrimeiroErro(form);
-        }
-
-        carregando(botaoEnviar(form), true, 'Criando conta…');
-        const { status, data } = await api('POST', '/user', { name, email, password });
-        carregando(botaoEnviar(form), false);
-
-        if (status !== 201) {
-            return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível cadastrar'));
-        }
-
-        irPara('/login', 'success', mensagemDaApi(data, 'Usuário criado com sucesso'));
-    });
-
-    qa('a[href="/logout"]').forEach((link) => {
-        link.addEventListener('click', (event) => {
-            event.preventDefault();
-            sair();
-        });
-    });
 
     // ------------------------------------------------------------ usuário (telas logadas)
 
-    let usuario = null;
-
     function preencherPerfil() {
         const perfil = q('#formPerfil');
-        if (!perfil || !usuario) return;
-        perfil.elements.name.value = usuario.name ?? '';
-        perfil.elements.email.value = usuario.email ?? '';
-        perfil.elements.phone.value = usuario.phone ?? '';
+        if (!perfil) return;
+        perfil.reset();
         perfil.elements.password.value = '';
         perfil.elements.confirmarSenha.value = '';
         limparErros(perfil);
     }
 
-    async function carregarUsuario() {
-        const salvar = q('#btnSalvar');
-        if (salvar) {
-            salvar.disabled = true;
-            limparAlerta();
-        }
-        const { status, data } = await api('GET', '/user');
-        if (status !== 200 || !data.user) {
-            if (q('#formPerfil'))
-                mostrarAlerta(
-                    'danger',
-                    mensagemDaApi(data, 'Não foi possível carregar o perfil'),
-                    'Carregue seus dados antes de salvar alterações.',
-                    { texto: 'Tentar de novo', aoClicar: carregarUsuario }
-                );
-            return;
-        }
-
-        usuario = data.user;
-        qa('[data-user="name"]').forEach((el) => {
-            el.textContent = usuario.name ?? '';
-        });
-        qa('[data-user="email"]').forEach((el) => {
-            el.textContent = usuario.email ?? '';
-        });
-        qa('[data-user="urlImage"]').forEach((el) => {
-            if (usuario.urlImage) el.src = usuario.urlImage;
-        });
-        qa('[data-user="createdAt"]').forEach((el) => {
-            if (usuario.createdAt) el.textContent = dataBR(usuario.createdAt);
-        });
-        preencherPerfil();
-        if (salvar) salvar.disabled = false;
-    }
-
-    if (!paginaPublica) carregarUsuario();
-
     q('#btnDescartar')?.addEventListener('click', preencherPerfil);
-
-    // Últimos acessos: a rota chega com conloq/mash#102; até lá o 404 vira lista vazia
-    async function carregarAcessos() {
-        const lista = q('#listaAcessos');
-        if (!lista) return;
-
-        listaCarregando(lista, 2);
-        const { status, data } = await api('GET', '/user/login-history');
-        if (status !== 200 && status !== 404)
-            return listaErro(lista, 'Não foi possível carregar os acessos', data, carregarAcessos);
-
-        // shortcut: formato da resposta ainda não publicado no Swagger; ajustar quando a #102 sair
-        const acessos = status === 404 ? [] : (data.loginHistory ?? []);
-        if (!acessos.length)
-            return listaEstado(lista, {
-                icone: 'ph-clock-counter-clockwise',
-                titulo: 'Nenhum acesso registrado',
-            });
-
-        lista.removeAttribute('aria-busy');
-        lista.replaceChildren(
-            ...acessos.map((acesso) => {
-                const linha = clonar('tplLinhaAcesso', {
-                    local: acesso.location,
-                    quando: `${new Date(acesso.loggedAt).toLocaleDateString('pt-BR')} · ${new Date(acesso.loggedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · ${acesso.ipAddress}`,
-                    // status = IP já visto nesta conta (não é sucesso/falha do login)
-                    status:
-                        acesso.status === null || acesso.status === undefined
-                            ? null
-                            : acesso.status
-                              ? 'Dispositivo conhecido'
-                              : 'Novo dispositivo',
-                });
-                q('[data-slot="status"]', linha)?.classList.add(
-                    acesso.status ? 'selo-sucesso' : 'selo-aviso'
-                );
-                return linha;
-            })
-        );
-    }
-
-    carregarAcessos();
 
     const volume = q('#volume');
     volume?.addEventListener('input', () =>
         volume.setAttribute('aria-valuetext', ['Baixo', 'Médio', 'Alto'][volume.value])
     );
 
-    q('#formPerfil')?.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    q('#formPerfil')?.addEventListener('submit', (event) => {
         const form = event.target;
-        if (q('#btnSalvar')?.disabled || !usuario) return;
-        const { name, email, phone, password, confirmarSenha } = formData(form);
+        const { name, email, password, confirmarSenha } = formData(form);
         limparErros(form);
-        limparAlerta();
 
         if (!name.trim()) erroCampo(form, 'name', 'Informe seu nome.');
         if (!email.trim()) erroCampo(form, 'email', 'Informe seu e-mail.');
@@ -533,271 +164,48 @@
             erroCampo(form, 'password', 'A senha não pode conter espaços');
         if (password && password !== confirmarSenha)
             erroCampo(form, 'confirmarSenha', 'As senhas não conferem');
-        if (q('.campo-erro', form)) return focarPrimeiroErro(form);
-
-        carregando(botaoEnviar(form), true);
-        const { status, data } = await api('PUT', '/user', {
-            name,
-            email,
-            phone,
-            ...(password && { password }),
-        });
-        carregando(botaoEnviar(form), false);
-
-        if (status !== 200) {
-            return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível salvar'));
+        if (q('.campo-erro', form)) {
+            event.preventDefault();
+            focarPrimeiroErro(form);
         }
-
-        mostrarToast(mensagemDaApi(data, 'Usuário atualizado com sucesso'));
-        carregarUsuario();
-    });
-
-    q('#formFoto')?.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const form = event.target;
-        const arquivo = q('#inputFoto')?.files[0];
-        limparAlerta();
-        if (!arquivo)
-            return mostrarAlerta(
-                'danger',
-                'Nenhuma imagem foi enviada',
-                'Escolha uma foto JPEG ou PNG.'
-            );
-
-        const corpo = new FormData();
-        corpo.append('image', arquivo);
-
-        carregando(botaoEnviar(form), true, 'Enviando…');
-        const { status, data } = await api('PUT', '/user/upload', corpo);
-        carregando(botaoEnviar(form), false);
-
-        if (status !== 200) {
-            return mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível enviar a foto'));
-        }
-
-        mostrarToast(mensagemDaApi(data, 'Imagem enviada com sucesso'));
-        if (data.url)
-            qa('[data-user="urlImage"]').forEach((el) => {
-                el.src = data.url;
-            });
-    });
-
-    q('#btnExcluir')?.addEventListener('click', async () => {
-        const excluida = await confirmar({
-            titulo: 'Excluir sua conta?',
-            mensagem: 'Você sai do MASH e perde o acesso às suas receitas. Não dá para desfazer.',
-            botao: 'Excluir conta',
-            aoConfirmar: async () => {
-                const { status, data } = await api('DELETE', '/user');
-                if (status === 204) return true;
-                mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível excluir a conta'));
-                return false;
-            },
-        });
-        if (excluida) sair('Conta excluída');
     });
 
     // ------------------------------------------------------------ receitas
 
-    let receitasCarregadas = [];
-
-    // Faixa das rampas de uma receita: menor mínima até a maior máxima
-    function faixaDasRampas(rampas) {
-        if (!rampas?.length) return null;
-        const min = Math.min(...rampas.map((t) => t.minTemperatureRamp));
-        const max = Math.max(...rampas.map((t) => t.maxTemperatureRamp));
-        return `${min} – ${max} ºC`;
-    }
-
-    function linhaReceita({ receita, rampas }) {
-        const faixa = faixaDasRampas(rampas);
-        const linha = clonar('tplLinhaReceita', {
-            nome: { href: `/recipes/${receita.id}`, texto: receita.name },
-            rampas: rampas
-                ? rampas.length
-                    ? plural(rampas.length, 'rampa', 'rampas')
-                    : 'Nenhuma'
-                : '—',
-            faixa: rampas === null ? 'Não foi possível carregar' : (faixa ?? 'Sem rampas'),
-            criadaEm: dataBR(receita.createdAt),
-            novaRampa: {
-                href: `/recipes/${receita.id}/temperatures/new`,
-                'aria-label': `Adicionar rampa em ${receita.name}`,
-            },
-            renomear: {
-                href: `/recipes/${receita.id}/edit`,
-                'aria-label': `Editar ${receita.name}`,
-            },
-            excluir: { 'aria-label': `Excluir ${receita.name}` },
+    const linhasReceita = [...qa('#listaReceitas [data-receita-nome]')];
+    if (q('#contagemReceitas'))
+        q('#contagemReceitas').textContent = plural(linhasReceita.length, 'receita', 'receitas');
+    q('#buscaReceitas')?.addEventListener('input', (event) => {
+        const termo = event.target.value.trim().toLowerCase();
+        linhasReceita.forEach((linha) => {
+            linha.hidden = !linha.dataset.receitaNome.includes(termo);
         });
-        if (!faixa) {
-            q('[data-slot="faixa"]', linha).classList.remove('md:font-medium', 'md:text-texto');
-            // no mobile fica só "Sem rampas", sem o "Nenhuma ·" antes
-            ['rampas', 'separador'].forEach((slot) =>
-                q(`[data-slot="${slot}"]`, linha).classList.add('max-md:hidden')
-            );
-        }
-        q('[data-slot="excluir"]', linha).addEventListener('click', async () => {
-            if (!(await excluirReceita(receita))) return;
-            mostrarToast('Receita excluída');
-            carregarReceitas();
-        });
-        return linha;
-    }
-
-    function desenharReceitas() {
-        const lista = q('#listaReceitas');
-        const termo = (q('#buscaReceitas')?.value ?? '').trim().toLowerCase();
-        const visiveis = receitasCarregadas.filter(({ receita }) =>
-            receita.name.toLowerCase().includes(termo)
-        );
-        q('#contagemReceitas').textContent = plural(
-            receitasCarregadas.length,
-            'receita',
-            'receitas'
-        );
-
-        if (!receitasCarregadas.length) {
-            return listaEstado(lista, {
-                icone: 'ph-scroll',
-                titulo: 'Nenhuma receita cadastrada',
-                texto: 'Crie uma receita e adicione as rampas de temperatura para usá-la nos seus lotes.',
-                acao: {
-                    texto: 'Criar primeira receita',
-                    icone: 'ph-plus',
-                    aoClicar: () => abrirModal('modalReceita'),
-                },
+    });
+    qa('form[data-confirmar-titulo]').forEach((form) =>
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const confirmado = await confirmar({
+                titulo: form.dataset.confirmarTitulo,
+                mensagem: form.dataset.confirmarMensagem,
+                botao: form.dataset.confirmarBotao,
             });
-        }
-        if (!visiveis.length) {
-            return listaEstado(lista, {
-                icone: 'ph-magnifying-glass',
-                titulo: 'Nenhuma receita encontrada',
-                texto: 'Tente outro nome.',
-            });
-        }
-        lista.removeAttribute('aria-busy');
-        lista.replaceChildren(...visiveis.map(linhaReceita));
-    }
+            if (confirmado) form.submit();
+        })
+    );
 
-    async function carregarReceitas() {
-        const lista = q('#listaReceitas');
-        if (!lista) return;
-
-        listaCarregando(lista);
-        const { status, data } = await api('GET', '/recipes');
-        if (status !== 200) {
-            mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível carregar as receitas'));
-            return listaErro(
-                lista,
-                'Não foi possível carregar as receitas',
-                data,
-                carregarReceitas
-            );
-        }
-
-        const receitas = data.recipes ?? [];
-        const rampas = await Promise.all(
-            receitas.map((r) => api('GET', `/recipes/${r.id}/temperatures`))
-        );
-        receitasCarregadas = receitas.map((receita, i) => ({
-            receita,
-            rampas: rampas[i].status === 200 ? (rampas[i].data.temperatures ?? []) : null,
-        }));
-        desenharReceitas();
-    }
-
-    async function excluirReceita(receita) {
-        return confirmar({
-            titulo: `Excluir a receita ${receita.name}?`,
-            mensagem:
-                'As rampas de temperatura desta receita também serão excluídas. Não dá para desfazer.',
-            botao: 'Excluir receita',
-            aoConfirmar: async () => {
-                const { status, data } = await api('DELETE', `/recipes/${receita.id}`);
-                if (status === 204) return true;
-                mostrarAlerta('danger', mensagemDaApi(data, 'Não foi possível excluir a receita'));
-                return false;
-            },
-        });
-    }
-
-    q('#buscaReceitas')?.addEventListener('input', desenharReceitas);
-
-    q('#formReceita')?.addEventListener('submit', async (event) => {
-        event.preventDefault();
+    q('#formReceita')?.addEventListener('submit', (event) => {
         const form = event.target;
         const name = formData(form).name.trim();
         limparErros(form);
 
         if (!name) {
+            event.preventDefault();
             erroCampo(form, 'name', 'Nome não pode estar vazio');
-            return focarPrimeiroErro(form);
+            focarPrimeiroErro(form);
         }
-
-        carregando(botaoEnviar(form), true, 'Criando…');
-        const { status, data } = await api('POST', '/recipes', { name });
-        carregando(botaoEnviar(form), false);
-
-        if (status !== 201) {
-            erroCampo(form, 'name', mensagemDaApi(data, 'Não foi possível criar a receita'));
-            return focarPrimeiroErro(form);
-        }
-
-        form.reset();
-        fecharModal('modalReceita');
-        mostrarToast(mensagemDaApi(data, 'Receita criada com sucesso'), data.recipe?.name);
-        carregarReceitas();
     });
 
-    carregarReceitas();
-
-    // ------------------------------------------------------------ novo lote: receitas reais no seletor
-
-    async function carregarReceitasDoLote() {
-        const seletor = q('#loteReceita');
-        if (!seletor) return;
-        const { status, data } = await api('GET', '/recipes');
-        if (status !== 200) {
-            seletor.options[0].textContent = 'Não foi possível carregar as receitas';
-            return erroCampo(
-                q('#formLote'),
-                'recipeId',
-                mensagemDaApi(data, 'Tente de novo em alguns segundos.')
-            );
-        }
-        const receitas = data.recipes ?? [];
-        seletor.options[0].textContent = receitas.length
-            ? 'Escolha uma receita'
-            : 'Nenhuma receita cadastrada';
-        receitas.forEach((r) => seletor.add(new Option(r.name, r.id)));
-    }
-
-    carregarReceitasDoLote();
-
     // ------------------------------------------------------------ detalhe da receita
-
-    const receitaId = rota(/^\/recipes\/([1-9][0-9]*)(?:\/edit)?$/);
-
-    function linhaRampa(t, i) {
-        const ordem = String(t.orderRamp ?? i + 1);
-        const linha = clonar('tplLinhaRampa', {
-            ordem,
-            faixa: `${t.minTemperatureRamp} – ${t.maxTemperatureRamp} ºC`,
-            limites: `${t.minTemperatureLimit} – ${t.maxTemperatureLimit} ºC`,
-            timer: t.timer,
-            inicio: t.initialization,
-            ideal: t.idealTime,
-            editar: {
-                href: `/recipes/${receitaId}/temperatures/${t.id}/edit`,
-                'aria-label': `Editar rampa ${ordem}`,
-            },
-            excluir: { 'aria-label': `Excluir rampa ${ordem}` },
-        });
-        // Excluir rampa ainda não tem rota na API (conloq/mash#97): avisa em vez de apagar
-        q('[data-sem-api]', linha).addEventListener('click', avisarSemApi);
-        return linha;
-    }
 
     // "HH:MM:SS" em minutos; NaN quando o formato não bate
     const minutos = (hms) => {
@@ -861,110 +269,27 @@
         q('[data-perfil="total"]').textContent = `${Math.round(total)} min`;
     }
 
-    async function carregarRampasDaReceita() {
-        const lista = q('#detalheRampas');
-        listaCarregando(lista, 2);
-        const { status, data } = await api('GET', `/recipes/${receitaId}/temperatures`);
-        if (status !== 200) {
-            listaErro(lista, 'Não foi possível carregar as rampas', data, carregarRampasDaReceita);
+    const dadosRampas = q('#detalheRampas')?.dataset.rampas;
+    if (dadosRampas) {
+        try {
+            desenharPerfil(JSON.parse(dadosRampas));
+        } catch {
             desenharPerfil(null);
-            return null;
         }
-
-        const rampas = data.temperatures ?? [];
-        if (!rampas.length) {
-            listaEstado(lista, {
-                icone: 'ph-thermometer-simple',
-                titulo: 'Nenhuma rampa ainda',
-                texto: 'Adicione a primeira rampa de temperatura desta receita.',
-                acao: {
-                    texto: 'Adicionar rampa',
-                    icone: 'ph-plus',
-                    href: `/recipes/${receitaId}/temperatures/new`,
-                },
-            });
-        } else {
-            lista.removeAttribute('aria-busy');
-            lista.replaceChildren(...rampas.map(linhaRampa));
-        }
-        desenharPerfil(rampas);
-        return rampas;
     }
 
-    async function carregarDetalhe() {
-        const form = q('#formEditarReceita');
-        if (!form || !receitaId) return;
-
-        q('#newTemperatureLink').href = `/recipes/${receitaId}/temperatures/new`;
-        q('#newTemperatureLinkMobile').href = `/recipes/${receitaId}/temperatures/new`;
-        q('#iodoReceitaLink').href = `/recipes/${receitaId}/iodine`;
-        const { status, data } = await api('GET', `/recipes/${receitaId}`);
-        if (status !== 200) {
-            q('#recipeResumo').textContent = '';
-            // Receita inexistente ou de outra conta: sem ações que só levariam a outro erro
-            [
-                q('#btnExcluirReceita').closest('.acoes'),
-                q('#tituloRampas').closest('section'),
-                q('#newTemperatureLinkMobile').parentElement,
-            ].forEach((el) => el.classList.add('hidden'));
-            return mostrarAlerta(
-                'danger',
-                mensagemDaApi(data, 'Não foi possível carregar a receita')
-            );
-        }
-
-        const receita = data.recipe;
-        q('#recipeName').textContent = receita.name;
-        nomearPagina(receita.name);
-        form.elements.name.value = receita.name;
-
-        const rampas = await carregarRampasDaReceita();
-        q('#recipeResumo').textContent = [
-            rampas
-                ? rampas.length
-                    ? plural(rampas.length, 'rampa', 'rampas')
-                    : 'nenhuma rampa'
-                : null,
-            `criada em ${dataBR(receita.createdAt)}`,
-        ]
-            .filter(Boolean)
-            .join(' · ');
-
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const name = form.elements.name.value.trim();
-            limparErros(form);
+    const formEditarReceita = q('#formEditarReceita');
+    if (formEditarReceita) {
+        formEditarReceita.addEventListener('submit', (event) => {
+            const name = formEditarReceita.elements.name.value.trim();
+            limparErros(formEditarReceita);
             if (!name) {
-                erroCampo(form, 'name', 'Nome não pode estar vazio');
-                return focarPrimeiroErro(form);
+                event.preventDefault();
+                erroCampo(formEditarReceita, 'name', 'Nome não pode estar vazio');
+                focarPrimeiroErro(formEditarReceita);
             }
-
-            carregando(botaoEnviar(form), true);
-            const resposta = await api('PUT', `/recipes/${receitaId}`, { name });
-            carregando(botaoEnviar(form), false);
-            if (resposta.status !== 200) {
-                erroCampo(
-                    form,
-                    'name',
-                    mensagemDaApi(resposta.data, 'Não foi possível salvar a receita')
-                );
-                return focarPrimeiroErro(form);
-            }
-
-            receita.name = name;
-            q('#recipeName').textContent = name;
-            nomearPagina(name);
-            fecharModal('modalRenomear');
-            history.replaceState(null, '', `/recipes/${receitaId}`);
-            mostrarToast(mensagemDaApi(resposta.data, 'Receita atualizada com sucesso'));
-        });
-
-        q('#btnExcluirReceita').addEventListener('click', async () => {
-            if (await excluirReceita(receita)) irPara('/recipes', 'success', 'Receita excluída');
         });
     }
-
-    carregarDetalhe();
 
     // ------------------------------------------------------------ nova rampa de temperatura
 
@@ -1025,66 +350,19 @@
             caminho.match(
                 /^\/recipes\/([1-9][0-9]*)\/temperatures\/(?:new|([1-9][0-9]*)\/edit)$/
             ) ?? [];
-        const urlReceita = `/recipes/${idReceita}`;
-        q('#voltarReceita').href = urlReceita;
-        q('#voltarTopo').href = urlReceita;
-        q('#cancelarRampa').href = urlReceita;
-        api('GET', urlReceita).then(({ status, data }) => {
-            if (status === 200) q('#voltarReceita span').textContent = data.recipe.name;
-        });
+        // Edição recebe a rampa renderizada pelo EJS; salvar aguarda a rota da API (#97).
+        if (idRampa) return;
 
-        // Edição: preenche com a rampa salva; o envio fica com o aviso data-sem-api (conloq/mash#97)
-        if (idRampa) return preencherRampa(form, idReceita, idRampa);
-
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
+        form.addEventListener('submit', (event) => {
             const campos = formData(form);
             limparErros(form);
-            limparAlerta();
 
             if (!validarRampa(form, campos)) {
+                event.preventDefault();
                 mostrarAlerta('danger', 'Confira os campos marcados', 'Corrija e salve de novo.');
-                return focarPrimeiroErro(form);
+                focarPrimeiroErro(form);
             }
-
-            carregando(botaoEnviar(form), true);
-            const { status, data } = await api('POST', `/recipes/${idReceita}/temperatures`, {
-                ...Object.fromEntries(TEMPERATURAS.map((key) => [key, Number(campos[key])])),
-                ...Object.fromEntries(HORARIOS.map((key) => [key, comSegundos(campos[key])])),
-                ...(campos.orderRamp !== '' && { orderRamp: Number(campos.orderRamp) }),
-            });
-            carregando(botaoEnviar(form), false);
-
-            if (status !== 201) {
-                return mostrarAlerta(
-                    'danger',
-                    mensagemDaApi(data, 'Não foi possível salvar a temperatura')
-                );
-            }
-
-            irPara(urlReceita, 'success', mensagemDaApi(data, 'Temperatura criada com sucesso'));
         });
-    }
-
-    async function preencherRampa(form, idReceita, idRampa) {
-        const { status, data } = await api('GET', `/recipes/${idReceita}/temperatures`);
-        const rampa =
-            status === 200 && (data.temperatures ?? []).find((t) => String(t.id) === idRampa);
-        if (!rampa) {
-            return mostrarAlerta(
-                'danger',
-                status === 200
-                    ? 'Rampa não encontrada nesta receita'
-                    : mensagemDaApi(data, 'Não foi possível carregar a rampa')
-            );
-        }
-        [...TEMPERATURAS, ...HORARIOS, 'orderRamp'].forEach((key) => {
-            form.elements[key].value = rampa[key] ?? '';
-        });
-        if (rampa.orderRamp) {
-            q('#tituloRampa').textContent = `Editar rampa ${rampa.orderRamp}`;
-            nomearPagina(`Editar rampa ${rampa.orderRamp}`);
-        }
     }
 
     iniciarFormRampa();
@@ -1149,30 +427,12 @@
         const form = q('#formIodoReceita');
         if (!form || !receitaIodo) return;
 
-        const seletor = form.elements.rampa;
-        api('GET', `/recipes/${receitaIodo}`).then(({ status, data }) => {
-            if (status === 200) q('#voltarReceitaIodo').textContent = data.recipe.name;
-        });
-        const { status, data } = await api('GET', `/recipes/${receitaIodo}/temperatures`);
-        const rampas = status === 200 ? (data.temperatures ?? []) : [];
-        if (status !== 200)
-            erroCampo(form, 'rampa', mensagemDaApi(data, 'Não foi possível carregar as rampas'));
-        seletor.options[0].textContent = rampas.length
-            ? 'Escolha a rampa'
-            : 'Nenhuma rampa nesta receita';
-        rampas.forEach((t, i) =>
-            seletor.add(
-                new Option(
-                    `Rampa ${t.orderRamp ?? i + 1} · ${t.minTemperatureRamp} a ${t.maxTemperatureRamp} ºC`,
-                    t.id
-                )
-            )
-        );
-        // sugere a sacarificação: a rampa cuja faixa inclui 65 ºC
-        const sacarificacao = rampas.find(
-            (t) => t.minTemperatureRamp <= 65 && 65 <= t.maxTemperatureRamp
-        );
-        if (sacarificacao) seletor.value = String(sacarificacao.id);
+        let rampas = [];
+        try {
+            rampas = JSON.parse(form.dataset.rampas ?? '[]');
+        } catch {
+            rampas = [];
+        }
 
         form.addEventListener('input', () => desenharPrevia(form, rampas));
         desenharPrevia(form, rampas);

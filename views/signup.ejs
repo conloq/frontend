@@ -7,7 +7,7 @@
     <div class="flex w-full max-w-[440px] flex-col gap-7">
       <h1 class="text-[32px] font-bold max-lg:sr-only">Criar conta</h1>
       <%- include('partials/mensagens.ejs') %>
-      <form id="formCadastro" method="post" class="flex flex-col gap-[18px]" novalidate>
+      <form id="formCadastro" action="/signup" method="post" class="flex flex-col gap-[18px]">
         <label class="campo" for="nome">
           <span class="campo-rotulo">Nome completo</span>
           <span class="campo-caixa">
@@ -26,7 +26,7 @@
           <label class="campo-rotulo" for="senha">Senha</label>
           <span class="campo-caixa">
             <i class="ph ph-lock-simple" aria-hidden="true"></i>
-            <input id="senha" type="password" name="password" autocomplete="new-password" required>
+            <input id="senha" type="password" name="password" autocomplete="new-password" placeholder="Crie uma senha" required>
             <button type="button" class="btn-icone -mr-2" data-toggle-senha="senha" aria-label="Mostrar senha"><i class="ph ph-eye" aria-hidden="true"></i></button>
           </span>
           <span class="campo-ajuda">Sem espaços.</span>
@@ -35,7 +35,7 @@
           <label class="campo-rotulo" for="confirmarSenha">Confirmar senha</label>
           <span class="campo-caixa">
             <i class="ph ph-lock-simple" aria-hidden="true"></i>
-            <input id="confirmarSenha" type="password" name="confirmarSenha" autocomplete="new-password" required>
+            <input id="confirmarSenha" type="password" name="confirmarSenha" autocomplete="new-password" placeholder="Repita a senha" required>
             <button type="button" class="btn-icone -mr-2" data-toggle-senha="confirmarSenha" aria-label="Mostrar senha"><i class="ph ph-eye" aria-hidden="true"></i></button>
           </span>
           <span class="campo-ajuda" data-erro></span>

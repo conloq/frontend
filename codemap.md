@@ -4,33 +4,35 @@
 
 Frontend do Sistema MASH (Projeto Integrador III, DSM3, FATEC Registro, org `conloq`): templates EJS, Tailwind CSS v4 e JavaScript vanilla do navegador, entregues por um `index.js` na porta 4000.
 
-Dois repositórios, um papel cada: este só tem telas; o Back-End (`conloq/Back-End`, API REST na porta 8080) tem regra de negócio, banco e JWT. O `index.js` **só entrega as páginas** (`res.render`) e não repete nenhuma rota da API. Quem consome a API é o navegador, em `public/js/app.js`, com `fetch` direto nas rotas do próprio Back-End (`/login`, `/user`, `/recipes`...). O Back-End libera CORS para `http://localhost:4000`. O token JWT fica no `localStorage` (`mash-token`) e vai como Bearer.
+Dois repositórios, um papel cada: este tem telas e apresentação; o Back-End (`conloq/Back-End`, API REST na porta 8080) tem regra de negócio, dados de domínio e emite JWT. `controllers/pageController.js` busca dados no servidor e usa `res.render(view, locals)`, como nas views de DW2. Formulários fazem POST a rotas do frontend, que chamam a API e redirecionam. A sessão Express e o JWT ficam na tabela `sessions` do mesmo MySQL, com uma conta frontend limitada a essa tabela.
 
 ## System Entry Points
 
-- `index.js`: aplicação Express: view engine EJS, `public/` e `/vendor/phosphor` estáticos e uma rota `GET` por tela. Escuta em `PORT` (padrão 4000). Lê `API_URL` (padrão `http://localhost:8080`), expõe em `app.locals.apiUrl` e carrega `.env` com `process.loadEnvFile()`.
-- `public/js/app.js`: consumo da API: guarda de rota, login, cadastro, perfil, foto, receitas, temperatura e mensagens. Lê `window.API_URL`, definido em `views/partials/footer.ejs`.
+- `index.js`: Express/EJS, sessão, arquivos estáticos e montagem do controller. Escuta em `PORT` (padrão 4000); `.env` é opcional.
+- `controllers/pageController.js`: rotas GET/POST das telas, login/cadastro/logout, chamadas server-side à API, locals EJS e flash de sessão.
+- `public/js/app.js`: interações da interface, validação dos formulários e visuais derivados; não guarda JWT nem chama a API.
 - `package.json`: runtime ESM; scripts `start` (`nodemon index.js`), `build:css`, `watch:css` e `test` (sintaxe do servidor e verificações de perfil, upload e regressões do cliente).
-- `.env.example`: `PORT=4000` e `API_URL=http://localhost:8080`.
+- `.env.example`: `PORT`, `API_URL`, `SESSION_SECRET` e `SESSION_DB_*`.
 - `public/css/tailwind.css`: entrada do Tailwind v4 e fonte das classes usadas nos templates e no JS.
 - `views/partials/header.ejs`: `<head>` compartilhado que carrega `/vendor/phosphor/src/regular/style.css` e `/css/style.css`.
 
-### Telas (`index.js`)
+### Rotas de tela (`controllers/pageController.js`)
 
-| Rota GET | Template | Chamadas da API feitas por `app.js` |
+| Rota GET | Template | Dados do Back-End buscados pelo controller |
 |---|---|---|
-| `/` | - | redireciona para `/recipes` |
-| `/login` | `login.ejs` | `POST /login` |
-| `/signup` | `signup.ejs` | `POST /user` |
-| `/logout` | - | redireciona para `/login`; o `app.js` apaga o token |
-| `/profile` | `profile.ejs` | `GET /user`, `PUT /user`, `PUT /user/upload`, `DELETE /user` e `GET /user/login-history` no card "Últimos acessos" (rota prevista na conloq/mash#102; enquanto a API responde 404, o card mostra a lista vazia) |
-| `/profile/access-history` | `accessHistory.ejs` | `GET /user/login-history` (tela mobile de últimos acessos, aberta pelo Perfil) |
+| `/` | - | redireciona para `/dashboard` |
+| `/dw2-example` | `dw2Example.ejs` | nenhuma; exemplo didático de `res.render` com lista estática percorrida pelo EJS |
+| `/login` | `login.ejs` | POST `/login` no servidor |
+| `/signup` | `signup.ejs` | POST `/user` no servidor |
+| `/logout` | - | destrói a sessão e redireciona para `/login` |
+| `/profile` | `profile.ejs` | `GET /user`, `/user/login-history`; dados passados como `user` e `acessos` |
+| `/profile/access-history` | `accessHistory.ejs` | `GET /user`, `/user/login-history` |
 | `/settings`, `/settings/security` | `settings.ejs` (`aba`) | nenhuma; salvar usa `data-sem-api` |
-| `/recipes` | `recipes.ejs` | `GET /user`, `GET /recipes`, `GET /recipes/:id/temperatures` (uma por receita), `POST /recipes`, `DELETE /recipes/:id` |
-| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | `GET /recipes/:id`, `GET /recipes/:id/temperatures`, `PUT /recipes/:id`, `DELETE /recipes/:id` (`/edit` é a mesma tela com o modal de renomear aberto; cada rampa oferece ações para editar e excluir, ambas com `data-sem-api`: não fazem nada e não mostram aviso, #97) |
-| `/recipes/:id/iodine` | `recipeIodine.ejs` | `GET /user`, `GET /recipes/:id/temperatures` (seletor de rampa); salvar é `data-sem-api` (#101); a prévia da sessão é desenhada com os valores do formulário |
-| `/recipes/:id/temperatures/new` | `temperatureForm.ejs` | `GET /user`, `GET /recipes/:id`, `POST /recipes/:id/temperatures` |
-| `/recipes/:id/temperatures/:temperatureId/edit` | `temperatureForm.ejs` (`editando`) | `GET /user`, `GET /recipes/:id`, `GET /recipes/:id/temperatures`; salvar é `data-sem-api` (#97) |
+| `/recipes` | `recipes.ejs` | `GET /user`, `/recipes` e temperaturas de cada receita |
+| `/recipes/:id`, `/recipes/:id/edit` | `recipe.ejs` | usuário, `/recipes/:id` e rampas; `/edit` abre modal |
+| `/recipes/:id/iodine` | `recipeIodine.ejs` | usuário, receita e rampas |
+| `/recipes/:id/temperatures/new` | `temperatureForm.ejs` | usuário e receita |
+| `/recipes/:id/temperatures/:temperatureId/edit` | `temperatureForm.ejs` (`editando`) | usuário, receita e temperatura |
 | `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `forgotPassword.ejs` (`etapa`) | nenhuma; páginas públicas (barra da marca, espuma `img/espuma.png` e card central no desktop; código em 6 caixas e contagem do "Reenviar"); formulários `data-sem-api` (conloq/mash#73) |
 | `/dashboard` | `dashboard.ejs` | `GET /user`; indicadores e cards em estado vazio (sem rota na API) |
 | `/lots`, `/lots/:id` | `lots.ejs`, `lot.ejs` | `GET /user`; lista e detalhe em estado vazio; excluir é `data-sem-api` (API de lotes na #31/#92) |
@@ -45,34 +47,34 @@ Fora desta entrega: recuperar senha (as telas existem, sem endpoint no depósito
 
 | Directory | Responsibility Summary | Detailed Map |
 |---|---|---|
-| `views/` | Templates EJS das telas. O HTML sai sem dados; o `app.js` preenche. | [views/codemap.md](views/codemap.md) |
+| `views/` | Templates EJS das telas; `dw2Example.ejs` demonstra renderização de dados no servidor. | [views/codemap.md](views/codemap.md) |
+| `controllers/` | Rotas de página, leituras e gravações à API no servidor. | [controllers/codemap.md](controllers/codemap.md) |
 | `views/partials/` | Shell compartilhado: header, footer, sidebar, top bar e área de mensagens. | [views/partials/codemap.md](views/partials/codemap.md) |
 | `public/` | Recursos estáticos do navegador: CSS, JavaScript, imagens e ícones. | [public/codemap.md](public/codemap.md) |
 | `public/css/` | Fonte Tailwind v4 e CSS compilado servido pela aplicação. | [public/css/codemap.md](public/css/codemap.md) |
-| `public/js/` | `script.js` (sidebar, modais, formulários) e `app.js` (consumo da API). | [public/js/codemap.md](public/js/codemap.md) |
-| `scripts/` | Verificações com assert/VM para perfil, upload, sessão, timeout, foco e EJS (`npm test`). | [scripts/codemap.md](scripts/codemap.md) |
+| `public/js/` | `script.js` (sidebar e modais) e `app.js` (validação e interações de tela). | [public/js/codemap.md](public/js/codemap.md) |
+| `scripts/` | Verificações com assert/VM para forms, perfil, upload, foco e EJS (`npm test`). | [scripts/codemap.md](scripts/codemap.md) |
 | `docs/` | Documentação de frontend, planos, specs, export do Figma e docs de codebase. | `docs/frontend-screens.md`, `docs/frontend-components.md`, `docs/frontend-figma.md` |
 
 Arquivos na raiz: `index.js`, `package.json`, `.env.example`, `README.md`, `AGENTS.md`, `.coderabbit.yaml`, este `codemap.md`.
 
 ## Runtime Flow
 
-1. `npm start` executa `nodemon index.js` na porta 4000. A API (`conloq/Back-End`) precisa estar de pé em `API_URL`.
-2. Toda página carrega `window.API_URL` (footer), `/js/script.js` e `/js/app.js`.
-3. Guarda de rota: sem `mash-token`, qualquer tela que não seja `/login` ou `/signup` volta para `/login`; com token, `/login` e `/signup` vão para `/recipes`.
-4. Login: `#formLogin` faz `POST {API_URL}/login`; com 200 grava `data.token` no `localStorage` e vai para `/recipes`.
-5. Chamadas protegidas: `api()` envia `Authorization: Bearer <token>`. Um 401 só apaga o token usado naquela chamada, se ainda for o atual, e volta ao `/login` com aviso.
-6. Mensagens: a mensagem da API (`error` ou `message`, em pt-BR) aparece como veio em `#mensagens`, em Tailwind: `danger`, `warning` e `success`. Após um redirecionamento, a mensagem passa por `localStorage` (`mash-flash`). Com a API fora do ar, `api()` devolve 503 com "Não foi possível falar com a API". Chamadas têm timeout de 15 s; em gravações, o aviso pede conferir os dados antes de repetir.
-7. Logout e exclusão de conta apagam o token. A API não revoga tokens; eles expiram em um dia.
-8. Todo template inclui `partials/header.ejs` e `partials/footer.ejs`; as telas autenticadas incluem também `partials/sidebar.ejs` e `partials/topBar.ejs`, que o `app.js` preenche com `data-user`.
-9. `npm run build:css` compila `public/css/tailwind.css` em `public/css/style.css`.
+1. `npm start` executa `nodemon index.js` na porta 4000. A API (`conloq/Back-End`) precisa estar de pé em `API_URL` para login e páginas com dados.
+2. `index.js` configura a sessão e monta `controllers/pageController.js`; o controller carrega dados e chama `res.render(view, locals)`.
+3. Login envia POST ao controller, que guarda o JWT na sessão. O navegador recebe cookie `HttpOnly`, nunca o token.
+4. Páginas autenticadas validam sessão e consultam `/user`; EJS recebe o usuário e dados específicos da tela.
+5. Formulários POST chegam ao controller, que valida entradas, chama a rota correspondente da API com Bearer e redireciona (PRG). O browser não chama a API.
+6. Mensagens e valores reaproveitáveis após erro passam pelo flash de sessão. Logout e 401 destroem a sessão local, mas não revogam o JWT na API.
+7. O cookie é HttpOnly, SameSite Strict e Secure em produção. A sessão persiste no MySQL em `sessions`; `SESSION_SECRET` forte é obrigatório em produção.
+8. `npm run build:css` compila `public/css/tailwind.css` em `public/css/style.css`.
 
 ## Cross-Module Integration
 
-- **Back-End:** só `public/js/app.js` fala com a API, nas rotas do próprio Back-End. O `app.js` do Back-End libera CORS para `FRONTEND_URL` (padrão `http://localhost:4000`). Contrato de autenticação na issue `conloq/mash#38`; rotas em `Back-End/routes/` (`userRoutes.js`, `recipeRoutes.js`, `temperatureRoutes.js`).
+- **Back-End:** `controllers/pageController.js` fala com a API do Back-End; o browser não chama diretamente e não depende de CORS. Contrato de autenticação na issue `conloq/mash#38`; rotas em `Back-End/routes/` (`userRoutes.js`, `recipeRoutes.js`, `temperatureRoutes.js`).
 - **Nomes de campo:** o perfil recebe `phone` e `urlImage` em camelCase e envia `phone` no formulário (conloq/mash#71). Receitas e rampas usam `/recipes` e campos camelCase, incluindo `minTemperatureRamp`, `idealTime` e `orderRamp`, pela #86.
-- **Shell:** `header.ejs` + `footer.ejs` envolvem todas as páginas; `topBar.ejs` e `profile.ejs` são preenchidos pelo `app.js` via `data-user`; `partials/mensagens.ejs` é a área `#mensagens`.
-- **JavaScript ↔ templates:** `public/js/script.js` depende de IDs, classes e `data-*` das views (`#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `#senha`, `#btnAlterar`, `#btnSalvar`, `#inputFoto`, `#previewFoto`, `#formPerfil`, `.js-modal`, `[data-modal-open]`, `[data-modal-close]`). `public/js/app.js` depende de `#formLogin`, `#formCadastro`, `#formPerfil`, `#formFoto`, `#btnExcluir`, `#formReceita`, `#listaReceitas`, `#formTemperatura`, `#mensagens` e `[data-user]`.
+- **Shell:** `header.ejs` + `footer.ejs` envolvem todas as páginas; o `topBar.ejs` e `profile.ejs` recebem `user` como local EJS; `partials/mensagens.ejs` é a área `#mensagens`.
+- **JavaScript ↔ templates:** `public/js/script.js` depende de IDs, classes e `data-*` das views (`#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `#senha`, `#btnAlterar`, `#btnSalvar`, `#inputFoto`, `#previewFoto`, `#formPerfil`, `.js-modal`, `[data-modal-open]`, `[data-modal-close]`). `public/js/app.js` cuida de validação e interações de interface (`#formPerfil`, `#formFoto`, `#formReceita`, `#listaReceitas`, `#formTemperatura`, `#mensagens`).
 - **Tailwind:** `public/css/tailwind.css` coleta classes de `views/` e `public/js/` via `@source` e define o tema do redesign v2 (tokens `--color-*` como `--color-acao`, `--color-fundo` e `--color-mash-brown`) e as classes de componente (`btn-*`, `campo*`, `card`, `selo-*`, `tabela-*`, `esqueleto`); detalhes em `public/css/codemap.md`.
 - **Coordenação:** `haimonvieira/conloq-pi-coordenacao` (local `D:/Fatec/PI/team-lead`) guarda o estado do projeto.
 
@@ -80,12 +82,12 @@ Arquivos na raiz: `index.js`, `package.json`, `.env.example`, `README.md`, `AGEN
 
 Este atlas documenta o código verificável deste repositório. Ficam fora: `node_modules/`, `public/css/style.css` (saída gerada), `.git/` e `docs/**` como fonte de arquitetura.
 
-O Back-End **não faz parte deste repositório**: aqui não existem `config/`, `routes/` de API, `controllers/`, `middlewares/`, `models/` nem `services/`, nem MySQL, Sequelize, bcrypt, JWT ou sessão de servidor. Regra de negócio e banco vivem em `conloq/Back-End`.
+O Back-End **não faz parte deste repositório**: `controllers/pageController.js` contém rotas de apresentação, não regras de negócio nem controllers da API. Banco e emissão de JWT vivem em `conloq/Back-End`.
 
 ## Receitas e rampas: integração da #86
 
-O navegador consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista em `recipes`, detalhe em `recipe` e rampas em `temperatures`. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
+O controller consome `GET/POST /recipes`, `GET /recipes/:id` e `GET/POST /recipes/:id/temperatures` da #32. Lista, detalhe e rampas são passados aos templates EJS. A tela usa `minTemperatureRamp`, `maxTemperatureRamp`, `minTemperatureLimit`, `maxTemperatureLimit`, `timer`, `initialization`, `idealTime` e `orderRamp` opcional. Temperaturas inteiras entre 0 e 100 °C, mínimo ≤ máximo; horários HH:MM:SS.
 
 Rotas de tela: `/recipes` (`recipes.ejs`), `/recipes/:id` e `/recipes/:id/edit` (`recipe.ejs`) e `/recipes/:id/temperatures/new` e `/recipes/:id/temperatures/:temperatureId/edit` (`temperatureForm.ejs`). Lotes e análises mostram estados de indisponibilidade até a integração com a API. O teste de iodo em `/analyses/new` é uma simulação com dados locais, sem persistência e sem etiqueta de simulação na tela (decisão de 21/10/2026, conloq/mash#9). Edição e exclusão de rampas permanecem na #97. O visual segue o redesign v2 de `docs/design/mash.pen`.
 
-Detalhe, criação, edição do nome e exclusão de receita usam chamadas reais com Bearer. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.
+O controller realiza leituras e mutações com Bearer no servidor; o navegador não recebe o token. PUT/DELETE existentes foram alinhados ao caminho em inglês para preservar a interface; a conclusão das regras da #93, incluindo vínculo com lotes, continua naquela issue. Perfil mantém phone/urlImage da #71. O design atual é mantido pela regra da #78, sem bloqueio por desenho ausente. Validação pública ainda depende do deploy #68/#69; evidência local não equivale a deploy.

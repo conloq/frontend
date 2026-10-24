@@ -1,16 +1,18 @@
-<%- include('partials/shellInicio.ejs', { titulo: 'Receita', trilha: ['Receitas', 'Receita'], voltar: '/recipes' }) %>
+<%- include('partials/shellInicio.ejs', { titulo: recipe.name, trilha: ['Receitas', recipe.name], voltar: '/recipes' }) %>
 <div class="flex flex-col gap-2">
   <a href="/recipes" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Todas as receitas</a>
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div class="flex min-w-0 flex-col gap-1.5">
-      <h1 id="recipeName" class="truncate text-[22px] font-semibold lg:text-[30px]">Receita</h1>
-      <p id="recipeResumo" class="text-texto-2">Carregando…</p>
+      <h1 id="recipeName" class="truncate text-[22px] font-semibold lg:text-[30px]"><%= recipe.name %></h1>
+      <p id="recipeResumo" class="text-texto-2"><%= rampas === null ? 'Não foi possível carregar as rampas' : `${rampas.length ? `${rampas.length} ${rampas.length === 1 ? 'rampa' : 'rampas'}` : 'nenhuma rampa'} · criada em ${recipe.createdAt ? new Date(recipe.createdAt).toLocaleDateString('pt-BR') : '—'}` %></p>
     </div>
     <div class="acoes">
-      <button type="button" id="btnExcluirReceita" class="btn-perigo max-lg:order-1"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
+      <form action="/recipes/<%= recipe.id %>/delete" method="post" data-confirmar-titulo="Excluir a receita <%= recipe.name %>?" data-confirmar-mensagem="As rampas de temperatura desta receita também serão excluídas. Não dá para desfazer." data-confirmar-botao="Excluir receita">
+        <button type="submit" id="btnExcluirReceita" class="btn-perigo max-lg:order-1"><i class="ph ph-trash" aria-hidden="true"></i>Excluir</button>
+      </form>
       <button type="button" class="btn-secundario" data-modal-open="modalRenomear"><i class="ph ph-pencil-simple" aria-hidden="true"></i>Renomear</button>
-      <a id="iodoReceitaLink" href="#" class="btn-secundario max-lg:order-2 max-lg:col-span-2"><i class="ph ph-test-tube" aria-hidden="true"></i>Teste de iodo</a>
-      <a id="newTemperatureLink" href="#" class="btn-primario max-lg:hidden"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
+      <a id="iodoReceitaLink" href="/recipes/<%= recipe.id %>/iodine" class="btn-secundario max-lg:order-2 max-lg:col-span-2"><i class="ph ph-test-tube" aria-hidden="true"></i>Teste de iodo</a>
+      <a id="newTemperatureLink" href="/recipes/<%= recipe.id %>/temperatures/new" class="btn-primario max-lg:hidden"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
     </div>
   </div>
 </div>
@@ -21,7 +23,23 @@
   <div class="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]" aria-hidden="true">
     <span>Ordem</span><span>Faixa da rampa</span><span>Limites</span><span>Temporizador</span><span>Início do timer</span><span>Tempo ideal</span><span class="text-right">Ações</span>
   </div>
-  <div id="detalheRampas" aria-live="polite"></div>
+  <div id="detalheRampas" aria-live="polite" data-rampas="<%= JSON.stringify(rampas ?? []) %>">
+    <% if (rampas === null) { %>
+      <%- include('partials/estadoVazio.ejs', { icone: 'ph-cloud-slash', titulo: 'Não foi possível carregar as rampas', texto: 'Tente novamente em alguns instantes.' }) %>
+    <% } else if (!rampas.length) { %>
+      <%- include('partials/estadoVazio.ejs', { icone: 'ph-thermometer-simple', titulo: 'Nenhuma rampa ainda', texto: 'Adicione a primeira rampa de temperatura desta receita.', acao: { texto: 'Adicionar rampa', icone: 'ph-plus', href: `/recipes/${recipe.id}/temperatures/new` } }) %>
+    <% } else { rampas.forEach((rampa, i) => { const ordem = rampa.orderRamp ?? i + 1; %>
+      <div class="tabela-linha grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-6 py-4 max-lg:mb-3 max-lg:rounded-xl max-lg:border max-lg:bg-superficie max-lg:px-4 max-lg:pb-4 max-lg:pt-3 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:gap-x-4 lg:py-0">
+        <span class="grid size-8 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold"><%= ordem %></span>
+        <span class="font-semibold max-lg:text-[17px]"><%= rampa.minTemperatureRamp %> – <%= rampa.maxTemperatureRamp %> ºC</span>
+        <span class="flex gap-1 max-lg:col-start-3 max-lg:row-start-1 lg:col-start-7 lg:justify-end"><a href="/recipes/<%= recipe.id %>/temperatures/<%= rampa.id %>/edit" class="btn-icone" aria-label="Editar rampa <%= ordem %>"><i class="ph ph-pencil-simple" aria-hidden="true"></i></a><button type="button" class="btn-icone-perigo" data-sem-api="conloq/mash#97" aria-label="Excluir rampa <%= ordem %>"><i class="ph ph-trash" aria-hidden="true"></i></button></span>
+        <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-3 lg:row-start-1 lg:text-texto-2"><span class="text-texto-2 lg:hidden">Limites</span><span><%= rampa.minTemperatureLimit %> – <%= rampa.maxTemperatureLimit %> ºC</span></span>
+        <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-4 lg:row-start-1"><span class="text-texto-2 lg:hidden">Temporizador</span><span><%= rampa.timer %></span></span>
+        <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-5 lg:row-start-1"><span class="text-texto-2 lg:hidden">Início do timer</span><span><%= rampa.initialization %></span></span>
+        <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-6 lg:row-start-1"><span class="text-texto-2 lg:hidden">Tempo ideal</span><span><%= rampa.idealTime %></span></span>
+      </div>
+    <% }); } %>
+  </div>
 </section>
 
 <%# Perfil das rampas: app.js posiciona cada faixa pelo início e pela duração do timer %>
@@ -56,38 +74,22 @@
 </template>
 
 <div class="barra-mobile lg:hidden">
-  <a id="newTemperatureLinkMobile" href="#" class="btn-primario w-full"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
+  <a id="newTemperatureLinkMobile" href="/recipes/<%= recipe.id %>/temperatures/new" class="btn-primario w-full"><i class="ph ph-plus" aria-hidden="true"></i>Adicionar rampa</a>
 </div>
 
-<%# Linha da rampa; app.js clona e preenche os data-slot %>
-<template id="tplLinhaRampa">
-  <%# Mobile: card por rampa (número, faixa e ações em cima; rótulo/valor embaixo). Desktop: linha da tabela %>
-  <div class="tabela-linha grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-6 py-4 max-lg:mb-3 max-lg:rounded-xl max-lg:border max-lg:bg-superficie max-lg:px-4 max-lg:pb-4 max-lg:pt-3 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:gap-x-4 lg:py-0">
-    <span class="grid size-8 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold" data-slot="ordem"></span>
-    <span class="font-semibold max-lg:text-[17px]" data-slot="faixa"></span>
-    <span class="flex gap-1 max-lg:col-start-3 max-lg:row-start-1 lg:col-start-7 lg:justify-end">
-      <a class="btn-icone" data-slot="editar"><i class="ph ph-pencil-simple" aria-hidden="true"></i></a>
-      <button type="button" class="btn-icone-perigo" data-slot="excluir" data-sem-api="conloq/mash#97"><i class="ph ph-trash" aria-hidden="true"></i></button>
-    </span>
-    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-3 lg:row-start-1 lg:text-texto-2"><span class="text-texto-2 lg:hidden">Limites</span><span data-slot="limites"></span></span>
-    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-4 lg:row-start-1"><span class="text-texto-2 lg:hidden">Temporizador</span><span data-slot="timer"></span></span>
-    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-5 lg:row-start-1"><span class="text-texto-2 lg:hidden">Início do timer</span><span data-slot="inicio"></span></span>
-    <span class="max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm lg:col-start-6 lg:row-start-1"><span class="text-texto-2 lg:hidden">Tempo ideal</span><span data-slot="ideal"></span></span>
-  </div>
-</template>
 
-<div id="modalRenomear" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true"<%- locals.abrirRenomear ? ` data-abrir data-voltar="/recipes/${encodeURIComponent(id)}"` : '' %>>
+<div id="modalRenomear" class="js-modal folha fixed inset-0 z-50 hidden bg-texto/60 p-4" aria-hidden="true"<% if (locals.abrirRenomear) { %> data-abrir data-voltar="/recipes/<%= encodeURIComponent(recipe.id) %>"<% } %>>
   <div class="flex min-h-full items-center justify-center">
     <div class="w-full max-w-[520px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]" role="dialog" aria-modal="true" aria-labelledby="modalRenomearTitulo">
       <div class="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
         <h2 id="modalRenomearTitulo" class="flex-1 text-[22px] font-semibold">Renomear receita</h2>
         <button type="button" class="btn-icone" data-modal-close aria-label="Fechar"><i class="ph ph-x" aria-hidden="true"></i></button>
       </div>
-      <form id="formEditarReceita" novalidate>
+      <form id="formEditarReceita" action="/recipes/<%= recipe.id %>" method="post" novalidate>
         <div class="flex flex-col gap-4 p-6">
           <div class="campo" data-campo="name">
             <label class="campo-rotulo" for="receitaNomeEditar">Nome da receita</label>
-            <span class="campo-caixa"><input id="receitaNomeEditar" name="name" maxlength="255" required></span>
+            <span class="campo-caixa"><input id="receitaNomeEditar" name="name" value="<%= locals.flash?.values?.name ?? recipe.name %>" maxlength="255" placeholder="Ex.: American Pale Ale" required></span>
             <span class="campo-ajuda" data-erro>Até 255 caracteres. Não pode repetir o nome de outra receita sua.</span>
           </div>
         </div>

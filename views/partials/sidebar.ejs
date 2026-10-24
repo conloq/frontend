@@ -1,4 +1,11 @@
 <%# Menu lateral: 18rem aberto, 5rem recolhido (desktop); gaveta no mobile. public/js/script.js controla. %>
+<script>
+  try {
+    if (localStorage.getItem('mash-sidebar-collapsed') === 'true') document.body.classList.add('sidebar-collapsed');
+  } catch {
+    // Sem acesso ao storage, a sidebar começa expandida.
+  }
+</script>
 <aside id="appSidebar" class="fixed inset-y-0 left-0 z-40 flex shrink-0 -translate-x-full flex-col border-r border-linha bg-superficie px-4 pb-5 transition-[width,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:shadow-[8px_0_32px_rgba(31,26,23,0.18)] motion-reduce:transition-none lg:translate-x-0" aria-label="Navegação principal" data-sidebar-state="expanded">
   <div class="sidebar-marca flex min-h-18 items-center justify-between gap-2">
     <a href="/dashboard" class="flex min-w-0 items-center gap-2.5 rounded-[10px]" aria-label="MASH, ir para o painel">
