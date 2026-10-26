@@ -1,10 +1,10 @@
-# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 # code-wiki:start
 # Summary: Define CodeRabbit review language, focus areas, and excluded checks for this frontend.
 # Description: Reviews use Brazilian Portuguese and prioritize browser security, accessibility, and repository guidance.
 # The configuration disables automated tests and formatting actions during review.
 # Generated CSS, lockfiles, and design documentation are omitted from review scope.
 # code-wiki:end
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "pt-BR"
 tone_instructions: "Seja objetivo e técnico. Este repositório só tem telas (EJS, Tailwind CSS e JavaScript do navegador). Foque em segurança no navegador, acessibilidade e nas regras do AGENTS.md. Não peça testes automatizados."
 reviews:
