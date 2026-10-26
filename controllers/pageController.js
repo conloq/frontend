@@ -1,11 +1,12 @@
 // code-wiki:start
-// Summary: Render authenticated MASH pages and forward form actions to the REST API.
-// Description: Server-side API requests use the session token as a bearer credential and stop after a timeout.
-// Protected pages reload the current user, clear expired sessions, and render an error page when account data cannot be fetched.
-// Login rotates the session before storing a returned token, while logout and account deletion destroy the session.
-// Profile changes, photo uploads, recipe edits, and temperature submissions validate inputs and use flash messages with redirects.
-// Recipe pages combine API details with temperature ranges, while unavailable lot and analysis screens render their EJS layouts directly.
-// A rejected API authorization clears the session cookie and returns the visitor to login.
+// Summary: Atende as páginas do frontend no servidor EJS: autentica pela sessão, repete as chamadas à API e devolve as views já renderizadas.
+// Description: O token guardado na sessão do servidor é o que autoriza cada chamada à API; o navegador nunca fala com a API diretamente.
+// As rotas de tela exigem sessão viva, e as de entrada desviam para o login quando ela falta ou expirou.
+// A falha da API vira mensagem de estado exibida uma vez na página seguinte, com o destino de retorno preservado.
+// Cadastro e login são as duas ações sem token; as demais passam a identidade do usuário para a API.
+// As telas de receita e de rampa carregam o detalhe e a lista de rampas em paralelo, e respondem 404 quando a receita não pertence a quem pediu.
+// As telas de lote existem com estado vazio e sem chamada à API, porque a rota de lote ainda não existe no Back-End.
+// O histórico de acessos é lido da API e, quando ela não responde, a tela é renderizada sem o histórico em vez de quebrar.
 // code-wiki:end
 import express from 'express';
 
