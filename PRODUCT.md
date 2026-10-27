@@ -12,7 +12,7 @@ Cervejeiro artesanal que produz cerveja por hobby, em pequena escala. Durante a 
 
 ## Product Purpose
 
-O MASH apoia o acompanhamento da mosturação com receitas e rampas de temperatura. A leitura automatizada do teste de iodo é uma visão futura do produto: OpenCV e todo o fluxo real de imagem, análise e histórico ficam no backlog para o próximo semestre. Neste semestre, o teste de iodo aparece somente como simulação no frontend; a cena correspondente é obrigatória no pitch e deve ser apresentada sem etiqueta de simulação.
+O MASH apoia o acompanhamento da mosturação com receitas, rampas de temperatura, lotes e leituras do teste de iodo. O recorte do que entra neste semestre e do que fica planejado está centralizado na [conloq/mash#66](https://github.com/conloq/mash/issues/66) e em [conloq/documentation/geral/README.md](https://github.com/conloq/documentation/blob/main/geral/README.md).
 
 ## Positioning
 
@@ -20,14 +20,12 @@ Controladores de rampa térmica garantem a temperatura, mas não dizem se ainda 
 
 ## Operating Context
 
-- Escopo observado no código do depósito: conta, receitas e criação/listagem de rampas. Lotes permanecem planejados. A tela do teste de iodo é uma simulação de frontend, sem envio de imagem, análise real ou persistência.
-- Backlog para o próximo semestre, sem Sprint: OpenCV e o fluxo real de imagem, armazenamento, análise, consulta e histórico (#34 e issues relacionadas). Leitura automática de temperatura e alertas também são futuros.
-- A cena do teste de iodo é obrigatória no pitch (#25, #28), usando a simulação frontend e sem etiqueta de simulação na cena.
+- Escopo observado no código atual: conta, receitas, criação/listagem de rampas e simulação do teste de iodo no frontend. Lotes (#31, #58, #92) e edição/exclusão de rampas (#97) estão planejados na Sprint 5; as demais entregas futuras seguem na [conloq/mash#66](https://github.com/conloq/mash/issues/66).
 
 ## Capabilities and Constraints
 
-- Frontend EJS + Tailwind CSS v4 + JavaScript vanilla; a API REST (`conloq/Back-End`) tem as regras, o banco e o JWT. Rotas atualmente observadas: `/login`, `/user`, `/user/upload`, `/recipes`, `/recipes/:id` e `/recipes/:id/temperatures`. Lotes e análises reais não têm rotas implementadas neste escopo.
-- Já no código da API: login, operações de usuário, CRUD de receitas e criação/listagem de rampas. A edição/exclusão de rampas (#97) ainda não está concluída; lotes e análises reais permanecem planejados para outro semestre, sem Sprint, conforme o recorte vigente (#31, #92, #33, #1, #3 e #34).
+- Frontend EJS + Tailwind CSS v4 + JavaScript vanilla, com sessão persistida na tabela `sessions` do MySQL e cookie `HttpOnly`; o servidor Express (`controllers/pageController.js`) chama a API REST (`conloq/Back-End`). Rotas da API atualmente consumidas: `/login`, `/user`, `/user/upload`, `/recipes`, `/recipes/:id` e `/recipes/:id/temperatures`.
+- Já no código da API: login, operações de usuário, CRUD de receitas e criação/listagem de rampas. A edição/exclusão de rampas (#97) e o CRUD de lotes (#31 e #92) pertencem ao escopo planejado da Sprint 5 (#66).
 - Restrições planejadas para o fluxo futuro: imagens JPEG ou PNG até 10 MB e lote com análises não pode ser excluído (409). Para o código atual, temperaturas são inteiras de 0 a 100 ºC, mínima nunca maior que a máxima, e horários `HH:MM:SS`.
 - Sem rota e sem issue: recuperação de senha e painel (dashboard). Telas dessas áreas são só layout e precisam dizer isso.
 - Termos do domínio em pt-BR: receita, processo, lote, mosturação, rampa de temperatura, teste de iodo, coleta, fervura.
