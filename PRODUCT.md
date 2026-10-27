@@ -24,7 +24,7 @@ Controladores de rampa térmica garantem a temperatura, mas não dizem se ainda 
 
 ## Capabilities and Constraints
 
-- Frontend EJS + Tailwind CSS v4 + JavaScript vanilla, com sessão persistida na tabela `sessions` do MySQL e cookie `HttpOnly`; o servidor Express (`controllers/pageController.js`) chama a API REST (`conloq/Back-End`). Rotas da API atualmente consumidas: `/login`, `/user`, `/user/upload`, `/recipes`, `/recipes/:id` e `/recipes/:id/temperatures`.
+- Frontend EJS + Tailwind CSS v4 + JavaScript vanilla, com sessão persistida na tabela `sessions` do MySQL e cookie `HttpOnly`; o servidor Express (`controllers/pageController.js`) chama a API REST (`conloq/Back-End`). Rotas da API atualmente consumidas: `/login`, `/user`, `/user/upload`, `/user/login-history`, `/recipes`, `/recipes/:id` e `/recipes/:id/temperatures`; na `/user/login-history`, um `404` vira lista vazia ("Nenhum acesso registrado").
 - Já no código da API: login, operações de usuário, CRUD de receitas e criação/listagem de rampas. A edição/exclusão de rampas (#97) e o CRUD de lotes (#31 e #92) pertencem ao escopo planejado da Sprint 5 (#66).
 - Restrições planejadas para o fluxo futuro: imagens JPEG ou PNG até 10 MB e lote com análises não pode ser excluído (409). Para o código atual, temperaturas são inteiras de 0 a 100 ºC, mínima nunca maior que a máxima, e horários `HH:MM:SS`.
 - Sem rota e sem issue: recuperação de senha e painel (dashboard). Telas dessas áreas são só layout e precisam dizer isso.
