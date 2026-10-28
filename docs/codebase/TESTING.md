@@ -1,15 +1,14 @@
 # Testing Patterns
 
-`npm test` verifica a sintaxe de `index.js` e executa três scripts com `node:assert/strict`, `node:vm` e EJS, sem API, banco ou framework de testes:
+`npm test` roda `node --test scripts/verify-frontend.mjs`, com `node:test` e `node:assert/strict`, sem API, banco nem framework de testes:
 
-- `scripts/verify-profile-contract.mjs`: valores do usuário chegam escapados ao HTML EJS e a gravação usa POST para o controller do frontend.
-- `scripts/verify-upload.mjs`: contrato de multipart do browser e encaminhamento pela sessão server-side.
-- `scripts/verify-client.mjs`: `API_URL` carregada após importar o controller, configuração da sessão MySQL, formulários POST, foco/restauração de `inert`, placeholders em inputs compatíveis, compilação dos templates e escape de atributo no modal.
+- a camada de API usa `axios.create`, `NEXT_PUBLIC_API_URL`, Bearer no interceptor e trata o `401`; não existem mais `controllers/pageController.js` nem `index.js`;
+- o login chama `signIn`, e `auth.js` usa `POST /login` e `GET /user`, que o `AppShell` consulta;
+- `validarRampa` (`src/services/rampa.js`) aceita uma rampa válida e marca temperatura fora de 0 a 100, mínima maior que máxima e horário inválido;
+- nenhum componente usa `dangerouslySetInnerHTML`.
 
-O store MySQL exige tabela e credenciais para iniciar o servidor; os checks locais não conectam ao banco. Para validar esse caminho, iniciar o frontend com a migration aplicada e as variáveis `SESSION_DB_*` configuradas.
+Outras verificações: `npm run lint`, `npm run format:check`, `npm run build:css` e `npm run build` (compila as 28 rotas). Rode o `next build` na raiz do repositório.
 
-Os testes não substituem verificação em navegador desktop/mobile com a API real, especialmente para layout, autenticação, armazenamento de sessão e upload multipart.
+Os testes não substituem a verificação em navegador desktop e mobile com MySQL, o Back-End na 8080 e este app na 4000, especialmente para login, upload, `401` e layout.
 
-Outras verificações: `node --check public/js/app.js`, `node --check public/js/script.js`, `npm run format:check` e `npm run build:css`. O CSS gerado é versionado; regenere após mudanças de classes ou da fonte Tailwind.
-
-O CI Super-Linter verifica sintaxe/estilo dos arquivos alterados; ainda não executa `npm test` nem o build CSS.
+O CI Super-Linter verifica sintaxe e estilo dos arquivos alterados; ainda não executa `npm test` nem o build.

@@ -2,59 +2,54 @@
 
 ## Project shape
 
-- Frontend-only repository of the Sistema MASH (Projeto Integrador III, DSM3, FATEC Registro, GitHub org `conloq`): EJS templates, Tailwind CSS v4 and vanilla browser JavaScript.
-- Two repositories, one role each. This one owns screen rendering and its session table; the Back-End (`conloq/Back-End`, REST on port 8080) owns business rules, application data and JWT issuance.
-- `index.js` is the runtime entrypoint on port 4000. It configures Express, EJS and `express-session` with the MySQL session store, then mounts `controllers/pageController.js`.
-- Page routes in `pageController.js` call the separate Back-End API on the server and render views with EJS locals (`res.render('profile', { user })`). The browser never calls the Back-End directly.
-- The JWT lives in the frontend server session, persisted in the `sessions` table in the existing MySQL database; the browser receives an `HttpOnly` session cookie. The frontend DB account is restricted to that table. Forms POST to same-origin page routes; `controllers/pageController.js` calls implemented Back-End routes and redirects back for EJS rendering. CORS is not used by this server-to-server flow.
+- Frontend-only repository of the Sistema MASH (Projeto Integrador III, DSM3, FATEC Registro, GitHub org `conloq`): Next.js 16 (Pages Router), React 18, Tailwind CSS v4 and `axios`. The structure follows the course reference project `front-end-react`: `src/pages/` (one file per route) and `src/components/XContent/index.js` (one folder per screen).
+- Two repositories, one role each. This one owns the screens; the Back-End (`conloq/Back-End`, REST on port 8080) owns business rules, application data and JWT issuance. This repository does not connect to MySQL (the old `sessions` table was dropped by the Back-End migration `20261028120000-remover-tabela-sessions`).
+- The browser calls the Back-End directly through `src/services/api.js` (`axios.create` with `NEXT_PUBLIC_API_URL`). The JWT from `POST /login` is stored in `localStorage` as `mash_token`; a request interceptor sends `Authorization: Bearer`. The Back-End CORS must allow this origin (`FRONTEND_URL`, default `http://localhost:4000`).
 - Contexto global portátil: [conloq/.github/PROJECT_CONTEXT.md](https://github.com/conloq/.github/blob/main/PROJECT_CONTEXT.md). Leia antes de tarefas não triviais; consulte o estado operacional ao vivo no GitHub.
 
 ## Commands and prerequisites
 
 - Install: `npm install`
-- Start: `npm start` (`nodemon index.js`) on port 4000 (default; override with `PORT`). Configure the session MySQL connection in `SESSION_DB_*`; production enables TLS (optional CA in `SESSION_DB_SSL_CA`). The API must be running at `API_URL` (default `http://localhost:8080`).
-- Build CSS: `npm run build:css` (`tailwindcss -i public/css/tailwind.css -o public/css/style.css`)
-- Watch CSS: `npm run watch:css`
-- Check: `npm test` executa `node --check index.js` e `scripts/verify-profile-contract.mjs`, `scripts/verify-upload.mjs` e `scripts/verify-client.mjs`. Não é apenas um check de sintaxe e não é uma suíte de typecheck.
+- Dev: `npm run dev` (`next dev -p 4000`). The API must be running at `NEXT_PUBLIC_API_URL` (default `http://localhost:8080`).
+- Production: `npm run build` (`build:css` + `next build`), then `npm start` (`next start -p 4000`). `NEXT_PUBLIC_*` is inlined at build time.
+- Build CSS: `npm run build:css` (`tailwindcss -i public/css/tailwind.css -o public/css/style.css`); watch with `npm run watch:css`.
+- Check: `npm test` runs `node --test scripts/verify-frontend.mjs` (API layer contract, auth routes, ramp validation, no `dangerouslySetInnerHTML` in screens). It needs no API or database.
+- Lint: `npm run lint` (`eslint .`, flat config in `eslint.config.mjs` extending `eslint-config-next/core-web-vitals`; `react-hooks/set-state-in-effect` is off because fetching in `useEffect` is the project pattern).
 - Format: `npm run format` (Prettier on `**/*.{js,mjs,css,json,html}`); `npm run format:check` only checks. Config in `.prettierrc.json` (4 spaces, single quotes; JSON and CSS 2 spaces, double quotes) and `.prettierignore` (generated CSS, `package-lock.json`, `docs/`).
-- Pre-commit: `npm install` installs a husky hook (`prepare`). On `git commit`, lint-staged runs `prettier --write` on the staged JS, CSS, JSON and HTML files and adds the result to the commit. `.ejs` and Markdown are not formatted. Use `git commit --no-verify` only to keep a commit free of unrelated formatting.
+- Pre-commit: `npm install` installs a husky hook (`prepare`). On `git commit`, lint-staged runs `prettier --write` on the staged JS, CSS, JSON and HTML files and adds the result to the commit. Markdown is not formatted. Use `git commit --no-verify` only to keep a commit free of unrelated formatting.
 - CI: the Super-Linter (`.github/workflows/super-linter.yml`) checks ESLint, Prettier and HTMLHint on changed files in PRs and on `main`; it never commits. CodeQL runs through GitHub default setup.
-- Focused checks: `node --check <file>.js`, compile EJS templates with the installed `ejs` package, and rerun `npm run build:css` after changing classes or `@source` directives.
 
 ## Runtime constraints
 
-- `index.js` connects `express-session` to the MySQL `sessions` table, then mounts page GET and form POST routes from `controllers/pageController.js`. GETs render EJS; POSTs call the API and use redirect-after-POST.
-- `API_URL` and `SESSION_DB_*` are server-only and must never be exposed to the browser. `.env.example` documents `PORT`, `API_URL`, session DB settings and `SESSION_SECRET`.
-- The Back-End migration owns creation of the `sessions` table; `express-mysql-session` has auto-creation disabled. TLS is mandatory in production; `SESSION_SECRET` is mandatory in production.
-- `index.js` calls `process.loadEnvFile()` inside `try/catch`, so `.env` is optional.
-- `/vendor/phosphor` is mounted from `node_modules/@phosphor-icons/web`; `views/partials/header.ejs` loads `/vendor/phosphor/src/regular/style.css`. Do not add a second icon delivery mechanism.
+- `.env` is optional; `.env.example` documents only `NEXT_PUBLIC_API_URL`. Everything under `NEXT_PUBLIC_` reaches the browser: never put secrets there.
+- Icons come from `@phosphor-icons/web` imported in `src/pages/_app.js` (`/regular` and `/fill`). Do not add a second icon delivery mechanism.
+- `src/pages/_document.js` loads Google Fonts, `/css/style.css` and an inline script that applies `body.sidebar-collapsed` before first paint.
 - `public/css/style.css` is committed and must be regenerated whenever Tailwind classes change.
-- Node version is not pinned (no `engines`, no `.nvmrc`).
+- Node version is not pinned (no `engines`, no `.nvmrc`). Next 16 still accepts React 18 but warns that support ends in Next 17.
 
-## Client contract (`public/js/app.js`)
+## Client contract
 
-The whole client is one IIFE. Keep these boundaries when editing:
-
-- The browser does not call the API. Forms submit to same-origin frontend routes; the page controller uses the server-only `API_URL` and session JWT to call the Back-End.
-- On API `401`, the page controller destroys the persistent server session and redirects to `/login`.
-- Page authentication and redirects belong in `pageController.js`; do not restore a browser-side token guard.
-- API messages are shown as returned, in pt-BR, read on the server as `data.error ?? data.message ?? <fallback>`. The login `400` responds in `message`; other errors use `error`.
-- API-backed page content is rendered by EJS with escaped `<%= ... %>` locals in the views. Keep `public/js/app.js` for interaction and derived visuals; do not move page data fetching or row rendering back into it. Browser-created alerts use `<template>` elements filled through `textContent`/`setAttribute`; never use `innerHTML` with API data.
-- Server messages survive redirect through session flash and render in `#mensagens`. Destructive actions use `confirmar({ titulo, mensagem, botao })` (`#dialogoConfirmar`), never `confirm()`. Field errors use `erroCampo(form, nome, texto)` on `[data-campo]`/`[data-erro]`.
-- Messages and non-sensitive form values that survive a POST redirect use the session flash; passwords are never flashed.
+- All API access goes through `src/services/api.js` and `src/services/auth.js`. Do not create a second `axios` instance or call `fetch` to the API from components.
+- On API `401` (except `POST /login`), the interceptor removes the token and sends the user to `/login`. `AppShell` redirects to `/login` without a token and calls `GET /user` before rendering a logged-in screen; the user is available through `useUser()`.
+- The Back-End has no logout route: "Sair" (`a[href="/logout"]`) only removes the token.
+- API messages are shown as returned, in pt-BR, through `mensagemErro(error, fallback)` (`data.error ?? data.message ?? fallback`). The login `400` responds in `message`; other errors use `error`.
+- Messages render in `#mensagens` through `flash(tipo, texto)` (`src/components/Feedback`), which also survives one `router.push` via `sessionStorage`. Passwords are never flashed or stored.
+- React escapes rendered values; never use `dangerouslySetInnerHTML` with API data (the only use is the static sidebar script in `_document.js`).
+- Destructive actions use `ConfirmDialog` (`#dialogoConfirmar`), never `window.confirm()`. Field errors use `Field` with `error` (`.campo-erro`, `[data-campo]`, `[data-erro]`).
 
 ## UI changes
 
-- Bootstrap has been removed. Use Tailwind utilities and the existing vanilla JS; do not reintroduce Bootstrap CDNs, `data-bs-*` attributes or Bootstrap classes.
-- Preserve the EJS partial composition, route URLs, and the ids/attributes the client binds to: `#formLogin`, `#formCadastro`, `#formPerfil`, `#formFoto`, `#formReceita`, `#formEditarReceita`, `#formTemperatura`, `#listaReceitas`, `#listaAcessos`, `#formLote`, `#loteReceita`, `#formIodoReceita`, `#iodoReceitaLink`, `#formRecuperar`, `#detalheRampas`, `#mensagens`, `#dialogoConfirmar`, `#btnExcluir`, `#btnSalvar`, `#btnDescartar`, `#inputFoto`, `#previewFoto`, `#senha`, `data-campo`, `data-erro`, `data-slot`, `data-sem-api`, `data-toggle-senha`, `a[href="/logout"]`.
-- The shell is handled by `public/js/script.js`, which needs `#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `.js-modal`, `[data-modal-open]` and `[data-modal-close]`. Desktop collapses the sidebar (18rem/5rem, persisted in `localStorage` as `mash-sidebar-collapsed`); mobile uses the top-bar drawer plus overlay. Keep touch targets at 44px minimum.
-- Use only honest visual states. Do not invent successful API calls or persistence to make a screen look finished. The client calls only routes that exist in the Back-End `main`. Lots, the dashboard, the iodine session and password recovery have no API route in the current scope: `/dashboard`, `/lots*` (list, new, detail, edit, monitoring), `/lots/:id/iodine*` and `/forgot-password*` show the full layout with honest empty states (`partials/estadoVazio.ejs`, never sample data) and `data-sem-api` forms (`conloq/mash#31`, `#1`, `#3`, `#73`); the lot form only reads real recipes from `GET /recipes`. Analysis detail (`/analyses/:id`) shows an empty state too. `/analyses/new` (`iodineDemo.ejs`) is a frontend simulation with fake data; real image upload, storage, OpenCV analysis, query and history stay in Backlog for next semester, without a Sprint (`conloq/mash#34` and related issues). The iodine-test scene is mandatory in the pitch (`#25`, `#28`) and must use the frontend simulation without a simulation label in the scene. Editing and deleting ramps wait for `conloq/mash#97`; saving and deleting remain `data-sem-api`. Exception decided on 22/10/2026: `data-sem-api` actions (ramp edit and delete, Configuração "Salvar alterações") stay enabled and only block the submit, with no "Ainda sem rota na API" message; do not reintroduce that alert or the removed `avisoSemApi.ejs` banner. The one exception to "existing routes only" is `GET /user/login-history` (`conloq/mash#102`), called ahead of the Back-End by the Perfil card "Últimos acessos": a `404` is treated as an empty list ("Nenhum acesso registrado"), never sample rows. Screens never tell the user that the API, a route or a feature is missing or in development.
-- Visual source: `docs/design/mash.pen` (redesign v2 and design system). Tokens are in `public/css/tailwind.css` (`@theme`); reuse the component classes (`btn-primario`, `btn-secundario`, `btn-perigo`, `btn-fantasma`, `btn-voltar` (back links only), `acoes`, `btn-icone`, `campo*`, `card`, `selo-*`, `tabela-*`, `esqueleto`) instead of new one-off styles.
+- Bootstrap has been removed. Use Tailwind utilities; do not reintroduce Bootstrap CDNs, `data-bs-*` attributes or Bootstrap classes.
+- Preserve the route URLs and the ids/attributes kept from the design: `#formLogin`, `#formCadastro`, `#formPerfil`, `#formFoto`, `#formReceita`, `#formEditarReceita`, `#formTemperatura`, `#listaReceitas`, `#listaAcessos`, `#formLote`, `#loteReceita`, `#formIodoReceita`, `#iodoReceitaLink`, `#formRecuperar`, `#detalheRampas`, `#mensagens`, `#dialogoConfirmar`, `#btnExcluir`, `#btnSalvar`, `#btnDescartar`, `#inputFoto`, `#previewFoto`, `#senha`, `data-campo`, `data-erro`, `data-sem-api`, `data-toggle-senha`, `a[href="/logout"]`.
+- The shell is `src/components/AppShell`: `#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `.menu-link-active`. Desktop collapses the sidebar (18rem/5rem); the choice is written to `localStorage` as `mash-sidebar-collapsed` only when the user toggles it, so it survives navigation and reload. Mobile uses the top-bar drawer plus overlay. Keep touch targets at 44px minimum.
+- Use only honest visual states. Do not invent successful API calls or persistence to make a screen look finished. The client calls only routes that exist in the Back-End `main`. Lots, the dashboard, the iodine session and password recovery have no API route in the current scope: `/dashboard`, `/lots*` (list, new, detail, edit, monitoring), `/lots/:id/iodine*` and `/forgot-password*` show the full layout with honest empty states (`EmptyState`, never sample data) and `data-sem-api` forms (`conloq/mash#31`, `#1`, `#3`, `#73`); the lot form only reads real recipes from `GET /recipes`. Analysis detail (`/analyses/:id`) shows an empty state too. `/analyses/new` (`IodineDemoContent`) is a frontend simulation with fake data; real image upload, storage, OpenCV analysis, query and history stay in Backlog for next semester, without a Sprint (`conloq/mash#34` and related issues). The iodine-test scene is mandatory in the pitch (`#25`, `#28`) and must use the frontend simulation without a simulation label in the scene. Editing and deleting ramps wait for `conloq/mash#97`; saving and deleting remain `data-sem-api`. Exception decided on 22/10/2026: `data-sem-api` actions (ramp edit and delete, Configuração "Salvar alterações") stay enabled and only block the submit, with no "Ainda sem rota na API" message; do not reintroduce that alert or banner. The one exception to "existing routes only" is `GET /user/login-history` (`conloq/mash#102`), called ahead of the Back-End by the Perfil card "Últimos acessos": a `404` is treated as an empty list ("Nenhum acesso registrado"), never sample rows. Screens never tell the user that the API, a route or a feature is missing or in development.
+- Visual source: `docs/design/mash.pen` (redesign v2 and design system) and the Figma export of its screens. Tokens are in `public/css/tailwind.css` (`@theme`); reuse the component classes (`btn-primario`, `btn-secundario`, `btn-perigo`, `btn-fantasma`, `btn-voltar` (back links only), `acoes`, `btn-icone`, `campo*`, `card`, `selo-*`, `tabela-*`, `esqueleto`, `interruptor`, `segmentado`, `deslizante`) and the shared components in `src/components/Feedback` instead of new one-off styles.
 
 ## Verification
 
-- Before claiming a change works, run `npm test`, `node --check` on changed JS, `npm run format:check`, an EJS compile of touched templates, and `npm run build:css` when classes changed.
-- For behaviour, apply the Back-End migration, run MySQL, both servers (API on 8080, this on 4000), and exercise the flow in a browser at desktop and mobile widths.
+- Before claiming a change works, run `npm test`, `npm run lint`, `npm run format:check`, `npm run build:css` when classes changed, and `npm run build`.
+- Run `next build` from the repository root; run from `src/` it creates a stray `src/.next`.
+- For behaviour, run MySQL, the Back-End (`npm start` in `conloq/Back-End`, which applies the migrations) on 8080 and this app on 4000, and exercise the flow in a browser at desktop and mobile widths.
 - Stop any server started for verification.
 - Do not run destructive Git commands, edit `node_modules/`, or commit generated artifacts other than `public/css/style.css` when its source changed.
 
@@ -67,10 +62,10 @@ The whole client is one IIFE. Keep these boundaries when editing:
 
 ## Source of truth
 
-- Treat `package.json` scripts, `index.js`, `public/js/app.js` and the current templates as authoritative over stale documentation.
+- Treat `package.json` scripts, `src/services/`, `src/components/` and `src/pages/` as authoritative over stale documentation.
 - `codemap.md` is the repository atlas; read it before non-trivial work. The seven files in `docs/codebase/` describe this repository.
-- Keep them current: when a change adds, removes or renames files, routes, partials, tokens, scripts or tooling, update the matching `codemap.md` (root and that folder's) and the affected `docs/codebase/` file in the same PR. A codemap that lists files that no longer exist is a bug.
-- Ignore documents that describe the legacy monolith `conloq/mash` as part of this repository. This frontend has `controllers/pageController.js` for page rendering and connects only to the shared MySQL `sessions` table; business tables, Sequelize models and API rules remain in `conloq/Back-End`.
+- Keep them current: when a change adds, removes or renames files, routes, components, tokens, scripts or tooling, update the matching `codemap.md` (root and that folder's) and the affected `docs/codebase/` file in the same PR. A codemap that lists files that no longer exist is a bug.
+- Ignore documents that describe the legacy monolith `conloq/mash` or the EJS version of this frontend (`index.js`, `controllers/pageController.js`, `views/`, `public/js/`) as current; `docs/evidence/` and `docs/superpowers/` are historical records of that version.
 
 ## Repository Map
 
@@ -82,3 +77,13 @@ Before working on any task, read `codemap.md` to understand:
 - Data flow and integration points between modules
 
 For deep work on a specific folder, also read that folder's `codemap.md`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

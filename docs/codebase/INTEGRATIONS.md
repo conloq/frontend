@@ -4,35 +4,32 @@
 
 | Item | Contrato |
 |---|---|
-| Serviço | `conloq/Back-End`, REST em `API_URL` (padrão `http://localhost:8080`) |
-| Leituras de página | `controllers/pageController.js` chama a API no servidor com `Authorization: Bearer <JWT>` e passa os dados a `res.render(view, locals)` |
-| Login | `POST /login`; JWT retornado fica em `req.session.token` |
-| Cadastro | `POST /user` do controller de página; em sucesso redireciona a `/login` |
-| Escritas autenticadas | formulários POST same-origin chegam ao controller, que chama `PUT/DELETE /user`, upload, `POST /recipes`, alterações/exclusões de receita e criação de temperatura |
-| Autenticação do navegador | cookie de sessão `mash.sid`, `HttpOnly`, `SameSite=Strict`, `Secure` em produção; JWT não é exposto a JavaScript |
-| CORS | não necessário: browser → frontend é same-origin e frontend → API é server-side |
-| Sessões | tabela `sessions` no mesmo MySQL do Back-End; migration no repo Back-End; usuário do frontend limitado a essa tabela |
+| Serviço | `conloq/Back-End`, REST em `NEXT_PUBLIC_API_URL` (padrão `http://localhost:8080`) |
+| Cliente | `axios.create` em `src/services/api.js`, timeout de 15 s |
+| Login | `POST /login`; o JWT retornado fica no `localStorage` (`mash_token`) |
+| Cadastro | `POST /user`; em sucesso vai para `/login` com mensagem |
+| Autenticação | interceptor envia `Authorization: Bearer <JWT>`; `401` (fora do login) apaga o token e vai para `/login` |
+| Logout | sem rota na API; só apaga o token |
+| CORS | obrigatório: o Back-End libera `FRONTEND_URL` com `Content-Type` e `Authorization` |
+| Banco | nenhum acesso; o frontend não conecta ao MySQL |
 
-## Variáveis e sessão
+## Variáveis
 
-- `PORT`: porta do frontend (padrão `4000`).
-- `API_URL`: URL da API do Back-End.
-- `SESSION_SECRET`: segredo da sessão, obrigatório em `NODE_ENV=production`.
-- `SESSION_DB_HOST`, `SESSION_DB_PORT`, `SESSION_DB_NAME`, `SESSION_DB_USER`, `SESSION_DB_PASSWORD`: conexão do store de sessão no MySQL existente; a porta padrão é `3306`.
-- `SESSION_DB_SSL=true` ativa TLS; `SESSION_DB_SSL_CA` aceita o certificado CA em PEM para provedores com CA privada. TLS é habilitado automaticamente em produção.
-- `.env` é opcional; `index.js` tenta `process.loadEnvFile()` e também aceita variáveis do ambiente.
-- A tabela de sessão é criada pela migration do Back-End. O usuário MySQL do frontend precisa de `SELECT`, `INSERT`, `UPDATE` e `DELETE` somente em `sessions`; não conceda acesso às tabelas de domínio.
+- `NEXT_PUBLIC_API_URL`: URL da API. Entra no build e chega ao navegador; não colocar segredos em `NEXT_PUBLIC_*`.
+- `.env` é opcional; `.env.example` documenta a variável.
 
 ## Rotas de dados
 
-| Tela | Leituras server-side |
+| Tela | Chamadas |
 |---|---|
 | Shell autenticado | `GET /user` |
-| Perfil e histórico | `GET /user/login-history`; `404` vira estado vazio |
-| Receitas | `GET /recipes` e `GET /recipes/:id/temperatures` por receita |
-| Receita | `GET /recipes/:id` e `GET /recipes/:id/temperatures` |
-| Iodo da receita | receita e rampas |
-| Temperatura | receita; ao editar também lista de rampas |
-| Lote novo/edição | lista real de receitas para o seletor |
+| Perfil | `PUT /user`, `PUT /user/upload` (multipart, campo `image`), `DELETE /user` |
+| Perfil e histórico | `GET /user/login-history`; `404` vira lista vazia (conloq/mash#102) |
+| Receitas | `GET /recipes`, `POST /recipes`, `DELETE /recipes/:id` e `GET /recipes/:id/temperatures` por receita |
+| Receita | `GET`, `PUT` e `DELETE /recipes/:id`, `GET /recipes/:id/temperatures` |
+| Iodo da receita | receita e rampas (salvar sem rota, conloq/mash#101) |
+| Nova rampa | receita e `POST /recipes/:id/temperatures` |
+| Editar rampa | receita e rampas (salvar e excluir sem rota, conloq/mash#97) |
+| Lote novo/edição | `GET /recipes` para o seletor |
 
-Lotes, recuperação de senha e análises não recebem dados de API que não existem no contrato implementado; as views exibem estados vazios ou formulários sem ação de backend.
+Lotes, recuperação de senha e análises não chamam rotas que não existem; as telas mostram estados vazios ou formulários que só bloqueiam o envio.

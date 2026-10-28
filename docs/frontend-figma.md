@@ -60,8 +60,6 @@ PNG preserva aparência, mas não gera camadas editáveis. SVG permite edição 
 ## Evidências
 
 - `public/css/tailwind.css`
-- `views/recipes.ejs`
-- `views/partials/sidebar.ejs`
-- `views/partials/topBar.ejs`
-- `views/partials/header.ejs`
-- `public/js/script.js`
+- `src/components/RecipesContent/index.js`
+- `src/components/AppShell/index.js`
+- `src/pages/_document.js`

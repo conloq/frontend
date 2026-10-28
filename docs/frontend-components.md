@@ -2,73 +2,57 @@
 
 ## Escopo
 
-Este documento registra somente a camada visual do Sistema-MASH: templates EJS, parciais, CSS/Tailwind, JavaScript do navegador e ícones. Rotas, controllers, models, banco, sessão e middleware ficam fora deste inventário.
+Este documento registra a camada visual do Sistema MASH: componentes React em `src/components/`, Tailwind CSS e ícones. As chamadas à API estão em `docs/codebase/INTEGRATIONS.md`.
 
 ## Shell compartilhado
 
 | Componente | Arquivo | Responsabilidade |
 |---|---|---|
-| Header HTML | `views/partials/header.ejs` | Define documento HTML, idioma `pt-BR`, viewport, stylesheet Phosphor e CSS compilado. |
-| Sidebar | `views/partials/sidebar.ejs` | Navegação lateral, logo MASH, recolhimento desktop e fechamento mobile. |
-| Top bar | `views/partials/topBar.ejs` | Barra superior, botão mobile da sidebar e acesso visual ao perfil. |
-| Footer | `views/partials/footer.ejs` | Carrega `public/js/script.js`. |
-| App shell | Templates autenticados | Combina sidebar, top bar e área de conteúdo em layout responsivo. |
+| Documento | `src/pages/_document.js` | `lang="pt-BR"`, Google Fonts, `/css/style.css`, favicon e o script que aplica `body.sidebar-collapsed` antes da primeira pintura. |
+| Ícones | `src/pages/_app.js` | Importa `@phosphor-icons/web/regular` e `/fill`. |
+| App shell | `src/components/AppShell` | Sidebar (`#appSidebar`, recolhível no desktop, gaveta no mobile com `#sidebarOverlay`), top bar com trilha, voltar no mobile e avatar, área `#mensagens` e guarda de sessão. |
+| Telas de acesso | `src/components/AuthLayout` | Painel marrom da marca no desktop, faixa da marca no mobile, título e `#mensagens`. |
 
-## Componentes de interface identificados
+## Componentes compartilhados (`src/components/Feedback`)
 
-- **Navegação lateral:** links com ícones Phosphor, estado ativo, modo expandido/recolhido e drawer mobile.
-- **Top bar:** ação de abrir menu, avatar/perfil e identificação do usuário.
-- **Botão primário:** fundo `mash-orange`, texto branco, estados hover/focus.
-- **Botão de ação icon-only:** ícone Phosphor, alvo mínimo de 44 px, `aria-label`, `title` e foco visível.
-- **Tabela/listagem de receitas:** cabeçalho de colunas, linhas de receita, dados de temperatura e ações.
-- **Modal:** overlay escuro, diálogo com título, botão de fechar e formulário.
-- **Campos de formulário:** labels, inputs com borda, foco laranja e agrupamento em cards.
-- **Cards de seção:** superfícies brancas com cantos arredondados e sombra leve.
-- **Navegação de configuração:** abas visuais de Temperatura e Iodo nos templates de criação/edição.
-- **Preview de imagem:** leitura local do arquivo escolhido antes do envio, implementada no JavaScript do navegador.
+- **`Messages` e `flash(tipo, texto)`:** alerta de sucesso ou erro em `#mensagens`, que sobrevive a uma navegação.
+- **`EmptyState`:** ícone, título, texto e ação opcional; versão `compact`.
+- **`Modal` e `ModalActions`:** diálogo com título, fechar, Escape, foco preso e retorno do foco; vira folha que sobe de baixo no mobile (`folha`).
+- **`ConfirmDialog`:** confirmação de ações destrutivas (`#dialogoConfirmar`), no lugar do `window.confirm`.
+- **`Field`:** campo do design system (`campo`, `campo-rotulo`, `campo-caixa`, `campo-ajuda`, `campo-unidade`), com erro em `.campo-erro`.
+- **`PasswordInput`:** senha com botão mostrar/ocultar (`data-toggle-senha`).
+- **`ServerError`:** falha ao carregar a página, com link para o painel.
 
-## Ícones Phosphor em uso
+## Componentes de tela identificados
 
-A fonte é carregada em `views/partials/header.ejs` a partir de `/vendor/phosphor/src/regular/style.css`.
+- **Navegação lateral:** links com ícones Phosphor, item ativo pelo prefixo mais específico da URL, estado recolhido persistido em `mash-sidebar-collapsed`.
+- **Tabelas:** receitas e rampas com `tabela-cabecalho`/`tabela-linha`; no mobile cada linha vira card.
+- **Perfil das rampas:** gráfico em blocos posicionados por início e duração do timer, com faixa da rampa e limites.
+- **Prévia da sessão de iodo:** trilho com calibração e capturas a partir da primeira coleta.
+- **Configuração:** abas laterais (topo no mobile), `interruptor`, `segmentado` e `deslizante`.
+- **Código de 6 dígitos:** caixas que avançam ao digitar, voltam no Backspace e aceitam colar.
+- **Simulação do teste de iodo:** amostra que muda de cor, escala de amido e lista de coletas.
+
+## Ícones Phosphor em uso (menu)
 
 | Uso | Classe |
 |---|---|
-| Marca da aplicação | `ph-flask` |
-| Painel | `ph-gauge` |
-| Iodo | `ph-drop` |
-| Lotes | `ph-package` |
-| Receitas | `ph-book-open-text` |
+| Painel | `ph-squares-four` |
+| Receitas | `ph-scroll` |
+| Lotes | `ph-cube` |
+| Teste de iodo | `ph-test-tube` |
+| Perfil | `ph-user-circle` |
 | Configuração | `ph-gear` |
-| Recolher/expandir sidebar | `ph-caret-left` / `ph-caret-right` |
-| Fechar | `ph-x` |
-| Abrir menu | `ph-list` |
-| Adicionar | `ph-plus` |
-| Editar temperatura | `ph-pencil-simple` |
-| Excluir receita | `ph-trash` |
-
-## Comportamento JavaScript
-
-Arquivo: `public/js/script.js`
-
-- Persiste o estado recolhido da sidebar em `localStorage` com a chave `mash-sidebar-collapsed`.
-- Atualiza `aria-expanded` e `aria-label` do controle desktop da sidebar.
-- Abre e fecha o drawer mobile com overlay.
-- Fecha sidebar e modais com `Escape`.
-- Marca o link correspondente ao `window.location.pathname`.
-- Alterna visibilidade da senha quando existe o controle correspondente.
-- Atualiza preview de foto usando `FileReader`.
-- Abre/fecha modais e bloqueia o scroll do `body` enquanto há modal aberto.
+| Sair | `ph-sign-out` |
+| Recolher/expandir sidebar | `ph-caret-double-left` / `ph-caret-double-right` |
+| Abrir menu, fechar | `ph-list`, `ph-x` |
 
 ## Evidências
 
-- `views/partials/header.ejs`
-- `views/partials/sidebar.ejs`
-- `views/partials/topBar.ejs`
-- `views/partials/footer.ejs`
-- `views/recipes.ejs`
-- `views/recipe.ejs`
-- `views/temperatureForm.ejs`
-- `views/iodineDemo.ejs`
-- `views/profile.ejs`
-- `public/js/script.js`
+- `src/components/AppShell/index.js`
+- `src/components/AuthLayout/index.js`
+- `src/components/Feedback/index.js`
+- `src/components/RecipeContent/index.js`
+- `src/components/SettingsContent/index.js`
+- `src/pages/_document.js`, `src/pages/_app.js`
 - `public/css/tailwind.css`
