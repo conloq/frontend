@@ -19,7 +19,7 @@
     "@phosphor-icons/web": "^2.1.2",
     "axios": "^1.8.4",
     "next": "16.4.3",
-    "react": "^18",
+    "react": "^19",
     "react-dom": "^18"
   },
   "devDependencies": {
