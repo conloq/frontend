@@ -1,6 +1,6 @@
 /* code-wiki:start
  * Summary: Define MASH design tokens and reusable responsive components for Tailwind CSS.
- * Description: Tailwind scans the EJS views and browser scripts as the sources of utility classes.
+ * Description: Tailwind scans the React components and pages in src/ as the sources of utility classes.
  * Theme variables define the MASH palette, typography, focus color, and semantic status colors.
  * Reusable button, badge, form, card, table, action-group, and loading styles apply shared visual rules.
  * The desktop shell supports expanded and collapsed sidebar widths with matching content offsets and labels.
@@ -8,8 +8,7 @@
  * Base styles set page colors, heading fonts, text selection, and visible keyboard focus.
  * code-wiki:end */
 @import "tailwindcss" source(none);
-@source "../../views";
-@source "../js";
+@source "../../src";
 
 /* Tokens do design system v2 (docs/design/mash.pen, prancha "Design System · 1 Fundamentos") */
 @theme {

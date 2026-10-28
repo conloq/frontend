@@ -48,7 +48,7 @@ jobs:
           # CSS
           VALIDATE_CSS_PRETTIER: true
 
-          # HTML (só arquivos .html; as views .ejs ficam de fora)
+          # HTML (só arquivos .html)
           VALIDATE_HTML: true
           VALIDATE_HTML_PRETTIER: true
 
