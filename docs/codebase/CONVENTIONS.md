@@ -18,7 +18,7 @@
 - Formatter: Prettier (`.prettierrc.json`). JS com 4 espaços, aspas simples, ponto e vírgula, `trailingComma: es5` e linha de até 100 caracteres; JSON e CSS com 2 espaços e aspas duplas. `.prettierignore` deixa de fora `public/css/style.css`, `package-lock.json` e `docs/`.
 - Pre-commit: o `npm install` instala um hook do husky; no `git commit`, o lint-staged roda `prettier --write` nos arquivos JS, CSS, JSON e HTML do staging.
 - Linter: `npm run lint` (`eslint .`) com `eslint.config.mjs`, que estende `eslint-config-next/core-web-vitals`. `react-hooks/set-state-in-effect` fica desligada porque buscar dados no `useEffect` é o padrão do projeto.
-- CI: o Super-Linter (`.github/workflows/super-linter.yml`) confere ESLint, Prettier e HTMLHint nos arquivos alterados, em PR e no `main`, e nunca faz commit. O CodeQL roda pelo default setup do GitHub.
+- CI: o Super-Linter (`.github/workflows/super-linter.yml`) confere ESLint, Prettier e HTMLHint nos arquivos alterados, em PR e no `main`, e nunca faz commit. O ESLint dele usa `.github/linters/eslint.config.mjs`, com regras de React, hooks e acessibilidade (`jsx-a11y`) só com os plugins que vêm no container; para conferir antes do push: `npx eslint -c .github/linters/eslint.config.mjs .`. O CodeQL roda pelo default setup do GitHub.
 - Revisão de PR: `.coderabbit.yaml` (pt-BR, perfil `chill`), que usa o `AGENTS.md` como guia e ignora arquivos gerados.
 
 ## 3) Import and Module Conventions

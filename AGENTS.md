@@ -17,7 +17,7 @@
 - Lint: `npm run lint` (`eslint .`, flat config in `eslint.config.mjs` extending `eslint-config-next/core-web-vitals`; `react-hooks/set-state-in-effect` is off because fetching in `useEffect` is the project pattern).
 - Format: `npm run format` (Prettier on `**/*.{js,mjs,css,json,html}`); `npm run format:check` only checks. Config in `.prettierrc.json` (4 spaces, single quotes; JSON and CSS 2 spaces, double quotes) and `.prettierignore` (generated CSS, `package-lock.json`, `docs/`).
 - Pre-commit: `npm install` installs a husky hook (`prepare`). On `git commit`, lint-staged runs `prettier --write` on the staged JS, CSS, JSON and HTML files and adds the result to the commit. Markdown is not formatted. Use `git commit --no-verify` only to keep a commit free of unrelated formatting.
-- CI: the Super-Linter (`.github/workflows/super-linter.yml`) checks ESLint, Prettier and HTMLHint on changed files in PRs and on `main`; it never commits. CodeQL runs through GitHub default setup.
+- CI: the Super-Linter (`.github/workflows/super-linter.yml`) checks ESLint, Prettier and HTMLHint on changed files in PRs and on `main`; it never commits. Its ESLint config is `.github/linters/eslint.config.mjs`, with only the plugins bundled in the container (`react`, `react-hooks`, `jsx-a11y`), because `eslint-config-next` is not installed there; check it locally with `npx eslint -c .github/linters/eslint.config.mjs .`. CodeQL runs through GitHub default setup.
 
 ## Runtime constraints
 

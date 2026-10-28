@@ -141,6 +141,8 @@ export function Modal({ id, open, onClose, title, subtitle, width = 'max-w-[520p
             id={id}
             ref={ref}
             className="js-modal folha fixed inset-0 z-50 bg-texto/60 p-4"
+            // clique no fundo fecha; pelo teclado, o Escape de useDialogo
+            role="presentation"
             onMouseDown={(event) => event.target === event.currentTarget && onClose()}
         >
             <div className="flex min-h-full items-center justify-center">
@@ -196,6 +198,8 @@ export function ConfirmDialog({ pedido, onClose }) {
             id="dialogoConfirmar"
             ref={ref}
             className="folha fixed inset-0 z-[70] flex items-center justify-center bg-texto/60 p-4"
+            // clique no fundo fecha; pelo teclado, o Escape de useDialogo
+            role="presentation"
             onMouseDown={(event) => event.target === event.currentTarget && onClose()}
         >
             <div
