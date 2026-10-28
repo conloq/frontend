@@ -1,290 +1,400 @@
 
 === DIRECTORY TREE (max depth 3, source files only) ===
+.agents
+.agents/skills
+.agents/skills/mash-pen-mcp
+.agents/skills/mash-pen-mcp/SKILL.md
+.claude
+.claude/skills
+.claude/skills/mash-pen-mcp
+.claude/skills/mash-pen-mcp/SKILL.md
 .coderabbit.yaml
 .env
 .env.example
+.github
+.github/dependabot.yml
+.github/workflows
+.github/workflows/super-linter.yml
 .gitignore
+.husky
+.husky/_
+.husky/_/.gitignore
+.husky/_/applypatch-msg
+.husky/_/commit-msg
+.husky/_/h
+.husky/_/husky.sh
+.husky/_/post-applypatch
+.husky/_/post-checkout
+.husky/_/post-commit
+.husky/_/post-merge
+.husky/_/post-rewrite
+.husky/_/pre-applypatch
+.husky/_/pre-auto-gc
+.husky/_/pre-commit
+.husky/_/pre-merge-commit
+.husky/_/pre-push
+.husky/_/pre-rebase
+.husky/_/prepare-commit-msg
+.husky/pre-commit
+.impeccable
+.impeccable/questions
+.impeccable/questions/roll.json
 .omp
-.omp\state
-.omp\state\continuity.md
+.omp/state
+.omp/state/continuity.md
+.prettierignore
+.prettierrc.json
 AGENTS.md
+PRODUCT.md
+README.md
 codemap.md
 docs
-docs\codebase
-docs\codebase\.codebase-scan.txt
-docs\codebase\ARCHITECTURE.md
-docs\codebase\CONCERNS.md
-docs\codebase\CONVENTIONS.md
-docs\codebase\INTEGRATIONS.md
-docs\codebase\STACK.md
-docs\codebase\STRUCTURE.md
-docs\codebase\TESTING.md
-docs\figma-export
-docs\figma-export\manifest.json
-docs\figma-export\README.md
-docs\figma-export\screens
-docs\figma-export\screens\receita-authenticated.png
-docs\figma-export\tokens.md
-docs\frontend-components.md
-docs\frontend-figma.md
-docs\frontend-screens.md
-docs\plans
-docs\plans\visual-polish.md
-docs\specs
-docs\specs\visual-flows.md
-docs\superpowers
-docs\superpowers\plans
-docs\superpowers\plans\2026-08-20-tailwind-css-dashboard-plan.md
-docs\superpowers\plans\2026-08-21-phosphor-recipes.md
-docs\superpowers\specs
-docs\superpowers\specs\2026-08-20-tailwind-css-dashboard-design.md
-index.js
+docs/codebase
+docs/codebase/.codebase-scan.txt
+docs/codebase/ARCHITECTURE.md
+docs/codebase/CONCERNS.md
+docs/codebase/CONVENTIONS.md
+docs/codebase/INTEGRATIONS.md
+docs/codebase/STACK.md
+docs/codebase/STRUCTURE.md
+docs/codebase/TESTING.md
+docs/design
+docs/design/mash-assets
+docs/design/mash-assets/avatar.jpg
+docs/design/mash-assets/espuma.png
+docs/design/mash-assets/logo-engrenagem.png
+docs/design/mash-assets/logo-mash.png
+docs/design/mash-assets/mash-emblema.png
+docs/design/mash.pen
+docs/evidence
+docs/evidence/70-upload.md
+docs/evidence/71-profile.md
+docs/evidence/73-navegacao.md
+docs/evidence/73-screens
+docs/evidence/73-screens/mobile-iodo-concluido-1.jpg
+docs/evidence/73-screens/mobile-iodo-concluido-2.jpg
+docs/evidence/73-screens/mobile-rampa-erro-validacao.jpg
+docs/evidence/73-screens/mobile-rampa-salva.jpg
+docs/evidence/73-screens/mobile-receita-alheia-antes.jpg
+docs/evidence/73-screens/mobile-receita-alheia-depois.jpg
+docs/evidence/73-screens/mobile-receitas-erro-api.jpg
+docs/evidence/73-screens/mobile-receitas-vazia.jpg
+docs/evidence/78-screens
+docs/evidence/78-screens/iodo-demo-desktop.png
+docs/evidence/78-screens/iodo-demo-mobile.png
+docs/evidence/78-screens/login-desktop.png
+docs/evidence/78-screens/lote-desktop.png
+docs/evidence/78-screens/perfil-desktop.png
+docs/evidence/78-screens/rampa-editar-desktop.png
+docs/evidence/78-screens/receita-editar-desktop.png
+docs/evidence/78-screens/receita-editar-mobile.png
+docs/evidence/78-screens/receitas-desktop.png
+docs/evidence/78-screens/receitas-mobile.png
+docs/evidence/86-recipes.md
+docs/evidence/86-screens
+docs/evidence/86-screens/ramp-mobile.png
+docs/evidence/86-screens/recipes-desktop.png
+docs/evidence/86-screens/recipes-mobile.png
+docs/figma-export
+docs/figma-export/README.md
+docs/figma-export/manifest.json
+docs/figma-export/screens
+docs/figma-export/screens/receita-authenticated.png
+docs/figma-export/tokens.md
+docs/frontend-components.md
+docs/frontend-figma.md
+docs/frontend-screens.md
+docs/plans
+docs/plans/visual-polish.md
+docs/specs
+docs/specs/visual-flows.md
+docs/superpowers
+docs/superpowers/plans
+docs/superpowers/plans/2026-08-20-tailwind-css-dashboard-plan.md
+docs/superpowers/plans/2026-08-21-phosphor-recipes.md
+docs/superpowers/specs
+docs/superpowers/specs/2026-08-20-tailwind-css-dashboard-design.md
+docs/superpowers/specs/2026-10-20-redesign-mash-design.md
+eslint.config.mjs
+graphify-out
+graphify-out/.graphify_analysis.json
+graphify-out/.graphify_ast.json
+graphify-out/.graphify_detect.json
+graphify-out/.graphify_extract.json
+graphify-out/.graphify_incremental.json
+graphify-out/.graphify_labels.json
+graphify-out/.graphify_labels.json.sig
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+graphify-out/.graphify_semantic.json
+graphify-out/2026-10-25
+graphify-out/2026-10-25/.graphify_labels.json
+graphify-out/2026-10-25/GRAPH_REPORT.md
+graphify-out/2026-10-25/cost.json
+graphify-out/2026-10-25/graph.json
+graphify-out/2026-10-25/manifest.json
+graphify-out/GRAPH_REPORT.md
+graphify-out/cache
+graphify-out/cache/ast
+graphify-out/cache/ast/v0.9.34
+graphify-out/cache/last_query_stamp
+graphify-out/cache/semantic
+graphify-out/cache/semantic/pd5fd89c46bb5
+graphify-out/cache/stat-index.json
+graphify-out/cost.json
+graphify-out/graph.html
+graphify-out/graph.json
+graphify-out/manifest.json
+jsconfig.json
+next.config.mjs
 package-lock.json
 package.json
 public
-public\codemap.md
-public\css
-public\css\codemap.md
-public\css\style.css
-public\css\tailwind.css
-public\icons
-public\icons\arrow.png
-public\icons\atencao.png
-public\icons\cadeado.png
-public\icons\check.png
-public\icons\config.png
-public\icons\email.png
-public\icons\iodo.png
-public\icons\localizacao-apagada.png
-public\icons\localizacao.png
-public\icons\log.png
-public\icons\lote.png
-public\icons\mais.png
-public\icons\mash_icon.png
-public\icons\olho.png
-public\icons\painel.png
-public\icons\porta.png
-public\icons\receita.png
-public\icons\sair.png
-public\icons\telefone.png
-public\icons\usuario.png
-public\img
-public\img\foto-perfil.png
-public\img\mash.png
-public\js
-public\js\app.js
-public\js\codemap.md
-public\js\script.js
-README.md
-views
-views\adicionarIodo.ejs
-views\adicionarTemperatura.ejs
-views\cadastro.ejs
-views\codemap.md
-views\editarIodo.ejs
-views\editarTemperatura.ejs
-views\index.ejs
-views\login.ejs
-views\partials
-views\partials\codemap.md
-views\partials\footer.ejs
-views\partials\header.ejs
-views\partials\mensagens.ejs
-views\partials\sidebar.ejs
-views\partials\topBar.ejs
-views\receita.ejs
-views\usuario.ejs
+public/codemap.md
+public/css
+public/css/codemap.md
+public/css/style.css
+public/css/tailwind.css
+public/img
+public/img/espuma.png
+public/img/foto-perfil.png
+public/img/logo-mash.png
+public/img/mash-emblema.png
+public/img/mash.png
+public/js
+scripts
+scripts/codemap.md
+scripts/verify-frontend.mjs
+src
+src/components
+src/components/AppShell
+src/components/AppShell/index.js
+src/components/AuthLayout
+src/components/AuthLayout/index.js
+src/components/DashboardContent
+src/components/DashboardContent/index.js
+src/components/Feedback
+src/components/Feedback/index.js
+src/components/ForgotPasswordContent
+src/components/ForgotPasswordContent/index.js
+src/components/IodineDemoContent
+src/components/IodineDemoContent/index.js
+src/components/LoginContent
+src/components/LoginContent/index.js
+src/components/LotContent
+src/components/LotContent/index.js
+src/components/LotsContent
+src/components/LotsContent/index.js
+src/components/ProfileContent
 
 === STACK DETECTION (manifest files) ===
 
 --- package-lock.json ---
 {
-  "name": "mash",
-  "version": "1.0.0",
+  "name": "mash-frontend",
+  "version": "2.0.0",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
-      "name": "mash",
-      "version": "1.0.0",
-      "license": "ISC",
+      "name": "mash-frontend",
+      "version": "2.0.0",
       "dependencies": {
         "@phosphor-icons/web": "^2.1.2",
-        "ejs": "^5.0.2",
-        "express": "^5.3.0",
-        "nodemon": "^3.1.14"
+        "axios": "^1.8.4",
+        "next": "16.4.3",
+        "react": "^18",
+        "react-dom": "^18"
       },
       "devDependencies": {
         "@tailwindcss/cli": "^4.3.3",
+        "eslint": "^9",
+        "eslint-config-next": "16.4.3",
+        "husky": "^9.1.7",
+        "lint-staged": "^17.6.0",
+        "prettier": "^3.9.10",
         "tailwindcss": "^4.3.3"
       }
     },
-    "node_modules/@jridgewell/gen-mapping": {
-      "version": "0.3.13",
-      "resolved": "https://registry.npmjs.org/@jridgewell/gen-mapping/-/gen-mapping-0.3.13.tgz",
-      "integrity": "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==",
+    "node_modules/@babel/code-frame": {
+      "version": "7.29.7",
+      "resolved": "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.29.7.tgz",
+      "integrity": "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==",
       "dev": true,
       "license": "MIT",
       "dependencies": {
-        "@jridgewell/sourcemap-codec": "^1.5.0",
-        "@jridgewell/trace-mapping": "^0.3.24"
+        "@babel/helper-validator-identifier": "^7.29.7",
+        "js-tokens": "^4.0.0",
+        "picocolors": "^1.1.1"
+      },
+      "engines": {
+        "node": ">=6.9.0"
       }
     },
-    "node_modules/@jridgewell/remapping": {
-      "version": "2.3.5",
-      "resolved": "https://registry.npmjs.org/@jridgewell/remapping/-/remapping-2.3.5.tgz",
-      "integrity": "sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==",
-      "dev": true,
-      "license": "MIT",
-      "dependencies": {
-        "@jridgewell/gen-mapping": "^0.3.5",
-        "@jridgewell/trace-mapping": "^0.3.24"
-      }
-    },
-    "node_modules/@jridgewell/resolve-uri": {
-      "version": "3.1.2",
-      "resolved": "https://registry.npmjs.org/@jridgewell/resolve-uri/-/resolve-uri-3.1.2.tgz",
-      "integrity": "sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==",
+    "node_modules/@babel/compat-data": {
+      "version": "7.29.7",
+      "resolved": "https://registry.npmjs.org/@babel/compat-data/-/compat-data-7.29.7.tgz",
+      "integrity": "sha512-locTkQyKvwIEgBzVrn8693ebc97F2U8ZHjbXwDXJ5Fn2TCpNwTlKcaKLkdHop5c/icOFE7qt7Q9JC5hnKNa6Gg==",
       "dev": true,
       "license": "MIT",
       "engines": {
-        "node": ">=6.0.0"
+        "node": ">=6.9.0"
       }
     },
-    "node_modules/@jridgewell/sourcemap-codec": {
-      "version": "1.5.5",
-      "resolved": "https://registry.npmjs.org/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.5.tgz",
-      "integrity": "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==",
-      "dev": true,
-      "license": "MIT"
-    },
-    "node_modules/@jridgewell/trace-mapping": {
-      "version": "0.3.31",
-      "resolved": "https://registry.npmjs.org/@jridgewell/trace-mapping/-/trace-mapping-0.3.31.tgz",
-      "integrity": "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==",
+    "node_modules/@babel/core": {
+      "version": "7.29.7",
+      "resolved": "https://registry.npmjs.org/@babel/core/-/core-7.29.7.tgz",
+      "integrity": "sha512-RgHBCvtjbOK2gXSNBNIkNoEc9qoVEtau3hj8gEqKQuL3HZAibKarWFEI3Lfm6EYKkLalOh8eSrj9b+ch9H/VBA==",
       "dev": true,
       "license": "MIT",
       "dependencies": {
-        "@jridgewell/resolve-uri": "^3.1.0",
-        "@jridgewell/sourcemap-codec": "^1.4.14"
-      }
-    },
-    "node_modules/@parcel/watcher": {
-      "version": "2.5.1",
-      "resolved": "https://registry.npmjs.org/@parcel/watcher/-/watcher-2.5.1.tgz",
-      "integrity": "sha512-dfUnCxiN9H4ap84DvD2ubjw+3vUNpstxa0TneY/Paat8a3R4uQZDLSvWjmznAY/DoahqTHl9V46HF/Zs3F29pg==",
-      "dev": true,
-      "hasInstallScript": true,
-      "license": "MIT",
-      "dependencies": {
-        "detect-libc": "^1.0.3",
+        "@babel/code-frame": "^7.29.7",
+        "@babel/generator": "^7.29.7",
+        "@babel/helper-compilation-targets": "^7.29.7",
+        "@babel/helper-module-transforms": "^7.29.7",
+        "@babel/helpers": "^7.29.7",
+        "@babel/parser": "^7.29.7",
+        "@babel/template": "^7.29.7",
+        "@babel/traverse": "^7.29.7",
+        "@babel/types": "^7.29.7",
+        "@jridgewell/remapping": "^2.3.5",
+        "convert-source-map": "^2.0.0",
+        "debug": "^4.1.0",
+        "gensync": "^1.0.0-beta.2",
+        "json5": "^2.2.3",
+        "semver": "^6.3.1"
+      },
+      "engines": {
+        "node": ">=6.9.0"
+      },
+      "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/babel"
 
-[TRUNCATED] Showing first 80 of 2258 lines.
+[TRUNCATED] Showing first 80 of 7508 lines.
 --- package.json ---
 {
-  "name": "mash",
-  "version": "1.0.0",
-  "description": "Frontend EJS do Sistema MASH",
-  "license": "ISC",
-  "author": "",
-  "main": "index.js",
+  "name": "mash-frontend",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Frontend React do Sistema MASH",
   "scripts": {
-    "test": "node --check index.js",
-    "start": "npx nodemon index.js",
-    "build:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css",
-    "watch:css": "npx @tailwindcss/cli -i public/css/tailwind.css -o public/css/style.css --watch"
+    "dev": "next dev -p 4000",
+    "start": "next start -p 4000",
+    "build": "npm run build:css && next build",
+    "build:css": "tailwindcss -i public/css/tailwind.css -o public/css/style.css",
+    "watch:css": "tailwindcss -i public/css/tailwind.css -o public/css/style.css --watch",
+    "test": "node --test scripts/verify-frontend.mjs",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{js,mjs,css,json,html}\"",
+    "format:check": "prettier --check \"**/*.{js,mjs,css,json,html}\"",
+    "prepare": "husky"
   },
   "dependencies": {
     "@phosphor-icons/web": "^2.1.2",
-    "ejs": "^5.0.2",
-    "express": "^5.3.0",
-    "nodemon": "^3.1.14"
+    "axios": "^1.8.4",
+    "next": "16.4.3",
+    "react": "^18",
+    "react-dom": "^18"
   },
-  "type": "module",
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
     "tailwindcss": "^4.3.3"
+  },
+  "lint-staged": {
+    "*.{js,mjs,css,json,html}": "prettier --write"
   }
 }
 
 
 === ENTRY POINTS ===
-Found: index.js
+No common entry points found. Check 'main' or 'scripts.start' in manifest files above.
 
 === LINTING AND FORMATTING CONFIG ===
-No linting or formatting config files found in project root.
+Found: eslint.config.mjs
+Found: .prettierrc.json
 
 === ENVIRONMENT VARIABLE TEMPLATES ===
 --- .env.example ---
-PORT=4000
-API_URL=http://localhost:8080
+NEXT_PUBLIC_API_URL=http://localhost:8080
 
 
 === TODO / FIXME / HACK (production code only, test dirs excluded) ===
 None found.
 
 === GIT RECENT COMMITS (last 20) ===
-6bf8d97 fix: tratar achados da revisão do CodeRabbit (#6)
-abda92b docs: atualizar codemaps para o consumo direto da API (#6)
-8711adb feat: login e consumo da API do backend pelo navegador (#6)
-cdd1beb feat: index.js na porta 4000 no lugar do preview-server (#6)
-0200fbd chore: ignorar .env e adicionar .env.example (#6)
-d6bbb83 Merge pull request #3 from conloq/chore/35-revisao-automatica
-e687fef chore: adicionar configuração do CodeRabbit (#35)
-eec19b9 Merge pull request #2 from conloq/docs/porta-4000-e-preview-temporario
-41dcd59 docs: porta 4000 e aviso de que o preview e temporario
-5fc33e0 Merge pull request #1 from conloq/fix/54-remover-chave-exposta
-cf2dc27 chore(security): remover chave de API versionada do opencode.json
-726005e chore: adiciona arquivos de configuracao e documentacao
-e930094 refactor: simplifica preview frontend com EJS estatico
+7483f80 docs: alinhar PRODUCT.md ao escopo da Sprint 5 e sessao no servidor (#39)
+7d6f232 docs: traduzir os headers code-wiki do frontend para pt-BR (#66) (#38)
+5db17ab docs: registrar URLs publicadas do Mash (#37)
+99e50d8 feat: renderizar as telas pelo servidor (#6) (#36)
+34af77c fix: esconder as ações da receita que não carregou (#73) (#35)
+69d2b14 fix: remover ícones PNG sem uso e atualizar o README (#73) (#34)
+ce49ffa docs: corrigir contexto local do frontend (#33)
+58ec542 Merge pull request #32 from conloq/fix/telas-iguais-ao-pen
+1b1e429 fix: alinhar as telas do frontend ao design do Pen
+7fedb0e fix(design): ícone preenchido do Teste de iodo no menu ativo do mash.pen
+8ee552e Merge pull request #31 from conloq/feat/78-acessos-mobile-e-barra-settings
+c28d4bc feat: tela de últimos acessos no mobile e barra de ações com largura total
+f53c1f4 Merge pull request #30 from conloq/feat/iodo-camera-e-configuracao
+d1213a2 feat: concluir telas responsivas do MASH
+3964aa6 Merge pull request #29 from conloq/docs/codemap-acoes-rampa
+b5e710c docs: deixar clara a frase das ações de rampa no codemap
+1ccb67b Merge pull request #28 from conloq/feat/configuracao-e-acessos
+f63f6c0 feat: histórico de acessos pela API, painel e monitoramento na v2
+2c8e2d0 Merge branch 'main' into feat/configuracao-e-acessos
+5bf498b feat: configuração, últimos acessos e excluir padronizado
 
 === HIGH-CHURN FILES (last 90 days, top 20) ===
-   3 views/cadastro.ejs
-   2 index.js
-   2 public/js/app.js
-   2 codemap.md
-   2 public/codemap.md
-   2 public/js/codemap.md
-   2 views/codemap.md
-   2 views/partials/codemap.md
-   2 public/css/style.css
-   2 views/adicionarIodo.ejs
-   2 views/adicionarTemperatura.ejs
-   2 views/editarIodo.ejs
-   2 views/editarTemperatura.ejs
-   2 views/login.ejs
-   2 views/partials/footer.ejs
-   2 views/partials/sidebar.ejs
-   2 views/partials/topBar.ejs
-   2 views/receita.ejs
-   2 views/usuario.ejs
-   2 package-lock.json
+  18 public/js/app.js
+  17 codemap.md
+  15 README.md
+  13 AGENTS.md
+  13 docs/codebase/CONCERNS.md
+  13 docs/codebase/CONVENTIONS.md
+  12 docs/codebase/STRUCTURE.md
+  12 index.js
+  11 public/css/style.css
+  11 views/codemap.md
+  11 views/partials/codemap.md
+  10 docs/codebase/INTEGRATIONS.md
+   9 docs/codebase/STACK.md
+   8 docs/codebase/ARCHITECTURE.md
+   8 views/login.ejs
+   8 views/partials/footer.ejs
+   8 views/partials/sidebar.ejs
+   8 views/recipe.ejs
+   8 docs/design/mash.pen
+   8 views/usuario.ejs
 
 === MONOREPO SIGNALS ===
 No monorepo signals detected.
 
 === CODE METRICS ===
-Total files scanned: 74
-Total lines of code: 2828
+Total files scanned: 414
+Total lines of code: 36370
 
 Files by language:
-  Other: 71
-  JavaScript: 3
+  Other: 361
+  JavaScript: 53
 
 Top 10 largest files:
-public\img\mash.png: 190.7KB
-package-lock.json: 74.0KB
-docs\figma-export\screens\receita-authenticated.png: 67.2KB
-public\css\style.css: 30.5KB
-public\img\foto-perfil.png: 26.7KB
-docs\superpowers\plans\2026-08-20-tailwind-css-dashboard-plan.md: 20.4KB
-public\js\app.js: 12.7KB
-public\icons\mash_icon.png: 10.0KB
-docs\codebase\CONCERNS.md: 8.8KB
-views\usuario.ejs: 8.1KB
+docs/design/mash.pen: 3255.6KB
+docs/design/mash-assets/mash-emblema.png: 340.3KB
+public/img/mash-emblema.png: 340.3KB
+package-lock.json: 250.2KB
+graphify-out/graph.json: 222.2KB
+graphify-out/2026-10-25/graph.json: 217.2KB
+docs/design/mash-assets/espuma.png: 204.5KB
+public/img/espuma.png: 204.5KB
+graphify-out/graph.html: 201.3KB
 
 === CI/CD PIPELINES ===
-No CI/CD pipelines detected.
+CI/CD: GitHub Actions
 
 === CONTAINERS & ORCHESTRATION ===
 No containerization configs detected.

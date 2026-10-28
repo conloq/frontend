@@ -1,7 +1,7 @@
 # code-wiki:start
 # Summary: Run Super-Linter on pull requests and changes pushed to the main branch.
 # Description: Checks out full Git history so linting can compare changed files.
-# Validates JavaScript, CSS, HTML, and JSON changes while excluding generated styles.
+# Validates JavaScript with React rules (.github/linters/eslint.config.mjs), CSS, HTML, and JSON changes while excluding generated styles.
 # Grants read-only workflow permissions for repository metadata and pull request status.
 # code-wiki:end
 name: Super-Linter
@@ -41,14 +41,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          # JavaScript
+          # JavaScript e React (JSX em .js e .jsx); regras em .github/linters/eslint.config.mjs
           VALIDATE_JAVASCRIPT_ES: true
           VALIDATE_JAVASCRIPT_PRETTIER: true
+          VALIDATE_JSX: true
+          VALIDATE_JSX_PRETTIER: true
 
           # CSS
           VALIDATE_CSS_PRETTIER: true
 
-          # HTML (só arquivos .html; as views .ejs ficam de fora)
+          # HTML (só arquivos .html)
           VALIDATE_HTML: true
           VALIDATE_HTML_PRETTIER: true
 

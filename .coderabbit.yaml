@@ -6,7 +6,7 @@
 # code-wiki:end
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "pt-BR"
-tone_instructions: "Seja objetivo e técnico. Este repositório só tem telas (EJS, Tailwind CSS e JavaScript do navegador). Foque em segurança no navegador, acessibilidade e nas regras do AGENTS.md. Não peça testes automatizados."
+tone_instructions: "Seja objetivo e técnico. Este repositório só tem telas (Next.js com React, Tailwind CSS e axios chamando a API). Foque em segurança no navegador, acessibilidade e nas regras do AGENTS.md. Não peça testes automatizados."
 reviews:
   profile: "chill"
   request_changes_workflow: false

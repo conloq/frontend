@@ -1,9 +1,0 @@
-<%# Mensagens flash da sessão; EJS escapa o texto retornado pela API. %>
-<div id="mensagens" class="empty:absolute" aria-live="polite">
-  <% if (locals.flash) { %>
-    <div class="<%= flash.tipo === 'success' ? 'bg-sucesso-suave text-sucesso' : 'bg-perigo-suave text-perigo' %> flex items-center gap-3 rounded-[10px] px-4 py-3" role="<%= flash.tipo === 'success' ? 'status' : 'alert' %>">
-      <i class="ph-fill <%= flash.tipo === 'success' ? 'ph-check-circle' : 'ph-x-circle' %> text-[22px]" aria-hidden="true"></i>
-      <p class="font-semibold"><%= flash.texto %></p>
-    </div>
-  <% } %>
-</div>

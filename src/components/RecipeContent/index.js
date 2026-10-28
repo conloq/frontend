@@ -1,0 +1,411 @@
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import AppShell from '@/components/AppShell';
+import {
+    ConfirmDialog,
+    dataBr,
+    EmptyState,
+    flash,
+    plural,
+    ServerError,
+} from '@/components/Feedback';
+import { pedidoExcluirReceita, RecipeNameModal } from '@/components/RecipesContent';
+import { api, mensagemErro } from '@/services/api';
+
+// Detalhe e rampas em paralelo; rampas null = falhou. erro só quando a receita não carrega.
+export function useReceita() {
+    const router = useRouter();
+    const id = router.query.id;
+    const [estado, setEstado] = useState({ recipe: null, rampas: null, erro: null });
+
+    const carregar = useCallback(async () => {
+        if (!id) return;
+        const [detalhe, rampas] = await Promise.allSettled([
+            api.get(`/recipes/${id}`),
+            api.get(`/recipes/${id}/temperatures`),
+        ]);
+        if (detalhe.status === 'rejected' || !detalhe.value.data.recipe) {
+            return setEstado({
+                recipe: null,
+                rampas: null,
+                erro: mensagemErro(detalhe.reason ?? {}, 'Não foi possível carregar a receita.'),
+            });
+        }
+        setEstado({
+            recipe: detalhe.value.data.recipe,
+            rampas: rampas.status === 'fulfilled' ? (rampas.value.data.temperatures ?? []) : null,
+            erro: null,
+        });
+    }, [id]);
+
+    useEffect(() => {
+        carregar();
+    }, [carregar]);
+
+    return { id, ...estado, carregar };
+}
+
+// "HH:MM:SS" em minutos; NaN quando o formato não bate
+export const minutos = (hms) => {
+    const [h, m, seg] = String(hms ?? '')
+        .split(':')
+        .map(Number);
+    return h * 60 + m + seg / 60;
+};
+
+const pct = (v) => `${v * 100}%`;
+
+// Perfil das rampas: cada faixa ocupa do início do timer até o fim, na altura da temperatura
+function PerfilRampas({ rampas }) {
+    const faixas = rampas
+        .map((t, i) => ({ t, i, ini: minutos(t.initialization), dur: minutos(t.timer) }))
+        .filter((f) => Number.isFinite(f.ini) && f.dur > 0);
+    if (!faixas.length) return null;
+
+    const total = Math.max(...faixas.map((f) => f.ini + f.dur));
+    const piso = Math.floor((Math.min(...faixas.map((f) => f.t.minTemperatureLimit)) - 2) / 5) * 5;
+    // folga em cima para o rótulo da rampa mais quente
+    const teto = Math.ceil((Math.max(...faixas.map((f) => f.t.maxTemperatureLimit)) + 8) / 5) * 5;
+
+    return (
+        <section
+            id="perfilRampas"
+            className="card flex flex-col overflow-hidden"
+            aria-labelledby="tituloPerfil"
+        >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linha px-6 py-5">
+                <div className="flex flex-col gap-0.5">
+                    <h2 id="tituloPerfil" className="text-lg font-semibold">
+                        Perfil das rampas
+                    </h2>
+                    <p className="text-sm text-texto-2">
+                        Faixa de cada rampa ao longo da mosturação, com os limites de alerta.
+                    </p>
+                </div>
+                <div className="flex gap-5 text-[13px] text-texto-2" aria-hidden="true">
+                    <span className="flex items-center gap-2">
+                        <span className="h-3 w-4 rounded-[3px] border border-acao/40 bg-acao/25" />
+                        Faixa da rampa
+                    </span>
+                    <span className="flex items-center gap-2">
+                        <span className="h-3 w-4 rounded-[3px] border border-acao/40 bg-acao/10" />
+                        Limites
+                    </span>
+                </div>
+            </div>
+            <div className="flex gap-3 px-6 pb-4 pt-5">
+                <div
+                    className="flex flex-col justify-between pb-6 text-xs tabular-nums text-texto-2"
+                    aria-hidden="true"
+                >
+                    <span>{teto} ºC</span>
+                    <span>{piso} ºC</span>
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div
+                        id="perfilGrafico"
+                        className="relative h-64 border-y border-linha"
+                        role="img"
+                        aria-label={`${plural(faixas.length, 'rampa', 'rampas')} entre ${piso} e ${teto} ºC em ${Math.round(total)} minutos. Os valores estão na tabela acima.`}
+                    >
+                        {faixas.map(({ t, i, ini, dur }) => {
+                            const limite = Math.max(
+                                t.maxTemperatureLimit - t.minTemperatureLimit,
+                                1
+                            );
+                            return (
+                                <div
+                                    key={t.id ?? i}
+                                    className="absolute border-r-2 border-superficie bg-acao/10"
+                                    style={{
+                                        left: pct(ini / total),
+                                        width: pct(dur / total),
+                                        top: pct((teto - t.maxTemperatureLimit) / (teto - piso)),
+                                        height: pct(limite / (teto - piso)),
+                                    }}
+                                >
+                                    <div
+                                        className="absolute inset-x-0 border-t-2 border-acao bg-acao/25"
+                                        style={{
+                                            top: pct(
+                                                (t.maxTemperatureLimit - t.maxTemperatureRamp) /
+                                                    limite
+                                            ),
+                                            height: pct(
+                                                (t.maxTemperatureRamp - t.minTemperatureRamp) /
+                                                    limite
+                                            ),
+                                        }}
+                                    />
+                                    {/* rótulo alinhado à direita nas rampas do fim, para não sair do gráfico */}
+                                    <span
+                                        className={`absolute bottom-full mb-1 flex flex-col whitespace-nowrap text-xs leading-tight ${ini / total > 0.6 ? 'right-0' : 'left-1'}`}
+                                    >
+                                        <span className="font-semibold">
+                                            Rampa {t.orderRamp ?? i + 1}
+                                        </span>
+                                        <span className="text-texto-2">
+                                            {t.minTemperatureRamp} – {t.maxTemperatureRamp} ºC ·{' '}
+                                            {Math.round(dur)} min
+                                        </span>
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <div
+                        className="flex justify-between text-xs tabular-nums text-texto-2"
+                        aria-hidden="true"
+                    >
+                        <span>0 min</span>
+                        <span>{Math.round(total)} min</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function LinhaRampa({ rampa, ordem, recipeId }) {
+    const celula = (rotulo, valor, coluna) => (
+        <span
+            className={`max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm ${coluna} lg:row-start-1`}
+        >
+            <span className="text-texto-2 lg:hidden">{rotulo}</span>
+            <span>{valor}</span>
+        </span>
+    );
+    return (
+        <div className="tabela-linha grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-6 py-4 max-lg:mb-3 max-lg:rounded-xl max-lg:border max-lg:bg-superficie max-lg:px-4 max-lg:pb-4 max-lg:pt-3 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:gap-x-4 lg:py-0">
+            <span className="grid size-8 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold">
+                {ordem}
+            </span>
+            <span className="font-semibold max-lg:text-[17px]">
+                {rampa.minTemperatureRamp} – {rampa.maxTemperatureRamp} ºC
+            </span>
+            <span className="flex gap-1 max-lg:col-start-3 max-lg:row-start-1 lg:col-start-7 lg:justify-end">
+                <Link
+                    href={`/recipes/${recipeId}/temperatures/${rampa.id}/edit`}
+                    className="btn-icone"
+                    aria-label={`Editar rampa ${ordem}`}
+                >
+                    <i className="ph ph-pencil-simple" aria-hidden="true" />
+                </Link>
+                {/* shortcut: sem rota de exclusão de rampa (conloq/mash#97), o botão não faz nada; ligar quando a rota existir */}
+                <button
+                    type="button"
+                    className="btn-icone-perigo"
+                    data-sem-api="conloq/mash#97"
+                    aria-label={`Excluir rampa ${ordem}`}
+                >
+                    <i className="ph ph-trash" aria-hidden="true" />
+                </button>
+            </span>
+            {celula(
+                'Limites',
+                `${rampa.minTemperatureLimit} – ${rampa.maxTemperatureLimit} ºC`,
+                'lg:col-start-3 lg:text-texto-2'
+            )}
+            {celula('Temporizador', rampa.timer, 'lg:col-start-4')}
+            {celula('Início do timer', rampa.initialization, 'lg:col-start-5')}
+            {celula('Tempo ideal', rampa.idealTime, 'lg:col-start-6')}
+        </div>
+    );
+}
+
+function Receita({ edit }) {
+    const router = useRouter();
+    const { id, recipe, rampas, erro, carregar } = useReceita();
+    const [renomeando, setRenomeando] = useState(false);
+    const [confirmacao, setConfirmacao] = useState(null);
+
+    useEffect(() => {
+        if (edit || router.query.edit === '1') setRenomeando(true);
+    }, [edit, router.query.edit]);
+
+    if (erro) return <ServerError message={erro} />;
+    if (!recipe) return <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />;
+
+    const fecharRenomear = () => {
+        setRenomeando(false);
+        if (edit) router.replace(`/recipes/${id}`);
+    };
+
+    const renomear = async (name) => {
+        try {
+            const { data } = await api.put(`/recipes/${id}`, { name });
+            flash('success', data?.message ?? 'Receita atualizada com sucesso.');
+            fecharRenomear();
+            carregar();
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível salvar os dados.'));
+        }
+    };
+
+    const excluir = async () => {
+        try {
+            await api.delete(`/recipes/${id}`);
+            flash('success', 'Receita excluída.');
+            router.push('/recipes');
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível excluir a receita.'));
+        }
+    };
+
+    const resumo =
+        rampas === null
+            ? 'Não foi possível carregar as rampas'
+            : `${rampas.length ? plural(rampas.length, 'rampa', 'rampas') : 'nenhuma rampa'} · criada em ${dataBr(recipe.createdAt)}`;
+    const novaRampa = `/recipes/${id}/temperatures/new`;
+
+    return (
+        <>
+            <div className="flex flex-col gap-2">
+                <Link href="/recipes" className="btn-voltar self-start max-lg:hidden">
+                    <i className="ph ph-arrow-left" aria-hidden="true" />
+                    Todas as receitas
+                </Link>
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                        <h1
+                            id="recipeName"
+                            className="truncate text-[22px] font-semibold lg:text-[30px]"
+                        >
+                            {recipe.name}
+                        </h1>
+                        <p id="recipeResumo" className="text-texto-2">
+                            {resumo}
+                        </p>
+                    </div>
+                    <div className="acoes">
+                        <button
+                            type="button"
+                            id="btnExcluirReceita"
+                            className="btn-perigo max-lg:order-1"
+                            onClick={() =>
+                                setConfirmacao(
+                                    pedidoExcluirReceita(
+                                        `Excluir a receita ${recipe.name}?`,
+                                        excluir
+                                    )
+                                )
+                            }
+                        >
+                            <i className="ph ph-trash" aria-hidden="true" />
+                            Excluir
+                        </button>
+                        <button
+                            type="button"
+                            className="btn-secundario"
+                            onClick={() => setRenomeando(true)}
+                        >
+                            <i className="ph ph-pencil-simple" aria-hidden="true" />
+                            Renomear
+                        </button>
+                        <Link
+                            id="iodoReceitaLink"
+                            href={`/recipes/${id}/iodine`}
+                            className="btn-secundario max-lg:order-2 max-lg:col-span-2"
+                        >
+                            <i className="ph ph-test-tube" aria-hidden="true" />
+                            Teste de iodo
+                        </Link>
+                        <Link
+                            id="newTemperatureLink"
+                            href={novaRampa}
+                            className="btn-primario max-lg:hidden"
+                        >
+                            <i className="ph ph-plus" aria-hidden="true" />
+                            Adicionar rampa
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            <section
+                className="card overflow-hidden max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent"
+                aria-labelledby="tituloRampas"
+            >
+                <h2
+                    id="tituloRampas"
+                    className="border-b border-linha px-6 py-5 text-lg font-semibold max-lg:border-0 max-lg:px-0 max-lg:pb-3 max-lg:pt-0"
+                >
+                    Rampas de temperatura
+                </h2>
+                <div
+                    className="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]"
+                    aria-hidden="true"
+                >
+                    <span>Ordem</span>
+                    <span>Faixa da rampa</span>
+                    <span>Limites</span>
+                    <span>Temporizador</span>
+                    <span>Início do timer</span>
+                    <span>Tempo ideal</span>
+                    <span className="text-right">Ações</span>
+                </div>
+                <div id="detalheRampas" aria-live="polite">
+                    {rampas === null && (
+                        <EmptyState
+                            icon="ph-cloud-slash"
+                            title="Não foi possível carregar as rampas"
+                            text="Tente novamente em alguns instantes."
+                        />
+                    )}
+                    {rampas?.length === 0 && (
+                        <EmptyState
+                            icon="ph-thermometer-simple"
+                            title="Nenhuma rampa ainda"
+                            text="Adicione a primeira rampa de temperatura desta receita."
+                            action={{ text: 'Adicionar rampa', icon: 'ph-plus', href: novaRampa }}
+                        />
+                    )}
+                    {rampas?.map((rampa, i) => (
+                        <LinhaRampa
+                            key={rampa.id}
+                            rampa={rampa}
+                            ordem={rampa.orderRamp ?? i + 1}
+                            recipeId={id}
+                        />
+                    ))}
+                </div>
+            </section>
+
+            {rampas && <PerfilRampas rampas={rampas} />}
+
+            <div className="barra-mobile lg:hidden">
+                <Link
+                    id="newTemperatureLinkMobile"
+                    href={novaRampa}
+                    className="btn-primario w-full"
+                >
+                    <i className="ph ph-plus" aria-hidden="true" />
+                    Adicionar rampa
+                </Link>
+            </div>
+
+            <RecipeNameModal
+                id="modalRenomear"
+                formId="formEditarReceita"
+                open={renomeando}
+                onClose={fecharRenomear}
+                title="Renomear receita"
+                help="Até 255 caracteres. Não pode repetir o nome de outra receita sua."
+                submit="Salvar nome"
+                inicial={recipe.name}
+                onSubmit={renomear}
+            />
+            <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
+        </>
+    );
+}
+
+// shortcut: título e trilha do topo ficam genéricos ("Receita"); o nome aparece no h1. Subir o fetch para a página se o topo precisar do nome.
+export default function RecipeContent({ edit = false }) {
+    return (
+        <AppShell title="Receita" trail={['Receitas', 'Receita']} back="/recipes">
+            <Receita edit={edit} />
+        </AppShell>
+    );
+}

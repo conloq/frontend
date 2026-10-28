@@ -3,32 +3,30 @@
 ## Fluxo
 
 ```text
-navegador --cookie HttpOnly--> frontend Express/EJS (:4000)
-                                  |-- GET página: sessão JWT -> Back-End REST (:8080)
-                                  |                     -> res.render(view, locals)
-                                  |-- POST /login: recebe JWT -> sessão
-                                  |-- POST formulário: controller -> Back-End com Bearer -> redirect 303
+navegador (Next.js, :4000) --axios + Authorization: Bearer--> Back-End REST (:8080)
+   |-- POST /login -> JWT no localStorage (mash_token)
+   |-- AppShell: GET /user antes de cada tela logada
+   |-- telas: GET/POST/PUT/DELETE no useEffect ou no envio do formulário
+   |-- 401 -> apaga o token -> /login
 ```
 
-O frontend e o Back-End continuam em repositórios separados. `index.js` configura Express, EJS e `express-session`, serve arquivos estáticos e monta `controllers/pageController.js`. Esse módulo valida a sessão, busca os dados e entrega as views com locals. O EJS escapa valores com `<%= ... %>`.
-
-`public/js/app.js` trata validações e interações do navegador. Formulários enviam POST para rotas same-origin do `pageController`, que chama a API, usa flash de sessão e redireciona após o envio. O navegador não recebe `API_URL` nem o JWT e não depende de CORS para acessar a API.
+O frontend e o Back-End continuam em repositórios separados. O Next.js (Pages Router) serve as páginas; cada arquivo de `src/pages/` monta um componente de tela de `src/components/`, no padrão do projeto de referência `front-end-react`. O navegador chama a API direto com `axios` (`src/services/api.js`), e o Back-End libera essa origem no CORS (`FRONTEND_URL`). React escapa os valores renderizados.
 
 ## Limites atuais
 
-- Dados disponíveis são buscados no servidor antes do render, incluindo usuário global do shell, perfil, acessos, receitas e rampas.
-- Rotas sem dados correspondentes no Back-End seguem em estados vazios honestos; o exemplo `/dw2-example` demonstra dados passados diretamente a `res.render`.
-- JWT fica em sessão Express com cookie `HttpOnly`, `SameSite=Strict` e `Secure` em produção.
-- A sessão usa `express-mysql-session` na tabela `sessions` do banco MySQL existente. A tabela é criada por migration do Back-End; o adaptador do frontend não a cria.
-- O frontend usa credenciais separadas, limitadas à tabela de sessões. A disponibilidade do MySQL passa a ser requisito de inicialização do servidor de páginas.
-- O token não é revogado no logout pela API; destruir a sessão do frontend impede que o navegador continue usando aquele token.
+- O frontend não conecta ao banco. A tabela `sessions` do app EJS foi removida pela migration `20261028120000-remover-tabela-sessions` do Back-End.
+- O JWT fica no `localStorage`, acessível ao JavaScript da página (ver `CONCERNS.md`).
+- O Back-End não tem rota de logout: sair só apaga o token do navegador; o JWT continua válido até expirar.
+- Rotas sem dados no Back-End (painel, lotes, sessão do iodo, recuperação de senha, análise) mostram estados vazios honestos; `/analyses/new` é a simulação do teste de iodo.
+- As páginas são estáticas no build (sem `getServerSideProps`); os dados chegam depois da hidratação, com `esqueleto` enquanto carregam.
 
 ## Camadas
 
 | Camada | Responsabilidade |
 |---|---|
-| `index.js` | Configuração do Express, sessão persistida em MySQL, estáticos e montagem do controller de páginas |
-| `controllers/pageController.js` | Rotas de tela, autenticação, chamadas à API e adaptação dos POSTs de formulário |
-| `views/` | HTML EJS das telas, formulários e estado inicial renderizado |
-| `public/js/app.js` | Validação de formulários, interações e visuais derivados dos dados renderizados |
-| `public/js/script.js` | Sidebar, modais, foco e interações do shell |
+| `src/pages/` | Uma página por rota; só monta o componente da tela |
+| `src/components/XContent/` | Tela: busca de dados, estado, formulários e marcação |
+| `src/components/AppShell` | Sidebar, top bar, guarda de sessão (`GET /user`) e `useUser()` |
+| `src/components/Feedback` | Mensagens (`flash`, `#mensagens`), `EmptyState`, `Modal`, `ConfirmDialog`, `Field`, `PasswordInput`, `ServerError` |
+| `src/services/` | `api.js` (axios, Bearer, 401), `auth.js` (login, cadastro, usuário, sair), `rampa.js` (validação pura) |
+| `public/css/` | Tailwind v4: tokens e classes de componente |

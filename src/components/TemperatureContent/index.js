@@ -1,0 +1,232 @@
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import AppShell from '@/components/AppShell';
+import { Field, flash, ServerError } from '@/components/Feedback';
+import { useReceita } from '@/components/RecipeContent';
+import { api, mensagemErro } from '@/services/api';
+import { comSegundos, HORARIOS, TEMPERATURAS, validarRampa } from '@/services/rampa';
+
+const CAMPOS = [...TEMPERATURAS, ...HORARIOS, 'orderRamp'];
+
+function Formulario() {
+    const router = useRouter();
+    const { id, recipe, rampas, erro } = useReceita();
+    const idRampa = router.query.temperatureId;
+    const editando = Boolean(idRampa);
+    const rampa = rampas?.find((t) => String(t.id) === idRampa);
+    const [valores, setValores] = useState(Object.fromEntries(CAMPOS.map((key) => [key, ''])));
+    const [erros, setErros] = useState({});
+
+    useEffect(() => {
+        if (rampa)
+            setValores(Object.fromEntries(CAMPOS.map((key) => [key, String(rampa[key] ?? '')])));
+    }, [rampa]);
+
+    if (erro) return <ServerError message={erro} />;
+    if (editando && rampas && !rampa)
+        return <ServerError message="Não foi possível carregar esta rampa." />;
+    if (!recipe || (editando && !rampa))
+        return <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />;
+
+    const salvar = async (event) => {
+        event.preventDefault();
+        const novos = validarRampa(valores);
+        setErros(novos);
+        if (Object.keys(novos).length) {
+            flash('danger', 'Confira os campos marcados. Corrija e salve de novo.');
+            return event.target.querySelector(`[name="${Object.keys(novos)[0]}"]`)?.focus();
+        }
+        // shortcut: edição de rampa sem rota na API (conloq/mash#97) só valida; ligar o PUT quando existir
+        if (editando) return;
+        try {
+            const { data } = await api.post(`/recipes/${id}/temperatures`, {
+                ...Object.fromEntries(TEMPERATURAS.map((key) => [key, Number(valores[key])])),
+                ...Object.fromEntries(HORARIOS.map((key) => [key, comSegundos(valores[key])])),
+                ...(valores.orderRamp !== '' && { orderRamp: Number(valores.orderRamp) }),
+            });
+            flash('success', data?.message ?? 'Temperatura criada com sucesso.');
+            router.push(`/recipes/${id}`);
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível salvar os dados.'));
+        }
+    };
+
+    const input = (name, props) => (
+        <input
+            id={name}
+            name={name}
+            value={valores[name]}
+            onChange={(event) => setValores({ ...valores, [name]: event.target.value })}
+            aria-invalid={erros[name] ? 'true' : undefined}
+            {...props}
+        />
+    );
+    const temperatura = (name, rotulo, curto) => (
+        <Field
+            name={name}
+            label={
+                <>
+                    <span className="lg:hidden">{curto}</span>
+                    <span className="max-lg:hidden">{rotulo}</span>
+                </>
+            }
+            unit="ºC"
+            error={erros[name]}
+        >
+            {input(name, {
+                type: 'number',
+                inputMode: 'numeric',
+                min: 0,
+                max: 100,
+                step: 1,
+                placeholder: 'Ex.: 65',
+                required: true,
+            })}
+        </Field>
+    );
+    const horario = (name, rotulo, ajuda) => (
+        <Field name={name} label={rotulo} help={ajuda} error={erros[name]}>
+            {input(name, { type: 'time', step: 1, required: true })}
+        </Field>
+    );
+    const legenda = (titulo, texto) => (
+        <legend className="mb-4 max-lg:sr-only">
+            <span className="block font-display text-lg font-semibold">{titulo}</span>
+            <span className="text-sm text-texto-2">{texto}</span>
+        </legend>
+    );
+    const titulo = editando
+        ? rampa.orderRamp
+            ? `Editar rampa ${rampa.orderRamp}`
+            : 'Editar rampa'
+        : 'Nova rampa';
+
+    return (
+        <form
+            id="formTemperatura"
+            className="flex flex-1 flex-col gap-6"
+            noValidate
+            onSubmit={salvar}
+            data-sem-api={editando ? 'conloq/mash#97' : undefined}
+        >
+            <div className="flex flex-col gap-1 max-lg:contents">
+                <Link
+                    id="voltarReceita"
+                    href={`/recipes/${id}`}
+                    className="btn-voltar self-start max-lg:hidden"
+                >
+                    <i className="ph ph-arrow-left" aria-hidden="true" />
+                    <span>{recipe.name}</span>
+                </Link>
+                <h1 id="tituloRampa" className="text-[30px] font-semibold max-lg:sr-only">
+                    {titulo}
+                </h1>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_400px]">
+                <div className="card flex flex-col gap-5 p-6 max-lg:border-0 max-lg:bg-transparent max-lg:p-0">
+                    <fieldset className="flex flex-col gap-4">
+                        {legenda(
+                            'Faixa da rampa',
+                            'Temperatura que o mosto precisa manter nesta rampa.'
+                        )}
+                        <div className="grid grid-cols-2 gap-3 lg:gap-5">
+                            {temperatura('minTemperatureRamp', 'Temperatura mínima', 'Mínima')}
+                            {temperatura('maxTemperatureRamp', 'Temperatura máxima', 'Máxima')}
+                        </div>
+                    </fieldset>
+                    <hr className="border-linha max-lg:hidden" />
+                    <fieldset className="flex flex-col gap-4">
+                        {legenda('Tempo', 'Horários no formato hh:min:s.')}
+                        <div className="grid gap-5 md:grid-cols-3">
+                            {horario('timer', 'Temporizador', 'Quanto a rampa dura.')}
+                            {horario(
+                                'initialization',
+                                'Início do timer',
+                                'Desde o começo da mosturação.'
+                            )}
+                            {horario('idealTime', 'Tempo ideal', 'Tempo esperado nesta rampa.')}
+                        </div>
+                    </fieldset>
+                    <hr className="border-linha max-lg:hidden" />
+                    <fieldset className="flex flex-col gap-4">
+                        {legenda(
+                            'Limites aceitáveis',
+                            'Faixa tolerada antes de corrigir o aquecimento.'
+                        )}
+                        <div className="grid grid-cols-2 gap-3 lg:gap-5">
+                            {temperatura('minTemperatureLimit', 'Limite mínimo', 'Limite mín.')}
+                            {temperatura('maxTemperatureLimit', 'Limite máximo', 'Limite máx.')}
+                        </div>
+                    </fieldset>
+                    <Field
+                        name="orderRamp"
+                        label="Ordem da rampa (opcional)"
+                        help="Posição desta rampa na receita."
+                        error={erros.orderRamp}
+                        className="sm:max-w-80"
+                    >
+                        {input('orderRamp', {
+                            type: 'number',
+                            inputMode: 'numeric',
+                            step: 1,
+                            placeholder: 'Ex.: 1',
+                        })}
+                    </Field>
+                </div>
+
+                <aside
+                    className="card flex flex-col gap-3.5 self-start p-6 max-lg:hidden"
+                    aria-labelledby="tituloComoPreencher"
+                >
+                    <h2 id="tituloComoPreencher" className="text-lg font-semibold">
+                        Como preencher
+                    </h2>
+                    <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed marker:text-texto-2">
+                        <li>Temperaturas em números inteiros, de 0 a 100&nbsp;ºC.</li>
+                        <li>A mínima nunca passa da máxima, na faixa e nos limites.</li>
+                        <li>Horários com hora, minuto e segundo, como 00:40:00.</li>
+                        <li>Só a ordem é opcional.</li>
+                    </ul>
+                </aside>
+            </div>
+
+            <div className="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+                {editando && (
+                    <button
+                        type="button"
+                        className="btn-perigo max-sm:w-full"
+                        data-sem-api="conloq/mash#97"
+                    >
+                        <i className="ph ph-trash" aria-hidden="true" />
+                        Excluir rampa
+                    </button>
+                )}
+                <div className="acoes sm:ml-auto">
+                    <Link id="cancelarRampa" href={`/recipes/${id}`} className="btn-secundario">
+                        Cancelar
+                    </Link>
+                    <button type="submit" className="btn-primario">
+                        {editando ? 'Salvar alterações' : 'Salvar rampa'}
+                    </button>
+                </div>
+            </div>
+        </form>
+    );
+}
+
+export default function TemperatureContent() {
+    const router = useRouter();
+    const editando = Boolean(router.query.temperatureId);
+    const titulo = editando ? 'Editar rampa' : 'Nova rampa';
+    return (
+        <AppShell
+            title={titulo}
+            trail={['Receitas', titulo]}
+            back={router.query.id ? `/recipes/${router.query.id}` : '/recipes'}
+        >
+            <Formulario />
+        </AppShell>
+    );
+}

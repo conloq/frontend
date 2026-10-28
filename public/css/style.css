@@ -26,8 +26,6 @@
     --text-xl--line-height: calc(1.75 / 1.25);
     --text-2xl: 1.5rem;
     --text-2xl--line-height: calc(2 / 1.5);
-    --text-3xl: 1.875rem;
-    --text-3xl--line-height: calc(2.25 / 1.875);
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
     --text-5xl: 3rem;
@@ -228,9 +226,6 @@
   .pointer-events-none {
     pointer-events: none;
   }
-  .collapse {
-    visibility: collapse;
-  }
   .sr-only {
     position: absolute;
     width: 1px;
@@ -332,6 +327,9 @@
   .row-start-1 {
     grid-row-start: 1;
   }
+  .m-5 {
+    margin: calc(var(--spacing) * 5);
+  }
   .-mx-4 {
     margin-inline: calc(var(--spacing) * -4);
   }
@@ -379,6 +377,9 @@
   }
   .block {
     display: block;
+  }
+  .contents {
+    display: contents;
   }
   .flex {
     display: flex;
@@ -444,6 +445,12 @@
   .h-18 {
     height: calc(var(--spacing) * 18);
   }
+  .h-24 {
+    height: calc(var(--spacing) * 24);
+  }
+  .h-40 {
+    height: calc(var(--spacing) * 40);
+  }
   .h-64 {
     height: calc(var(--spacing) * 64);
   }
@@ -473,6 +480,9 @@
   }
   .min-h-72 {
     min-height: calc(var(--spacing) * 72);
+  }
+  .min-h-\[60vh\] {
+    min-height: 60vh;
   }
   .min-h-full {
     min-height: 100%;
@@ -641,16 +651,6 @@
   .gap-y-1\.5 {
     row-gap: calc(var(--spacing) * 1.5);
   }
-  :where(.divide-y > :not(:last-child)) {
-    --tw-divide-y-reverse: 0;
-    border-bottom-style: var(--tw-border-style);
-    border-top-style: var(--tw-border-style);
-    border-top-width: calc(1px * var(--tw-divide-y-reverse));
-    border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
-  }
-  :where(.divide-linha > :not(:last-child)) {
-    border-color: var(--color-linha);
-  }
   .self-end {
     align-self: flex-end;
   }
@@ -750,18 +750,6 @@
   .border-white {
     border-color: var(--color-white);
   }
-  .bg-\[\#2b1a3d\] {
-    background-color: #2b1a3d;
-  }
-  .bg-\[\#9c3d1e\] {
-    background-color: #9c3d1e;
-  }
-  .bg-\[\#b9b0a8\] {
-    background-color: #b9b0a8;
-  }
-  .bg-\[\#e9b949\] {
-    background-color: #e9b949;
-  }
   .bg-\[\#faf8f6\] {
     background-color: #faf8f6;
   }
@@ -779,9 +767,6 @@
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--color-acao) 25%, transparent);
     }
-  }
-  .bg-aviso-suave {
-    background-color: var(--color-aviso-suave);
   }
   .bg-black\/40 {
     background-color: color-mix(in srgb, #000 40%, transparent);
@@ -956,9 +941,6 @@
   .pt-12 {
     padding-top: calc(var(--spacing) * 12);
   }
-  .pr-2 {
-    padding-right: calc(var(--spacing) * 2);
-  }
   .pr-4 {
     padding-right: calc(var(--spacing) * 4);
   }
@@ -980,9 +962,6 @@
   .pb-8 {
     padding-bottom: calc(var(--spacing) * 8);
   }
-  .pl-4 {
-    padding-left: calc(var(--spacing) * 4);
-  }
   .pl-5 {
     padding-left: calc(var(--spacing) * 5);
   }
@@ -998,10 +977,6 @@
   .text-2xl {
     font-size: var(--text-2xl);
     line-height: var(--tw-leading, var(--text-2xl--line-height));
-  }
-  .text-3xl {
-    font-size: var(--text-3xl);
-    line-height: var(--tw-leading, var(--text-3xl--line-height));
   }
   .text-4xl {
     font-size: var(--text-4xl);
@@ -1126,9 +1101,6 @@
   .text-white {
     color: var(--color-white);
   }
-  .uppercase {
-    text-transform: uppercase;
-  }
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
     font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
@@ -1156,10 +1128,6 @@
   }
   .shadow-\[inset_0_-12px_24px_rgba\(0\,0\,0\,0\.35\)\] {
     --tw-shadow: inset 0 -12px 24px var(--tw-shadow-color, rgba(0,0,0,0.35));
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-  .shadow-sm {
-    --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .transition-\[left\] {
@@ -2585,11 +2553,6 @@
   inherits: false;
   initial-value: 0;
 }
-@property --tw-divide-y-reverse {
-  syntax: "*";
-  inherits: false;
-  initial-value: 0;
-}
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
@@ -2768,7 +2731,6 @@
       --tw-translate-x: 0;
       --tw-translate-y: 0;
       --tw-translate-z: 0;
-      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-gradient-position: initial;
       --tw-gradient-from: #0000;

@@ -1,22 +1,24 @@
 # Sistema MASH
 
-Frontend EJS do Sistema MASH. O Back-End (`conloq/Back-End`, porta 8080) mantém as regras, os dados de domínio e emite o JWT; este repositório mantém as telas, a camada de apresentação e a sessão web. Os repositórios seguem separados.
+Frontend do Sistema MASH em Next.js (React, Pages Router) com Tailwind CSS v4. O Back-End (`conloq/Back-End`, porta 8080) mantém as regras, os dados e emite o JWT; este repositório mantém só as telas. Os repositórios seguem separados.
 
-## Fluxo das páginas
+## Como as telas consomem a API
 
-`index.js` configura Express, EJS e sessão, e monta `controllers/pageController.js`. Nas páginas autenticadas, o controller envia o JWT da sessão à API, recebe os dados e chama `res.render('profile', { user })`, por exemplo. A view imprime com EJS (`<%= user.name %>`), escapando o conteúdo.
+O navegador chama a API direto com `axios` (`src/services/api.js`), como no projeto de referência `front-end-react`. O login (`POST /login`) devolve o JWT, que fica no `localStorage` (`mash_token`). Um interceptor envia `Authorization: Bearer <token>` em toda chamada; um `401` apaga o token e volta para `/login`. Cada tela busca os próprios dados no `useEffect` e renderiza com React, que escapa o conteúdo.
 
-O navegador recebe um cookie de sessão `HttpOnly`; o JWT fica no servidor, persistido na tabela `sessions` do MySQL existente. A migration dessa tabela fica no Back-End; a conta do frontend acessa somente essa tabela. Os formulários enviam POST ao `pageController`, que chama as rotas da API e redireciona para a página EJS. O JavaScript fica com interações do navegador. Configure `SESSION_DB_*`, `API_URL` e `SESSION_SECRET` no `.env`; em produção, a conexão com MySQL usa TLS (`SESSION_DB_SSL_CA` para uma CA privada).
+Como a chamada sai do navegador, o Back-End precisa liberar a origem deste frontend no CORS (`FRONTEND_URL`). O frontend não conecta ao banco.
 
 ## Executar
 
 ```bash
 npm install
 npm run build:css
-npm start
+npm run dev
 ```
 
-O frontend roda em `http://localhost:4000`. Primeiro aplique a migration do Back-End; depois configure no frontend uma conta MySQL com acesso somente a `sessions`. A API precisa estar disponível em `API_URL` para login e páginas que exibem dados reais. Copie `.env.example` para `.env` e configure as credenciais locais.
+O frontend roda em `http://localhost:4000`. A API precisa estar de pé em `NEXT_PUBLIC_API_URL` (padrão `http://localhost:8080`); copie `.env.example` para `.env` se precisar mudar. Rode `npm run watch:css` em outro terminal enquanto edita classes.
+
+Produção local: `npm run build` (gera o CSS e o build do Next) e `npm start`.
 
 ## Deploy publicado
 
@@ -25,16 +27,19 @@ O frontend roda em `http://localhost:4000`. Primeiro aplique a migration do Back
 | Frontend | <https://frontend-a6u4.onrender.com> |
 | API do Back-End | <https://back-end-xxq5.onrender.com> |
 
-No serviço do frontend no Render, `API_URL` aponta para `https://back-end-xxq5.onrender.com`. Build Command: `npm install --include=dev && npm run build:css`. Start Command: `npm start`. Não versionar os valores de `SESSION_DB_*` nem `SESSION_SECRET`.
+No serviço do frontend no Render: `NEXT_PUBLIC_API_URL=https://back-end-xxq5.onrender.com`, Build Command `npm install --include=dev && npm run build`, Start Command `npm start`. A variável `NEXT_PUBLIC_*` entra no build, então mudar a URL exige novo deploy. No Back-End, `FRONTEND_URL` deve ser a URL do frontend.
 
-Para voltar a uma versão anterior da aplicação, use **Rollback** no histórico de deploys do serviço no Render. Isso não desfaz migrations do banco; alterações de schema exigem avaliação e procedimento próprios no Back-End.
+Para voltar a uma versão anterior, use **Rollback** no histórico de deploys do Render. Isso não desfaz migrations do banco.
 
 ## Verificações
 
-`npm test` verifica sintaxe, contrato EJS do perfil, upload e regressões do cliente. Não requer API nem banco. `npm run format:check` verifica os arquivos formatados pelo Prettier.
+- `npm test`: contrato da camada de API (Bearer, 401, rotas de login e usuário) e a validação de rampa, sem API nem banco.
+- `npm run lint`: ESLint com a configuração do Next (`eslint.config.mjs`).
+- `npm run format:check`: Prettier.
+- `npm run build`: compila o CSS e todas as rotas.
 
 ## Telas
 
-As rotas de página estão em `controllers/pageController.js`. Login, cadastro, perfil, histórico de acessos, receitas e rampas recebem dados do backend antes de renderizar. Dashboard, lotes, recuperação de senha e análise detalhada mantêm estados vazios quando a API ainda não oferece esses dados. `/dw2-example` é um exemplo didático isolado de `res.render` com dados EJS.
+As rotas ficam em `src/pages/` e o conteúdo de cada tela em `src/components/`. Login, cadastro, perfil, receitas e rampas usam a API real. Painel, lotes, sessão do iodo, recuperação de senha e análise detalhada mostram estados vazios enquanto a API não tem essas rotas. `/analyses/new` é a simulação do teste de iodo para o pitch.
 
 Consulte `codemap.md`, `AGENTS.md` e `docs/codebase/` para os mapas e convenções do projeto.

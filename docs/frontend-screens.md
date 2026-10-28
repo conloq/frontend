@@ -2,74 +2,52 @@
 
 ## Telas públicas
 
-| Tela | Template | Composição visual |
-|---|---|---|
-| Login | `views/login.ejs` | Header/footer, formulário de autenticação, campos de e-mail e senha, link de cadastro. |
-| Cadastro | `views/signup.ejs` | Header/footer, formulário de criação de conta e confirmação visual de senha. |
+| Tela | Rota | Componente | Composição visual |
+|---|---|---|---|
+| Login | `/login` | `LoginContent` em `AuthLayout` | Painel da marca, e-mail, senha com mostrar/ocultar, "Esqueceu a senha?" e link de cadastro. |
+| Cadastro | `/signup` | `SignupContent` em `AuthLayout` | Nome, e-mail, senha e confirmação com erro no campo. |
+| Recuperar senha | `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `ForgotPasswordContent` (`etapa`) | Barra da marca, espuma ao fundo e card central no desktop; passo 1 de 3; código em 6 caixas e "Reenviar" com contagem; formulários `data-sem-api` (conloq/mash#73). |
 
 ## Telas autenticadas
 
-| Tela | Rota | Template | Composição visual |
+| Tela | Rota | Componente | Composição visual |
 |---|---|---|---|
-| Perfil | `/profile` | `views/profile.ejs` | Shell autenticado, dados do perfil, edição, foto com preview e exclusão da conta com diálogo de confirmação. |
-| Últimos acessos | `/profile/access-history` | `views/accessHistory.ejs` | Tela mobile com o histórico de logins (`GET /user/login-history`), aberta pela linha "Últimos acessos" do Perfil. |
-| Receitas | `/recipes` | `views/recipes.ejs` | Shell autenticado, título, botão "Nova receita", listagem tabular e modal de criação. |
-| Receita | `/recipes/:id`, `/recipes/:id/edit` | `views/recipe.ejs` | Shell autenticado, rampas da receita, modal de renomear, exclusão e ações de editar/excluir rampa. |
-| Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `views/temperatureForm.ejs` | Shell autenticado, formulário de rampas, limites e temporização, com erro por campo; na edição, salvar não envia nada e não mostra aviso, porque a API ainda não tem rota (#97). |
-| Painel | `/dashboard` | `views/dashboard.ejs` | Indicadores com "—" e cards em estado vazio. |
-| Lotes | `/lots`, `/lots/:id`, `/lots/:id/monitoring` | `views/lots.ejs`, `views/lot.ejs`, `views/lotMonitoring.ejs` | Layout completo em estado vazio, sem registros fictícios; excluir lote é `data-sem-api`. |
-| Novo e editar lote | `/lots/new`, `/lots/:id/edit` | modal `views/partials/modalLote.ejs` sobre a lista e o detalhe | Receitas reais no seletor (`GET /recipes`); salvar é `data-sem-api`. |
-| Sessão do iodo | `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `views/iodineSession.ejs` | Câmera desconectada, calibração pendente, capturas vazias. |
-| Recuperar senha | `/forgot-password`, `/codigo`, `/redefinir` | `views/forgotPassword.ejs` | Páginas públicas; código de 6 dígitos; formulários `data-sem-api`. |
-| Teste de iodo | `/analyses/new` | `views/iodineDemo.ejs` | Shell autenticado e simulação de frontend das coletas, sem envio de imagem nem persistência. |
-| Análise | `/analyses/:id` | `views/analysis.ejs` | Shell autenticado e estado de indisponibilidade (consulta sem rota na API). |
+| Painel | `/dashboard` | `DashboardContent` | Indicadores com "—" e cards em estado vazio. |
+| Perfil | `/profile` | `ProfileContent` | Foto (troca envia na hora), dados da conta, troca de senha, últimos acessos e exclusão com confirmação. |
+| Últimos acessos | `/profile/access-history` | `AccessHistory` | Histórico de logins (`GET /user/login-history`; `404` = "Nenhum acesso registrado"). |
+| Configuração | `/settings`, `/settings/security` | `SettingsContent` | Abas Acessibilidade e Segurança; salvar só bloqueia o envio. |
+| Receitas | `/recipes` | `RecipesContent` | Busca, contagem, tabela (cards no mobile), modal "Nova receita" e exclusão com confirmação. |
+| Receita | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` | Rampas, perfil das rampas, modal Renomear, exclusão e link para o teste de iodo. |
+| Teste de iodo da receita | `/recipes/:id/iodine` | `RecipeIodineContent` | Rampa do teste, coletas e prévia da sessão; salvar é `data-sem-api` (conloq/mash#101). |
+| Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` | Faixa, tempos e limites com erro por campo; na edição, salvar e excluir só bloqueiam (conloq/mash#97). |
+| Lotes | `/lots`, `/lots/new` | `LotsContent` | Tabela em estado vazio; `/lots/new` abre o modal com receitas reais. |
+| Lote | `/lots/:id`, `/lots/:id/edit` | `LotDetail` | Leituras, receita e temperatura em estado vazio; `/edit` abre o modal; excluir é `data-sem-api`. |
+| Monitoramento | `/lots/:id/monitoring` | `LotMonitoring` | Histórico de conversão, registros e temperatura em estado vazio. |
+| Sessão do iodo | `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `IodineSession` | Câmera desconectada, calibração pendente, capturas vazias. |
+| Teste de iodo | `/analyses/new` | `IodineDemoContent` | Simulação das coletas, sem envio de imagem nem persistência e sem rótulo de simulação. |
+| Análise | `/analyses/:id` | página própria | Card "Captura e resultado" em estado vazio. |
 
 ## Estados que devem ser capturados para referência visual
 
-1. Login vazio.
-2. Cadastro vazio.
-3. Perfil em modo leitura.
-4. Perfil em modo edição.
-5. Perfil com exclusão de conta aberta (diálogo de confirmação).
-6. Receitas com uma ou mais linhas.
-7. Receitas sem receitas (estado vazio).
-8. Modal `Nova receita` aberto.
-9. Receita com rampas e modal `Renomear` aberto.
-10. Sidebar desktop expandida.
-11. Sidebar desktop recolhida.
-12. Drawer mobile aberto com overlay.
-13. Formulário de rampa em criação.
-14. Formulário de rampa em edição.
-15. Teste de iodo em andamento (simulação).
-16. Lotes e análise em estado de indisponibilidade.
+1. Login e cadastro vazios, e com erro da API.
+2. Perfil com dados, com erro de campo e com a confirmação de exclusão aberta.
+3. Receitas com linhas, vazia e com o modal "Nova receita".
+4. Receita com rampas, perfil das rampas e modal Renomear.
+5. Sidebar desktop expandida e recolhida (e mantida ao trocar de página); gaveta mobile com overlay.
+6. Rampa em criação, com erros, e em edição.
+7. Configuração nas duas abas.
+8. Recuperação de senha nas três etapas.
+9. Teste de iodo em andamento e concluído (simulação).
+10. Lotes, sessão do iodo e análise em estado vazio.
 
 ## Relação tela → componentes
 
-- Todas as telas usam `header.ejs` e `footer.ejs`.
-- Telas autenticadas usam `shellInicio.ejs` (com `sidebar.ejs` e `topBar.ejs`) e `shellFim.ejs`.
-- `recipes.ejs` e `recipe.ejs` usam listagem, ações icon-only e modais; as linhas vêm de `<template>`.
-- `profile.ejs` usa formulário, diálogo de confirmação e preview de imagem.
-- `temperatureForm.ejs` usa cards de formulário com erro por campo.
-- `dashboard.ejs`, `lots.ejs`, `lot.ejs`, `lotMonitoring.ejs` e `iodineSession.ejs` usam o partial `estadoVazio.ejs`, sem chamada à API além de `GET /user`; `analysis.ejs` mantém o card de indisponibilidade (`#tituloIndisponivel`).
+- Telas logadas usam `AppShell`; telas de acesso usam `AuthLayout` (a recuperação de senha tem layout próprio).
+- Listas e formulários usam `Field`, `Modal`, `ConfirmDialog` e `EmptyState` de `Feedback`.
+- `RecipeContent` exporta `useReceita()` e `minutos()`, reaproveitados por `TemperatureContent` e `RecipeIodineContent`.
+- `LotsContent` exporta `LotForm`, usado também por `LotDetail`.
 
 ## Evidências
 
-- `index.js`
-- `views/login.ejs`
-- `views/signup.ejs`
-- `views/profile.ejs`
-- `views/recipes.ejs`
-- `views/recipe.ejs`
-- `views/temperatureForm.ejs`
-- `views/lots.ejs`
-- `views/lot.ejs`
-- `views/iodineDemo.ejs`
-- `views/analysis.ejs`
-- `views/partials/header.ejs`
-- `views/partials/footer.ejs`
-- `views/partials/shellInicio.ejs`
-- `views/partials/shellFim.ejs`
-- `views/partials/sidebar.ejs`
-- `views/partials/topBar.ejs`
-- `public/js/script.js`
-- `public/js/app.js`
+- `src/pages/`
+- `src/components/`

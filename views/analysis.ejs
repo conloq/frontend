@@ -1,9 +1,0 @@
-<%- include('partials/shellInicio.ejs', { titulo: 'Análise de iodo', trilha: ['Teste de iodo', 'Análise'], voltar: '/analyses/new' }) %>
-<a href="/analyses/new" class="btn-voltar self-start max-lg:hidden"><i class="ph ph-arrow-left" aria-hidden="true"></i>Teste de iodo</a>
-<h1 class="text-[30px] font-semibold">Análise de iodo</h1>
-
-<section class="card overflow-hidden" aria-labelledby="tituloCaptura">
-  <h2 id="tituloCaptura" class="border-b border-linha px-6 py-5 text-lg font-semibold">Captura e resultado</h2>
-  <%- include('partials/estadoVazio.ejs', { icone: 'ph-test-tube', titulo: 'Nenhuma captura nesta análise', texto: 'A imagem, a classe e a temperatura da coleta aparecem aqui.' }) %>
-</section>
-<%- include('partials/shellFim.ejs') %>
