@@ -24,7 +24,7 @@ Dois repositórios, um papel cada: este tem as telas; o Back-End (`conloq/Back-E
 | `/` | - | redireciona para `/dashboard` |
 | `/login`, `/signup` | `LoginContent`, `SignupContent` em `AuthLayout` | `POST /login`, `POST /user` |
 | `/forgot-password`, `/code`, `/reset` | `ForgotPasswordContent` (`etapa`) | nenhuma (conloq/mash#73); `data-sem-api` |
-| `/dashboard` | `DashboardContent` | só `GET /user` do shell; cards em estado vazio |
+| `/dashboard` | `DashboardContent` | só `GET /user` do shell; dados de exemplo fixos até a conloq/mash#104 (decisão de 28/10/2026) |
 | `/profile` | `ProfileContent` | `PUT /user`, `PUT /user/upload`, `DELETE /user`, `GET /user/login-history` (404 = lista vazia, conloq/mash#102) |
 | `/profile/access-history` | `AccessHistory` | `GET /user/login-history` |
 | `/settings`, `/settings/security` | `SettingsContent` | nenhuma; salvar só bloqueia o envio |
