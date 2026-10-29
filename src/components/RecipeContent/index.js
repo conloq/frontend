@@ -63,10 +63,15 @@ function PerfilRampas({ rampas }) {
         .filter((f) => Number.isFinite(f.ini) && f.dur > 0);
     if (!faixas.length) return null;
 
-    const total = Math.max(...faixas.map((f) => f.ini + f.dur));
-    const piso = Math.floor((Math.min(...faixas.map((f) => f.t.minTemperatureLimit)) - 2) / 5) * 5;
+    const fim = Math.max(...faixas.map((f) => f.ini + f.dur));
+    // eixo do tempo em passos de 15 min, até 6 intervalos
+    const passo = [15, 30, 60, 120].find((p) => fim / p <= 6) ?? Math.ceil(fim / 6 / 60) * 60;
+    const total = Math.ceil(fim / passo) * passo;
+    const piso = Math.floor(Math.min(...faixas.map((f) => f.t.minTemperatureLimit)) / 10) * 10;
     // folga em cima para o rótulo da rampa mais quente
-    const teto = Math.ceil((Math.max(...faixas.map((f) => f.t.maxTemperatureLimit)) + 8) / 5) * 5;
+    const teto = Math.ceil((Math.max(...faixas.map((f) => f.t.maxTemperatureLimit)) + 3) / 10) * 10;
+    const graus = Array.from({ length: (teto - piso) / 10 + 1 }, (_, i) => teto - i * 10);
+    const tempos = Array.from({ length: total / passo + 1 }, (_, i) => i * passo);
 
     return (
         <section
@@ -99,16 +104,24 @@ function PerfilRampas({ rampas }) {
                     className="flex flex-col justify-between pb-6 text-xs tabular-nums text-texto-2"
                     aria-hidden="true"
                 >
-                    <span>{teto} ºC</span>
-                    <span>{piso} ºC</span>
+                    {graus.map((g) => (
+                        <span key={g}>{g} ºC</span>
+                    ))}
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <div
                         id="perfilGrafico"
-                        className="relative h-64 border-y border-linha"
+                        className="relative h-80"
                         role="img"
-                        aria-label={`${plural(faixas.length, 'rampa', 'rampas')} entre ${piso} e ${teto} ºC em ${Math.round(total)} minutos. Os valores estão na tabela acima.`}
+                        aria-label={`${plural(faixas.length, 'rampa', 'rampas')} entre ${piso} e ${teto} ºC em ${Math.round(fim)} minutos. Os valores estão na tabela acima.`}
                     >
+                        {graus.map((g) => (
+                            <div
+                                key={g}
+                                className="absolute inset-x-0 h-px bg-linha"
+                                style={{ top: pct((teto - g) / (teto - piso)) }}
+                            />
+                        ))}
                         {faixas.map(({ t, i, ini, dur }) => {
                             const limite = Math.max(
                                 t.maxTemperatureLimit - t.minTemperatureLimit,
@@ -158,8 +171,9 @@ function PerfilRampas({ rampas }) {
                         className="flex justify-between text-xs tabular-nums text-texto-2"
                         aria-hidden="true"
                     >
-                        <span>0 min</span>
-                        <span>{Math.round(total)} min</span>
+                        {tempos.map((m) => (
+                            <span key={m}>{m} min</span>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -214,11 +228,15 @@ function LinhaRampa({ rampa, ordem, recipeId }) {
     );
 }
 
-function Receita({ edit }) {
+function Receita({ edit, onNome }) {
     const router = useRouter();
     const { id, recipe, rampas, erro, carregar } = useReceita();
     const [renomeando, setRenomeando] = useState(false);
     const [confirmacao, setConfirmacao] = useState(null);
+
+    useEffect(() => {
+        if (recipe) onNome(recipe.name);
+    }, [recipe, onNome]);
 
     useEffect(() => {
         if (edit || router.query.edit === '1') setRenomeando(true);
@@ -323,54 +341,72 @@ function Receita({ edit }) {
                 </div>
             </div>
 
-            <section
-                className="card overflow-hidden max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent"
-                aria-labelledby="tituloRampas"
-            >
-                <h2
-                    id="tituloRampas"
-                    className="border-b border-linha px-6 py-5 text-lg font-semibold max-lg:border-0 max-lg:px-0 max-lg:pb-3 max-lg:pt-0"
+            {/* lado a lado só quando as colunas fixas da tabela (~800px) cabem ao lado do card */}
+            <div className="grid gap-6 min-[1760px]:grid-cols-[minmax(0,1fr)_440px] min-[1760px]:items-start">
+                <section
+                    className="card overflow-hidden max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent"
+                    aria-labelledby="tituloRampas"
                 >
-                    Rampas de temperatura
-                </h2>
-                <div
-                    className="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]"
-                    aria-hidden="true"
-                >
-                    <span>Ordem</span>
-                    <span>Faixa da rampa</span>
-                    <span>Limites</span>
-                    <span>Temporizador</span>
-                    <span>Início do timer</span>
-                    <span>Tempo ideal</span>
-                    <span className="text-right">Ações</span>
-                </div>
-                <div id="detalheRampas" aria-live="polite">
-                    {rampas === null && (
-                        <EmptyState
-                            icon="ph-cloud-slash"
-                            title="Não foi possível carregar as rampas"
-                            text="Tente novamente em alguns instantes."
-                        />
-                    )}
-                    {rampas?.length === 0 && (
-                        <EmptyState
-                            icon="ph-thermometer-simple"
-                            title="Nenhuma rampa ainda"
-                            text="Adicione a primeira rampa de temperatura desta receita."
-                            action={{ text: 'Adicionar rampa', icon: 'ph-plus', href: novaRampa }}
-                        />
-                    )}
-                    {rampas?.map((rampa, i) => (
-                        <LinhaRampa
-                            key={rampa.id}
-                            rampa={rampa}
-                            ordem={rampa.orderRamp ?? i + 1}
-                            recipeId={id}
-                        />
-                    ))}
-                </div>
-            </section>
+                    <h2
+                        id="tituloRampas"
+                        className="border-b border-linha px-6 py-5 text-lg font-semibold max-lg:border-0 max-lg:px-0 max-lg:pb-3 max-lg:pt-0"
+                    >
+                        Rampas de temperatura
+                    </h2>
+                    <div
+                        className="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]"
+                        aria-hidden="true"
+                    >
+                        <span>Ordem</span>
+                        <span>Faixa da rampa</span>
+                        <span>Limites</span>
+                        <span>Temporizador</span>
+                        <span>Início do timer</span>
+                        <span>Tempo ideal</span>
+                        <span className="text-right">Ações</span>
+                    </div>
+                    <div id="detalheRampas" aria-live="polite">
+                        {rampas === null && (
+                            <EmptyState
+                                icon="ph-cloud-slash"
+                                title="Não foi possível carregar as rampas"
+                                text="Tente novamente em alguns instantes."
+                            />
+                        )}
+                        {rampas?.length === 0 && (
+                            <EmptyState
+                                icon="ph-thermometer-simple"
+                                title="Nenhuma rampa ainda"
+                                text="Adicione a primeira rampa de temperatura desta receita."
+                                action={{
+                                    text: 'Adicionar rampa',
+                                    icon: 'ph-plus',
+                                    href: novaRampa,
+                                }}
+                            />
+                        )}
+                        {rampas?.map((rampa, i) => (
+                            <LinhaRampa
+                                key={rampa.id}
+                                rampa={rampa}
+                                ordem={rampa.orderRamp ?? i + 1}
+                                recipeId={id}
+                            />
+                        ))}
+                    </div>
+                </section>
+
+                {/* sem rota de lotes na API (conloq/mash#31): estado vazio até a lista existir */}
+                <section className="card overflow-hidden" aria-labelledby="tituloLotesReceita">
+                    <h2
+                        id="tituloLotesReceita"
+                        className="border-b border-linha px-6 py-5 text-lg font-semibold"
+                    >
+                        Lotes desta receita
+                    </h2>
+                    <EmptyState icon="ph-cube" title="Nenhum lote ainda" compact />
+                </section>
+            </div>
 
             {rampas && <PerfilRampas rampas={rampas} />}
 
@@ -401,11 +437,11 @@ function Receita({ edit }) {
     );
 }
 
-// shortcut: título e trilha do topo ficam genéricos ("Receita"); o nome aparece no h1. Subir o fetch para a página se o topo precisar do nome.
 export default function RecipeContent({ edit = false }) {
+    const [nome, setNome] = useState('Receita');
     return (
-        <AppShell title="Receita" trail={['Receitas', 'Receita']} back="/recipes">
-            <Receita edit={edit} />
+        <AppShell title={nome} trail={['Receitas', nome]} back="/recipes">
+            <Receita edit={edit} onNome={setNome} />
         </AppShell>
     );
 }

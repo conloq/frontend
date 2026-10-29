@@ -12,12 +12,12 @@
 
 | Tela | Rota | Componente | Composição visual |
 |---|---|---|---|
-| Painel | `/dashboard` | `DashboardContent` | Indicadores com "—" e cards em estado vazio. |
+| Painel | `/dashboard` | `DashboardContent` | Indicadores, gráfico da última hora, alertas, lotes recentes e controles com dados de exemplo fixos (decisão de 28/10/2026, até a conloq/mash#104). |
 | Perfil | `/profile` | `ProfileContent` | Foto (troca envia na hora), dados da conta, troca de senha, últimos acessos e exclusão com confirmação. |
 | Últimos acessos | `/profile/access-history` | `AccessHistory` | Histórico de logins (`GET /user/login-history`; `404` = "Nenhum acesso registrado"). |
 | Configuração | `/settings`, `/settings/security` | `SettingsContent` | Abas Acessibilidade e Segurança; salvar só bloqueia o envio. |
 | Receitas | `/recipes` | `RecipesContent` | Busca, contagem, tabela (cards no mobile), modal "Nova receita" e exclusão com confirmação. |
-| Receita | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` | Rampas, perfil das rampas, modal Renomear, exclusão e link para o teste de iodo. |
+| Receita | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` | Rampas, card "Lotes desta receita" em estado vazio (sem rota de lotes), perfil das rampas com grade de 10 ºC, modal Renomear, exclusão e link para o teste de iodo. |
 | Teste de iodo da receita | `/recipes/:id/iodine` | `RecipeIodineContent` | Rampa do teste, coletas e prévia da sessão; salvar é `data-sem-api` (conloq/mash#101). |
 | Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` | Faixa, tempos e limites com erro por campo; na edição, salvar e excluir só bloqueiam (conloq/mash#97). |
 | Lotes | `/lots`, `/lots/new` | `LotsContent` | Tabela em estado vazio; `/lots/new` abre o modal com receitas reais. |
