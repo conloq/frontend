@@ -18,37 +18,37 @@
   --color-mash-brown: #4e342e;
   --color-mash-brown-dark: #2a1c18;
   --color-mash-orange: #e87600;
-  --color-foco: #f57c00;
+  --color-focus: #f57c00;
 
-  --color-acao: #b35900;
-  --color-acao-hover: #9a4d00;
-  --color-acao-pressionado: #7f3f00;
-  --color-acao-suave: #fdf0e3;
+  --color-action: #b35900;
+  --color-action-hover: #9a4d00;
+  --color-action-pressed: #7f3f00;
+  --color-action-soft: #fdf0e3;
 
-  --color-fundo: #f6f3f0;
-  --color-superficie: #ffffff;
-  --color-linha: #e6dfd9;
-  --color-texto: #1f1a17;
-  --color-texto-2: #6b5f57;
-  --color-header-texto-2: #d9cbc4;
-  --color-desativado: #ede8e3;
-  --color-texto-desativado: #a1968e;
-  --color-hover-neutro: #f3eeea;
+  --color-background: #f6f3f0;
+  --color-surface: #ffffff;
+  --color-border: #e6dfd9;
+  --color-foreground: #1f1a17;
+  --color-muted-foreground: #6b5f57;
+  --color-header-muted-foreground: #d9cbc4;
+  --color-disabled: #ede8e3;
+  --color-disabled-foreground: #a1968e;
+  --color-hover-neutral: #f3eeea;
 
-  --color-sucesso: #1e7a45;
-  --color-sucesso-suave: #e3f4ea;
-  --color-aviso: #8a5300;
-  --color-aviso-suave: #fdf3d8;
-  --color-perigo: #b42318;
-  --color-perigo-suave: #fdecea;
+  --color-success: #1e7a45;
+  --color-success-soft: #e3f4ea;
+  --color-warning: #8a5300;
+  --color-warning-soft: #fdf3d8;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
   --color-info: #1d5d8c;
-  --color-info-suave: #e5f0f8;
+  --color-info-soft: #e5f0f8;
 }
 
 @layer base {
   body {
-    background: var(--color-fundo);
-    color: var(--color-texto);
+    background: var(--color-background);
+    color: var(--color-foreground);
     font-family: var(--font-sans);
   }
 
@@ -59,12 +59,12 @@
   }
 
   ::selection {
-    background: var(--color-acao-suave);
-    color: var(--color-texto);
+    background: var(--color-action-soft);
+    color: var(--color-foreground);
   }
 
   :focus-visible {
-    outline: 3px solid var(--color-foco);
+    outline: 3px solid var(--color-focus);
     outline-offset: 2px;
   }
 }
@@ -74,125 +74,125 @@
   @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-[10px] px-5 text-base font-semibold whitespace-nowrap transition-colors disabled:cursor-not-allowed;
 }
 
-@utility selo {
+@utility badge {
   @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current;
 }
 
 @layer components {
   /* Botões: primário, secundário, perigo, fantasma e ícone */
-  .btn-primario {
-    @apply btn bg-acao text-white hover:bg-acao-hover active:bg-acao-pressionado disabled:bg-desativado disabled:text-texto-desativado;
+  .btn-primary {
+    @apply btn bg-action text-white hover:bg-action-hover active:bg-action-pressed disabled:bg-disabled disabled:text-disabled-foreground;
   }
-  .btn-secundario {
-    @apply btn border border-linha bg-superficie text-texto hover:bg-hover-neutro active:bg-linha disabled:text-texto-desativado;
+  .btn-secondary {
+    @apply btn border border-border bg-surface text-foreground hover:bg-hover-neutral active:bg-border disabled:text-disabled-foreground;
   }
-  .btn-perigo {
-    @apply btn bg-perigo text-white hover:bg-[#962015] active:bg-[#7a1a12] disabled:bg-desativado disabled:text-texto-desativado;
+  .btn-danger {
+    @apply btn bg-danger text-white hover:bg-[#962015] active:bg-[#7a1a12] disabled:bg-disabled disabled:text-disabled-foreground;
   }
-  .btn-fantasma {
-    @apply inline-flex min-h-11 items-center gap-1.5 rounded-[10px] px-2 font-semibold text-acao transition-colors hover:bg-acao-suave disabled:text-texto-desativado;
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-[10px] px-2 font-semibold text-action transition-colors hover:bg-action-soft disabled:text-disabled-foreground;
   }
   /* Voltar: texto com seta, fundo branco e borda; só para subir um nível. Ações em cards e alertas seguem no fantasma */
-  .btn-voltar {
-    @apply inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-linha bg-superficie px-3.5 font-semibold text-acao transition-colors hover:bg-acao-suave active:bg-linha;
+  .btn-back {
+    @apply inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-border bg-surface px-3.5 font-semibold text-action transition-colors hover:bg-action-soft active:bg-border;
   }
-  .btn-icone {
-    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-xl text-texto-2 transition-colors hover:bg-hover-neutro active:bg-linha disabled:text-texto-desativado;
+  .btn-icon {
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] text-xl text-muted-foreground transition-colors hover:bg-hover-neutral active:bg-border disabled:text-disabled-foreground;
   }
-  .btn-icone-perigo {
-    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-perigo text-xl text-white transition-colors hover:bg-[#962015] active:bg-[#7a1a12] disabled:bg-desativado disabled:text-texto-desativado;
+  .btn-icon-danger {
+    @apply inline-flex size-11 shrink-0 items-center justify-center rounded-[10px] bg-danger text-xl text-white transition-colors hover:bg-[#962015] active:bg-[#7a1a12] disabled:bg-disabled disabled:text-disabled-foreground;
   }
 
   /* Grupo de ações: no mobile, duas colunas iguais (o último botão de um grupo ímpar ocupa a linha);
      a partir de sm, em linha e à direita */
-  .acoes {
+  .actions {
     @apply grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-wrap sm:justify-end;
   }
-  .acoes > :last-child:nth-child(odd) {
+  .actions > :last-child:nth-child(odd) {
     @apply col-span-2;
   }
 
   /* Barra de ação fixa no rodapé do mobile (a partir de lg volta ao fluxo normal).
-     Fica depois de .acoes para a largura toda vencer o w-full do grupo */
-  .barra-mobile {
-    @apply max-lg:sticky max-lg:w-auto max-lg:self-stretch max-lg:bottom-0 max-lg:z-20 max-lg:-mx-4 max-lg:-mb-6 max-lg:mt-auto max-lg:border-t max-lg:border-linha max-lg:bg-superficie max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-lg:-mx-6 sm:max-lg:px-6;
+     Fica depois de .actions para a largura toda vencer o w-full do grupo */
+  .mobile-bar {
+    @apply max-lg:sticky max-lg:w-auto max-lg:self-stretch max-lg:bottom-0 max-lg:z-20 max-lg:-mx-4 max-lg:-mb-6 max-lg:mt-auto max-lg:border-t max-lg:border-border max-lg:bg-surface max-lg:px-4 max-lg:pt-3 max-lg:pb-[calc(1rem+env(safe-area-inset-bottom))] sm:max-lg:-mx-6 sm:max-lg:px-6;
   }
 
-  /* Controles de preferência: interruptor (checkbox role="switch"), segmentado (rádios) e deslizante */
-  .interruptor {
-    @apply relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-linha transition-colors before:absolute before:top-[3px] before:left-[3px] before:size-[18px] before:rounded-full before:bg-superficie before:transition-transform checked:bg-acao checked:before:translate-x-5;
+  /* Controles de preferência: switch (checkbox role="switch"), segmented (rádios) e slider */
+  .switch {
+    @apply relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-border transition-colors before:absolute before:top-[3px] before:left-[3px] before:size-[18px] before:rounded-full before:bg-surface before:transition-transform checked:bg-action checked:before:translate-x-5;
   }
-  .segmentado {
-    @apply flex gap-1 rounded-[10px] border border-linha bg-fundo p-1;
+  .segmented {
+    @apply flex gap-1 rounded-[10px] border border-border bg-background p-1;
   }
-  .segmentado > label {
-    @apply flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-medium text-texto-2 has-checked:border has-checked:border-linha has-checked:bg-superficie has-checked:font-semibold has-checked:text-texto has-focus-visible:outline-3 has-focus-visible:outline-foco;
+  .segmented > label {
+    @apply flex min-h-9 flex-1 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-medium text-muted-foreground has-checked:border has-checked:border-border has-checked:bg-surface has-checked:font-semibold has-checked:text-foreground has-focus-visible:outline-3 has-focus-visible:outline-focus;
   }
-  .deslizante {
-    @apply w-full cursor-pointer accent-acao;
+  .slider {
+    @apply w-full cursor-pointer accent-action;
   }
 
   /* Campos */
-  .campo {
+  .field {
     @apply flex flex-col gap-1.5;
   }
-  .campo-rotulo {
-    @apply text-sm font-semibold text-texto;
+  .field-label {
+    @apply text-sm font-semibold text-foreground;
   }
-  .campo-caixa {
-    @apply flex min-h-12 items-center gap-2.5 rounded-[10px] border border-linha bg-superficie px-3.5 transition-colors focus-within:border-foco focus-within:ring-2 focus-within:ring-foco/30;
+  .field-box {
+    @apply flex min-h-12 items-center gap-2.5 rounded-[10px] border border-border bg-surface px-3.5 transition-colors focus-within:border-focus focus-within:ring-2 focus-within:ring-focus/30;
   }
-  .campo-caixa > input,
-  .campo-caixa > select {
-    @apply min-w-0 flex-1 self-stretch bg-transparent text-[15px] text-texto outline-none placeholder:text-texto-2 disabled:text-texto-desativado;
+  .field-box > input,
+  .field-box > select {
+    @apply min-w-0 flex-1 self-stretch bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground disabled:text-disabled-foreground;
   }
-  .campo-caixa > select {
+  .field-box > select {
     @apply cursor-pointer appearance-none pr-7;
   }
-  .campo-caixa > i {
-    @apply text-xl text-texto-2;
+  .field-box > i {
+    @apply text-xl text-muted-foreground;
   }
-  .campo-unidade {
-    @apply text-[15px] font-medium text-texto-2;
+  .field-unit {
+    @apply text-[15px] font-medium text-muted-foreground;
   }
-  .campo-ajuda {
-    @apply text-[13px] text-texto-2;
+  .field-help {
+    @apply text-[13px] text-muted-foreground;
   }
-  .campo-erro .campo-caixa {
-    @apply border-2 border-perigo;
+  .field-error .field-box {
+    @apply border-2 border-danger;
   }
-  .campo-erro .campo-ajuda {
-    @apply font-medium text-perigo;
+  .field-error .field-help {
+    @apply font-medium text-danger;
   }
 
   /* Cards e tabelas */
   .card {
-    @apply rounded-xl border border-linha bg-superficie;
+    @apply rounded-xl border border-border bg-surface;
   }
-  .tabela-cabecalho {
-    @apply border-b border-linha bg-[#faf8f6] text-[13px] font-semibold text-texto-2;
+  .list-header {
+    @apply border-b border-border bg-[#faf8f6] text-[13px] font-semibold text-muted-foreground;
   }
-  .tabela-linha {
-    @apply border-b border-linha last:border-b-0;
+  .list-row {
+    @apply border-b border-border last:border-b-0;
   }
 
   /* Selos */
-  .selo-sucesso {
-    @apply selo bg-sucesso-suave text-sucesso;
+  .badge-success {
+    @apply badge bg-success-soft text-success;
   }
-  .selo-aviso {
-    @apply selo bg-aviso-suave text-aviso;
+  .badge-warning {
+    @apply badge bg-warning-soft text-warning;
   }
-  .selo-perigo {
-    @apply selo bg-perigo-suave text-perigo;
+  .badge-danger {
+    @apply badge bg-danger-soft text-danger;
   }
-  .selo-info {
-    @apply selo bg-info-suave text-info;
+  .badge-info {
+    @apply badge bg-info-soft text-info;
   }
 
   /* Esqueleto de carregamento */
-  .esqueleto {
-    @apply animate-pulse rounded-md bg-desativado motion-reduce:animate-none;
+  .skeleton {
+    @apply animate-pulse rounded-md bg-disabled motion-reduce:animate-none;
   }
 
   /* Shell: sidebar recolhível no desktop (18rem/5rem), gaveta de 18rem no mobile */
@@ -233,8 +233,8 @@
       padding-inline: 0;
     }
 
-    #appSidebar[data-sidebar-state="collapsed"] .sidebar-marca,
-    body.sidebar-collapsed #appSidebar .sidebar-marca {
+    #appSidebar[data-sidebar-state="collapsed"] .sidebar-brand,
+    body.sidebar-collapsed #appSidebar .sidebar-brand {
       height: auto;
       flex-direction: column;
       gap: 0.5rem;
@@ -243,15 +243,15 @@
   }
 }
 
-/* Item ativo fora de @layer: precisa vencer os utilitários do link e do ícone (font-medium, text-texto-2) */
+/* Item ativo fora de @layer: precisa vencer os utilitários do link e do ícone (font-medium, text-muted-foreground) */
 .menu-link-active {
-  background: var(--color-acao-suave);
-  color: var(--color-acao);
+  background: var(--color-action-soft);
+  color: var(--color-action);
   font-weight: 600;
 }
 
 .menu-link-active i {
-  color: var(--color-foco);
+  color: var(--color-focus);
 }
 
 /* Gaveta mobile: os itens entram em sequência curta depois do painel (fora de @layer para vencer o transition-colors do link) */
@@ -287,37 +287,37 @@
   }
 }
 
-/* Modais no mobile: painel que sobe de baixo, ao alcance do polegar (classe folha no fundo escuro do modal) */
+/* Modais no mobile: painel que sobe de baixo, ao alcance do polegar (classe sheet no fundo escuro do modal) */
 @media (max-width: 639px) {
-  .folha {
+  .sheet {
     padding: 0;
     align-items: flex-end;
   }
-  .js-modal.folha > div {
+  .js-modal.sheet > div {
     align-items: flex-end;
   }
-  .folha [role="dialog"],
-  .folha [role="alertdialog"] {
+  .sheet [role="dialog"],
+  .sheet [role="alertdialog"] {
     max-width: none;
     border-radius: 20px 20px 0 0;
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
 @media (max-width: 639px) and (prefers-reduced-motion: no-preference) {
-  .folha:not(.hidden) {
-    animation: folha-fundo 200ms ease-out;
+  .sheet:not(.hidden) {
+    animation: sheet-backdrop 200ms ease-out;
   }
-  .folha:not(.hidden) [role="dialog"],
-  .folha:not(.hidden) [role="alertdialog"] {
-    animation: folha-subir 320ms cubic-bezier(0.32, 0.72, 0, 1);
+  .sheet:not(.hidden) [role="dialog"],
+  .sheet:not(.hidden) [role="alertdialog"] {
+    animation: sheet-up 320ms cubic-bezier(0.32, 0.72, 0, 1);
   }
 }
-@keyframes folha-subir {
+@keyframes sheet-up {
   from {
     transform: translateY(100%);
   }
 }
-@keyframes folha-fundo {
+@keyframes sheet-backdrop {
   from {
     opacity: 0;
   }

@@ -5,13 +5,13 @@
 | Item | Rule | Example | Evidence |
 |------|------|---------|----------|
 | Pages | arquivo por rota, em inglês, como a URL | `src/pages/recipes/[id]/iodine.js` | `src/pages/` |
-| Components | pasta PascalCase com `index.js`; telas terminam em `Content` | `RecipesContent/index.js`, `AppShell/index.js` | `src/components/` |
+| Components | pasta PascalCase com `index.js`; telas terminam em `Content` e não montam o `AppShell` (a página monta) | `RecipesContent/index.js`, `AppShell/index.js` | `src/components/` |
 | Services | camelCase | `api.js`, `auth.js`, `rampa.js` | `src/services/` |
 | Functions e estado | pt-BR em camelCase, verbo + alvo; componentes em PascalCase | `carregar`, `salvar`, `mensagemErro`, `LinhaRampa` | `src/components/` |
 | Constants/env vars | `UPPER_SNAKE` para constantes de módulo; `NEXT_PUBLIC_*` no ambiente | `TOKEN_KEY`, `NEXT_PUBLIC_API_URL` | `src/services/api.js` |
 | Rotas | inglês, minúsculas, plural nas coleções | `/recipes`, `/recipes/:id/temperatures/new` | `src/pages/` |
 | Campos de formulário | os que vão para a API seguem o nome da API em camelCase (decisão de 08/10/2026, #86); ids em pt-BR | `name="minTemperatureRamp"`, `id="senha"` | `TemperatureContent`, `LoginContent` |
-| Tokens de tema | `--color-*` em pt-BR por função; prefixo `mash-` só nas cores de marca | `--color-acao`, `--color-mash-brown` | `public/css/tailwind.css` |
+| Tokens de tema | `--color-*` em pt-BR por função; prefixo `mash-` só nas cores de marca | `--color-action`, `--color-mash-brown` | `public/css/tailwind.css` |
 
 ## 2) Formatting and Linting
 
@@ -31,7 +31,7 @@
 ## 4) Error and Logging Conventions
 
 - Erros da API viram `flash('danger', mensagemErro(error, fallback))`, com a mensagem da API como veio. Erros de campo usam `Field` com `error`.
-- Falha ao carregar o usuário ou a receita mostra `ServerError`; `401` é tratado só no interceptor.
+- Falha ao carregar o usuário ou a receita mostra `ServerError`; `401` é tratado só no interceptor de resposta.
 - Nenhum `console.*` nas telas. Nenhum segredo no código; `.env` fica fora do versionamento.
 
 ## 5) Testing Conventions

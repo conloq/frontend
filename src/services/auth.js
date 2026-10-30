@@ -1,19 +1,35 @@
-import { api, TOKEN_KEY } from '@/services/api';
+import { api, mensagemErro, TOKEN_KEY } from '@/services/api';
+// Serviço de Autenticação
 
-export async function signIn(email, password) {
-    const { data } = await api.post('/login', { email: email.trim(), password });
-    localStorage.setItem(TOKEN_KEY, data.token);
-}
+// Função que coleta o token do localStorage do navegador
+export const getAxiosConfig = () => ({
+    headers: {
+        Authorization: `Bearer ${
+            typeof window !== 'undefined' ? (localStorage.getItem(TOKEN_KEY) ?? '') : ''
+        }`,
+    },
+});
 
+// Função que realiza o login
+export const login = async (email, password) => {
+    try {
+        const response = await api.post('/login', { email: email.trim(), password });
+        // Armazenando o token devolvido pela API
+        localStorage.setItem(TOKEN_KEY, response.data.token);
+        return { success: true };
+    } catch (error) {
+        return { success: false, message: mensagemErro(error, 'Não foi possível entrar.') };
+    }
+};
+
+// Função que realiza logout (o Back-End não tem rota de logout: o token é descartado no navegador)
+export const logout = (router) => {
+    localStorage.removeItem(TOKEN_KEY);
+    router.push('/login');
+};
+
+// Função que cadastra um usuário
 export const signUp = (dados) => api.post('/user', dados);
 
-export const currentUser = async () => (await api.get('/user')).data.user;
-
-// O Back-End não tem rota de logout: o JWT é descartado no navegador.
-export function signOut() {
-    try {
-        localStorage.removeItem(TOKEN_KEY);
-    } catch {
-        /* sem storage */
-    }
-}
+// Função que busca o usuário logado
+export const currentUser = async () => (await api.get('/user', getAxiosConfig())).data.user;

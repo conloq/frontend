@@ -10,8 +10,8 @@ Dois repositórios, um papel cada: este tem as telas; o Back-End (`conloq/Back-E
 
 - `src/pages/_app.js`: carrega os ícones Phosphor (`@phosphor-icons/web/regular` e `/fill`).
 - `src/pages/_document.js`: `<head>` com Google Fonts, `/css/style.css` (Tailwind gerado) e o script que aplica a sidebar recolhida antes da primeira pintura.
-- `src/services/api.js`: instância `axios` (`NEXT_PUBLIC_API_URL`), interceptor que envia `Authorization: Bearer`, tratamento do `401` e `mensagemErro()` (`data.error ?? data.message ?? padrão`).
-- `src/services/auth.js`: `signIn` (`POST /login`, guarda `mash_token`), `signUp` (`POST /user`), `currentUser` (`GET /user`) e `signOut`.
+- `src/services/api.js`: instância `axios` (`NEXT_PUBLIC_API_URL`), interceptor de resposta que trata o `401` e `mensagemErro()` (`data.error ?? data.message ?? padrão`).
+- `src/services/auth.js`: no padrão do professor, `getAxiosConfig()` (cabeçalho `Authorization: Bearer` com o `mash_token`, passado em toda chamada), `login` (`POST /login`, guarda o token e devolve `{ success, message }`), `logout(router)`, `signUp` (`POST /user`) e `currentUser` (`GET /user`).
 - `src/services/rampa.js`: validação pura da rampa de temperatura (mesmas regras da API), testada em `npm test`.
 - `package.json`: scripts `dev`/`start` (porta 4000), `build` (CSS + `next build`), `build:css`, `watch:css`, `test`, `lint`, `format`.
 - `.env.example`: `NEXT_PUBLIC_API_URL`.
@@ -29,7 +29,7 @@ Dois repositórios, um papel cada: este tem as telas; o Back-End (`conloq/Back-E
 | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` (`edit` abre o modal Renomear) | `GET`/`PUT`/`DELETE /recipes/:id`, `GET /recipes/:id/temperatures`, `DELETE /temperatures/:id`, `GET /lots` (lotes da receita) |
 | `/recipes/:id/temperatures/new` | `TemperatureContent` | `POST /recipes/:id/temperatures` |
 | `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` | leitura das rampas, `PUT`/`DELETE /temperatures/:id` |
-| `/lots`, `/lots/new` | `LotsContent` (`form` abre `LotForm`) | `GET`/`POST /lots`, `GET /recipes` (nomes e seletor) |
+| `/lots`, `/lots/new` | `LotsContent` (`form` abre `LotForm`; busca, contagem e ações por linha no padrão de Receitas) | `GET`/`POST /lots`, `DELETE /lots/:id`, `GET /recipes` (nomes e seletor) |
 | `/lots/:id`, `/lots/:id/edit` | `LotDetail` (`editando` abre `LotForm`) | `GET`/`PUT`/`DELETE /lots/:id`, `GET /recipes/:id`; leituras em estado vazio |
 | `/lots/:id/monitoring` | `LotMonitoring` | nenhuma; estado vazio |
 | `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `IodineSession` (`leitura`) | nenhuma; câmera desconectada (conloq/mash#34) |
@@ -39,7 +39,7 @@ Dois repositórios, um papel cada: este tem as telas; o Back-End (`conloq/Back-E
 
 | Directory | Responsibility Summary | Detailed Map |
 |---|---|---|
-| `src/pages/` | Uma página por rota; cada uma só monta o componente da tela. | esta tabela |
+| `src/pages/` | Uma página por rota; cada uma monta o layout (`AppShell` com título e trilha, ou `AuthLayout`) e o componente da tela, como no projeto de referência do professor. | esta tabela |
 | `src/components/` | Uma pasta por tela (`XContent/index.js`) e os compartilhados: `AppShell` (sidebar, top bar, guarda de sessão, `useUser`), `AuthLayout`, `Feedback` (mensagens, `EmptyState`, `Modal`, `ConfirmDialog`, `Field`, `PasswordInput`). | - |
 | `src/services/` | Acesso à API e regras puras. | - |
 | `public/` | CSS (fonte e gerado) e imagens. | [public/codemap.md](public/codemap.md) |
@@ -52,11 +52,11 @@ Arquivos na raiz: `package.json`, `next.config.mjs`, `eslint.config.mjs`, `jscon
 ## Runtime Flow
 
 1. `npm run dev` sobe o Next na porta 4000; a API precisa estar em `NEXT_PUBLIC_API_URL`.
-2. Login: `signIn` chama `POST /login` e grava o JWT em `localStorage` (`mash_token`).
+2. Login: `login` chama `POST /login` e grava o JWT em `localStorage` (`mash_token`).
 3. Telas logadas usam `AppShell`, que sem token manda para `/login` e com token chama `GET /user` antes de mostrar a página. O usuário fica em `useUser()`.
-4. Cada tela chama a API no `useEffect` ou nos handlers de formulário, com Bearer pelo interceptor.
-5. `401` em qualquer rota autenticada apaga o token e vai para `/login`. Outros erros mostram a mensagem da API em `#mensagens`.
-6. Mensagens que precisam sobreviver a uma navegação usam `flash()` (`sessionStorage`); a tela seguinte mostra em `#mensagens`.
+4. Cada tela chama a API no `useEffect` ou nos handlers de formulário, passando `getAxiosConfig()` para enviar o Bearer.
+5. `401` em qualquer rota autenticada apaga o token e vai para `/login`. Outros erros mostram a mensagem da API em `#messages`.
+6. Mensagens que precisam sobreviver a uma navegação usam `flash()` (`sessionStorage`); a tela seguinte mostra em `#messages`.
 7. Sair (`a[href="/logout"]`) só apaga o token: o Back-End não tem rota de logout e o JWT não é revogado.
 8. `npm run build:css` compila `public/css/tailwind.css` em `public/css/style.css`, carregado pelo `_document.js`.
 
@@ -65,7 +65,7 @@ Arquivos na raiz: `package.json`, `next.config.mjs`, `eslint.config.mjs`, `jscon
 - **Back-End:** chamadas em `src/services/` e nos componentes. Rotas em `Back-End/routes/` (`userRoutes.js`, `recipeRoutes.js`, `temperatureRoutes.js`). O CORS do Back-End libera `FRONTEND_URL` (padrão `http://localhost:4000`) e os cabeçalhos `Content-Type` e `Authorization`.
 - **Nomes de campo:** JSON em camelCase (`phone`, `urlImage`, `minTemperatureRamp`, `idealTime`, `orderRamp`), conloq/mash#71 e #86.
 - **Shell:** `AppShell` mantém os ids e classes do design: `#appSidebar`, `#sidebarOverlay`, `.sidebar-open`, `.sidebar-close`, `.sidebar-collapse`, `.menu-link`, `.menu-link-active`; o estado recolhido fica em `localStorage` (`mash-sidebar-collapsed`) e na classe `body.sidebar-collapsed`.
-- **Tailwind:** `@source "../../src"`; tokens `--color-*` e classes de componente (`btn-*`, `campo*`, `card`, `selo-*`, `tabela-*`, `esqueleto`, `interruptor`, `segmentado`, `deslizante`), detalhes em `public/css/codemap.md`.
+- **Tailwind:** `@source "../../src"`; tokens `--color-*` e classes de componente (`btn-*`, `field*`, `card`, `badge-*`, `list-*`, `skeleton`, `switch`, `segmented`, `slider`), detalhes em `public/css/codemap.md`.
 - **Coordenação:** `haimonvieira/conloq-pi-coordenacao` guarda o estado do projeto.
 
 ## Scope Exclusions

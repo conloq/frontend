@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import AppShell from '@/components/AppShell';
 import {
+    ConfirmDialog,
     dataBr,
     EmptyState,
     Field,
@@ -12,10 +12,11 @@ import {
     plural,
 } from '@/components/Feedback';
 import { api, mensagemErro } from '@/services/api';
+import { getAxiosConfig } from '@/services/auth';
 
 export const STATUS_LOTE = {
-    active: ['selo-info', 'Em andamento'],
-    completed: ['selo-sucesso', 'Concluído'],
+    active: ['badge-info', 'Em andamento'],
+    completed: ['badge-success', 'Concluído'],
 };
 
 export function SeloLote({ status }) {
@@ -36,34 +37,36 @@ export function LotForm({ onClose, onSalvo, lote }) {
     const [receitas, setReceitas] = useState(null);
     const [erroReceitas, setErroReceitas] = useState(false);
     const [erros, setErros] = useState({});
+    // Criando os estados para as informações do lote
+    const [nome, setNome] = useState(lote?.name ?? '');
+    const [recipeId, setRecipeId] = useState(lote?.recipeId ?? '');
+    const [inicio, setInicio] = useState(lote ? paraLocal(lote.mashStart) : '');
+    const [status, setStatus] = useState(lote?.status === 'completed' ? 'completed' : 'active');
 
     useEffect(() => {
-        api.get('/recipes')
+        api.get('/recipes', getAxiosConfig())
             .then(({ data }) => setReceitas(data.recipes ?? []))
             .catch(() => setErroReceitas(true));
     }, []);
 
     const salvar = async (event) => {
         event.preventDefault();
-        const form = new FormData(event.target);
-        const name = form.get('name').trim();
-        const recipeId = Number(form.get('recipeId'));
+        const name = nome.trim();
         const novos = {};
         if (!name) novos.name = 'Nome não pode estar vazio';
-        if (!recipeId) novos.recipeId = 'Escolha uma receita';
+        if (!Number(recipeId)) novos.recipeId = 'Escolha uma receita';
         setErros(novos);
         if (Object.keys(novos).length) return event.target.elements[Object.keys(novos)[0]].focus();
-        const inicio = form.get('mashStart');
         const dados = {
             name,
-            recipeId,
-            status: form.get('status'),
+            recipeId: Number(recipeId),
+            status,
             ...(inicio && { mashStart: new Date(inicio).toISOString() }),
         };
         try {
             const { data } = editando
-                ? await api.put(`/lots/${lote.id}`, dados)
-                : await api.post('/lots', dados);
+                ? await api.put(`/lots/${lote.id}`, dados, getAxiosConfig())
+                : await api.post('/lots', dados, getAxiosConfig());
             flash('success', data?.message ?? 'Lote salvo.');
             onSalvo(data?.lot?.id ?? lote.id);
         } catch (error) {
@@ -73,20 +76,21 @@ export function LotForm({ onClose, onSalvo, lote }) {
 
     return (
         <Modal
-            id="modalLote"
+            id="lotModal"
             open
             onClose={onClose}
             title={editando ? 'Editar lote' : 'Novo lote'}
             subtitle={editando ? null : 'Um lote é uma brassagem feita com uma das suas receitas.'}
             width="max-w-[560px]"
         >
-            <form id="formLote" noValidate onSubmit={salvar}>
+            <form id="lotForm" noValidate onSubmit={salvar}>
                 <div className="flex flex-col gap-4 p-6">
-                    <Field name="name" inputId="loteNome" label="Nome do lote" error={erros.name}>
+                    <Field name="name" inputId="lotName" label="Nome do lote" error={erros.name}>
                         <input
-                            id="loteNome"
+                            id="lotName"
                             name="name"
-                            defaultValue={lote?.name}
+                            onChange={(e) => setNome(e.target.value)}
+                            value={nome}
                             aria-invalid={erros.name ? 'true' : undefined}
                             maxLength={255}
                             placeholder="Ex.: Lote 20/10"
@@ -95,16 +99,15 @@ export function LotForm({ onClose, onSalvo, lote }) {
                     </Field>
                     <Field
                         name="recipeId"
-                        inputId="loteReceita"
+                        inputId="lotRecipe"
                         label="Receita"
                         error={erros.recipeId}
                     >
-                        {/* key remonta o select quando as receitas chegam, para o defaultValue valer */}
                         <select
-                            key={receitas ? 'receitas' : 'carregando'}
-                            id="loteReceita"
+                            id="lotRecipe"
                             name="recipeId"
-                            defaultValue={lote?.recipeId ?? ''}
+                            onChange={(e) => setRecipeId(e.target.value)}
+                            value={recipeId}
                             aria-invalid={erros.recipeId ? 'true' : undefined}
                             required
                         >
@@ -134,7 +137,7 @@ export function LotForm({ onClose, onSalvo, lote }) {
                     </Field>
                     <Field
                         name="mashStart"
-                        inputId="loteInicio"
+                        inputId="lotStart"
                         label="Início da mosturação (opcional)"
                         help={
                             editando
@@ -143,24 +146,26 @@ export function LotForm({ onClose, onSalvo, lote }) {
                         }
                     >
                         <input
-                            id="loteInicio"
+                            id="lotStart"
                             name="mashStart"
                             type="datetime-local"
-                            defaultValue={lote ? paraLocal(lote.mashStart) : undefined}
+                            onChange={(e) => setInicio(e.target.value)}
+                            value={inicio}
                         />
                     </Field>
-                    <div className="campo" role="radiogroup" aria-labelledby="loteStatusRotulo">
-                        <span id="loteStatusRotulo" className="campo-rotulo">
+                    <div className="field" role="radiogroup" aria-labelledby="lotStatusLabel">
+                        <span id="lotStatusLabel" className="field-label">
                             Status
                         </span>
-                        <div className="segmentado w-full">
+                        <div className="segmented w-full">
                             <label>
                                 <input
                                     type="radio"
                                     name="status"
                                     value="active"
                                     className="sr-only"
-                                    defaultChecked={lote?.status !== 'completed'}
+                                    checked={status === 'active'}
+                                    onChange={(e) => setStatus(e.target.value)}
                                 />
                                 Em andamento
                             </label>
@@ -170,7 +175,8 @@ export function LotForm({ onClose, onSalvo, lote }) {
                                     name="status"
                                     value="completed"
                                     className="sr-only"
-                                    defaultChecked={lote?.status === 'completed'}
+                                    checked={status === 'completed'}
+                                    onChange={(e) => setStatus(e.target.value)}
                                 />
                                 Concluído
                             </label>
@@ -190,55 +196,104 @@ export default function LotsContent({ form = false }) {
     const router = useRouter();
     const [lotes, setLotes] = useState(null);
     const [receitas, setReceitas] = useState({});
+    const [busca, setBusca] = useState('');
+    const [confirmacao, setConfirmacao] = useState(null);
 
-    useEffect(() => {
-        api.get('/lots')
+    const carregar = useCallback(() => {
+        api.get('/lots', getAxiosConfig())
             .then(({ data }) => setLotes(data.lots ?? []))
             .catch((error) => {
                 flash('danger', mensagemErro(error, 'Não foi possível carregar os lotes.'));
                 setLotes([]);
             });
+    }, []);
+
+    useEffect(() => {
+        carregar();
         // o lote traz só o recipeId; o nome vem da lista de receitas
-        api.get('/recipes')
+        api.get('/recipes', getAxiosConfig())
             .then(({ data }) =>
                 setReceitas(Object.fromEntries((data.recipes ?? []).map((r) => [r.id, r.name])))
             )
             .catch(() => {});
-    }, []);
+    }, [carregar]);
+
+    const excluir = async (id) => {
+        try {
+            await api.delete(`/lots/${id}`, getAxiosConfig());
+            flash('success', 'Lote excluído.');
+            carregar();
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível excluir o lote.'));
+        }
+    };
+
+    const termo = busca.trim().toLowerCase();
+    const visiveis = (lotes ?? []).filter((lote) => lote.name.toLowerCase().includes(termo));
 
     return (
-        <AppShell title="Lotes" trail={['Lotes', 'Todos os lotes']}>
-            <h1 className="text-[30px] font-semibold max-md:sr-only">Lotes</h1>
-            <div className="card flex items-center gap-4 px-4 py-3 md:hidden">
-                <p className="flex-1 text-texto-2">
-                    {lotes?.length ? plural(lotes.length, 'lote', 'lotes') : 'Nenhum lote'}
-                </p>
-                <Link href="/lots/new" className="btn-primario">
+        <>
+            <div className="flex flex-wrap items-end justify-between gap-4 max-md:contents">
+                <h1 className="text-[30px] font-semibold max-md:sr-only">Lotes</h1>
+                <Link href="/lots/new" className="btn-primary max-md:hidden">
                     <i className="ph ph-plus" aria-hidden="true" />
                     Novo lote
                 </Link>
             </div>
-            <div className="tabela-cabecalho card hidden min-h-16 items-center gap-4 bg-superficie! px-5 md:grid md:grid-cols-[minmax(0,1fr)_220px_160px_150px_44px]">
-                <span aria-hidden="true">Nome do lote</span>
-                <span aria-hidden="true">Receita</span>
-                <span aria-hidden="true">Data de criação</span>
-                <span aria-hidden="true">Status</span>
-                <Link
-                    href="/lots/new"
-                    className="btn-primario size-11 min-h-0 p-0"
-                    aria-label="Novo lote"
-                    title="Novo lote"
-                >
-                    <i className="ph ph-plus text-lg" aria-hidden="true" />
-                </Link>
-            </div>
-            <section className="card overflow-hidden" aria-labelledby="tituloTabelaLotes">
-                <h2 id="tituloTabelaLotes" className="sr-only">
+
+            <section
+                className="card overflow-hidden max-md:overflow-visible max-md:border-0 max-md:bg-transparent"
+                aria-labelledby="lotTableTitle"
+            >
+                <h2 id="lotTableTitle" className="sr-only">
                     Lista de lotes
                 </h2>
-                <div id="listaLotes" aria-live="polite">
+                <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4 max-md:border-0 max-md:px-0 max-md:pt-0">
+                    <label className="field-box min-h-11 flex-1 sm:w-[360px] sm:flex-none">
+                        <i className="ph ph-magnifying-glass" aria-hidden="true" />
+                        <span className="sr-only">Buscar lote</span>
+                        <input
+                            id="lotSearch"
+                            type="search"
+                            placeholder="Buscar por nome do lote"
+                            autoComplete="off"
+                            value={busca}
+                            onChange={(event) => setBusca(event.target.value)}
+                        />
+                    </label>
+                    <Link
+                        href="/lots/new"
+                        className="grid size-12 shrink-0 place-items-center rounded-[10px] bg-action text-2xl text-white hover:bg-action-hover md:hidden"
+                        aria-label="Novo lote"
+                    >
+                        <i className="ph ph-plus" aria-hidden="true" />
+                    </Link>
+                    {lotes && (
+                        <span
+                            id="lotCount"
+                            className="ml-auto text-sm text-muted-foreground max-md:hidden"
+                        >
+                            {plural(lotes.length, 'lote', 'lotes')}
+                        </span>
+                    )}
+                </div>
+                <div
+                    className="list-header hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_200px_150px_150px_104px]"
+                    aria-hidden="true"
+                >
+                    <span>Lote</span>
+                    <span>Receita</span>
+                    <span>Criado em</span>
+                    <span>Status</span>
+                    <span className="text-right">Ações</span>
+                </div>
+                <div
+                    id="lotList"
+                    className="max-md:overflow-hidden max-md:rounded-xl max-md:border max-md:border-border max-md:bg-surface"
+                    aria-live="polite"
+                >
                     {!lotes && (
-                        <div className="esqueleto m-5 h-24 rounded-xl" aria-label="Carregando" />
+                        <div className="skeleton m-5 h-24 rounded-xl" aria-label="Carregando" />
                     )}
                     {lotes && !lotes.length && (
                         <EmptyState
@@ -252,36 +307,68 @@ export default function LotsContent({ form = false }) {
                             }}
                         />
                     )}
-                    {lotes?.map((lote) => (
+                    {visiveis.map((lote) => (
                         <div
                             key={lote.id}
-                            className="tabela-linha relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-3.5 md:min-h-[68px] md:grid-cols-[minmax(0,1fr)_220px_160px_150px_44px] md:px-5 md:py-0"
+                            className="list-row relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-3.5 max-md:hover:bg-hover-neutral md:min-h-[68px] md:grid-cols-[minmax(0,1fr)_200px_150px_150px_104px] md:px-5 md:py-0"
                         >
                             <Link
                                 href={`/lots/${lote.id}`}
-                                className="truncate font-semibold max-md:after:absolute max-md:after:inset-0 hover:text-acao md:hover:underline"
+                                className="truncate font-semibold max-md:text-[17px] max-md:after:absolute max-md:after:inset-0 hover:text-action md:hover:underline"
                             >
                                 {lote.name}
                             </Link>
-                            <span className="truncate text-sm text-texto-2 max-md:col-start-1 md:text-[15px] md:text-texto">
-                                {receitas[lote.recipeId] ?? '—'}
+                            <span className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground max-md:col-start-1 md:contents md:text-[15px]">
+                                <span className="truncate md:text-foreground">
+                                    {receitas[lote.recipeId] ?? '—'}
+                                </span>
+                                <span className="text-[15px] text-foreground max-md:hidden">
+                                    {dataBr(lote.createdAt)}
+                                </span>
+                                <span>
+                                    <SeloLote status={lote.status} />
+                                </span>
                             </span>
-                            <span className="text-[15px] max-md:hidden">
-                                {dataBr(lote.createdAt)}
-                            </span>
-                            <span className="max-md:col-start-2 max-md:row-span-2 max-md:row-start-1">
-                                <SeloLote status={lote.status} />
+                            <i
+                                className="ph ph-caret-right col-start-2 row-span-2 row-start-1 text-xl text-muted-foreground md:hidden"
+                                aria-hidden="true"
+                            />
+                            <span className="-mr-2 flex justify-end gap-1 max-md:hidden">
+                                <Link
+                                    href={`/lots/${lote.id}/edit`}
+                                    className="btn-icon"
+                                    title="Editar"
+                                >
+                                    <i className="ph ph-pencil-simple" aria-hidden="true" />
+                                </Link>
+                                <button
+                                    type="button"
+                                    className="btn-icon-danger"
+                                    title="Excluir"
+                                    onClick={() =>
+                                        setConfirmacao({
+                                            titulo: `Excluir o lote ${lote.name}?`,
+                                            mensagem: 'Não dá para desfazer.',
+                                            botao: 'Excluir lote',
+                                            aoConfirmar: () => excluir(lote.id),
+                                        })
+                                    }
+                                >
+                                    <i className="ph ph-trash" aria-hidden="true" />
+                                </button>
                             </span>
                         </div>
                     ))}
                 </div>
             </section>
+
             {form && (
                 <LotForm
                     onClose={() => router.push('/lots')}
                     onSalvo={(id) => router.push(`/lots/${id}`)}
                 />
             )}
-        </AppShell>
+            <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
+        </>
     );
 }

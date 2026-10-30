@@ -2,32 +2,33 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { flash, PasswordInput } from '@/components/Feedback';
-import { mensagemErro } from '@/services/api';
-import { signIn } from '@/services/auth';
+import { login } from '@/services/auth';
 
 export default function LoginContent() {
     const router = useRouter();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [enviando, setEnviando] = useState(false);
 
     const handleLogin = async (event) => {
         event.preventDefault();
-        const { email, password } = Object.fromEntries(new FormData(event.target));
         setEnviando(true);
-        try {
-            await signIn(email, password);
+        // Aqui é feita a lógica do login
+        const result = await login(email, password);
+        if (result.success) {
             router.push('/recipes');
-        } catch (error) {
-            flash('danger', mensagemErro(error, 'Não foi possível entrar.'));
+        } else {
+            flash('danger', result.message);
             setEnviando(false);
         }
     };
 
     return (
         <>
-            <form id="formLogin" className="flex flex-col gap-5" onSubmit={handleLogin}>
-                <label className="campo" htmlFor="email">
-                    <span className="campo-rotulo">E-mail</span>
-                    <span className="campo-caixa">
+            <form id="loginForm" className="flex flex-col gap-5" onSubmit={handleLogin}>
+                <label className="field" htmlFor="email">
+                    <span className="field-label">E-mail</span>
+                    <span className="field-box">
                         <i className="ph ph-envelope-simple" aria-hidden="true" />
                         <input
                             id="email"
@@ -36,31 +37,35 @@ export default function LoginContent() {
                             autoComplete="email"
                             placeholder="voce@email.com"
                             required
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
                         />
                     </span>
                 </label>
-                <div className="campo">
-                    <label className="campo-rotulo" htmlFor="senha">
+                <div className="field">
+                    <label className="field-label" htmlFor="password">
                         Senha
                     </label>
-                    <span className="campo-caixa">
+                    <span className="field-box">
                         <i className="ph ph-lock-simple" aria-hidden="true" />
                         <PasswordInput
-                            id="senha"
+                            id="password"
                             name="password"
                             autoComplete="current-password"
                             placeholder="Sua senha"
                             required
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
                         />
                     </span>
                 </div>
-                <button type="submit" className="btn-primario mt-2 w-full" disabled={enviando}>
+                <button type="submit" className="btn-primary mt-2 w-full" disabled={enviando}>
                     Entrar <i className="ph ph-sign-in" aria-hidden="true" />
                 </button>
             </form>
-            <p className="text-center text-texto-2">
+            <p className="text-center text-muted-foreground">
                 Ainda não tem conta?{' '}
-                <Link href="/signup" className="font-semibold text-acao hover:underline">
+                <Link href="/signup" className="font-semibold text-action hover:underline">
                     Criar conta
                 </Link>
             </p>

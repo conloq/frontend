@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import AppShell from '@/components/AppShell';
 import {
     ConfirmDialog,
     dataBr,
@@ -13,6 +12,7 @@ import {
 import { SeloLote } from '@/components/LotsContent';
 import { pedidoExcluirReceita, RecipeNameModal } from '@/components/RecipesContent';
 import { api, mensagemErro } from '@/services/api';
+import { getAxiosConfig } from '@/services/auth';
 
 // Detalhe e rampas em paralelo; rampas null = falhou. erro só quando a receita não carrega.
 export function useReceita() {
@@ -23,8 +23,8 @@ export function useReceita() {
     const carregar = useCallback(async () => {
         if (!id) return;
         const [detalhe, rampas] = await Promise.allSettled([
-            api.get(`/recipes/${id}`),
-            api.get(`/recipes/${id}/temperatures`),
+            api.get(`/recipes/${id}`, getAxiosConfig()),
+            api.get(`/recipes/${id}/temperatures`, getAxiosConfig()),
         ]);
         if (detalhe.status === 'rejected' || !detalhe.value.data.recipe) {
             return setEstado({
@@ -48,6 +48,14 @@ export function useReceita() {
 }
 
 // "HH:MM:SS" em minutos; NaN quando o formato não bate
+// Início da mosturação do lote, como no Figma: "12/03/2026 · 14:05"
+const inicioLote = (iso) =>
+    iso
+        ? new Date(iso)
+              .toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+              .replace(', ', ' · ')
+        : 'Sem início registrado';
+
 export const minutos = (hms) => {
     const [h, m, seg] = String(hms ?? '')
         .split(':')
@@ -76,33 +84,33 @@ function PerfilRampas({ rampas }) {
 
     return (
         <section
-            id="perfilRampas"
+            id="rampProfile"
             className="card flex flex-col overflow-hidden"
-            aria-labelledby="tituloPerfil"
+            aria-labelledby="profileTitle"
         >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linha px-6 py-5">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-5">
                 <div className="flex flex-col gap-0.5">
-                    <h2 id="tituloPerfil" className="text-lg font-semibold">
+                    <h2 id="profileTitle" className="text-lg font-semibold">
                         Perfil das rampas
                     </h2>
-                    <p className="text-sm text-texto-2">
+                    <p className="text-sm text-muted-foreground">
                         Faixa de cada rampa ao longo da mosturação, com os limites de alerta.
                     </p>
                 </div>
-                <div className="flex gap-5 text-[13px] text-texto-2" aria-hidden="true">
+                <div className="flex gap-5 text-[13px] text-muted-foreground" aria-hidden="true">
                     <span className="flex items-center gap-2">
-                        <span className="h-3 w-4 rounded-[3px] border border-acao/40 bg-acao/25" />
+                        <span className="h-3 w-4 rounded-[3px] border border-action/40 bg-action/25" />
                         Faixa da rampa
                     </span>
                     <span className="flex items-center gap-2">
-                        <span className="h-3 w-4 rounded-[3px] border border-acao/40 bg-acao/10" />
+                        <span className="h-3 w-4 rounded-[3px] border border-action/40 bg-action/10" />
                         Limites
                     </span>
                 </div>
             </div>
             <div className="flex gap-3 px-6 pb-4 pt-5">
                 <div
-                    className="flex flex-col justify-between pb-6 text-xs tabular-nums text-texto-2"
+                    className="flex flex-col justify-between pb-6 text-xs tabular-nums text-muted-foreground"
                     aria-hidden="true"
                 >
                     {graus.map((g) => (
@@ -111,7 +119,7 @@ function PerfilRampas({ rampas }) {
                 </div>
                 <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <div
-                        id="perfilGrafico"
+                        id="rampProfileChart"
                         className="relative h-80"
                         role="img"
                         aria-label={`${plural(faixas.length, 'rampa', 'rampas')} entre ${piso} e ${teto} ºC em ${Math.round(fim)} minutos. Os valores estão na tabela acima.`}
@@ -119,7 +127,7 @@ function PerfilRampas({ rampas }) {
                         {graus.map((g) => (
                             <div
                                 key={g}
-                                className="absolute inset-x-0 h-px bg-linha"
+                                className="absolute inset-x-0 h-px bg-border"
                                 style={{ top: pct((teto - g) / (teto - piso)) }}
                             />
                         ))}
@@ -131,7 +139,7 @@ function PerfilRampas({ rampas }) {
                             return (
                                 <div
                                     key={t.id ?? i}
-                                    className="absolute border-r-2 border-superficie bg-acao/10"
+                                    className="absolute border-r-2 border-surface bg-action/10"
                                     style={{
                                         left: pct(ini / total),
                                         width: pct(dur / total),
@@ -140,7 +148,7 @@ function PerfilRampas({ rampas }) {
                                     }}
                                 >
                                     <div
-                                        className="absolute inset-x-0 border-t-2 border-acao bg-acao/25"
+                                        className="absolute inset-x-0 border-t-2 border-action bg-action/25"
                                         style={{
                                             top: pct(
                                                 (t.maxTemperatureLimit - t.maxTemperatureRamp) /
@@ -159,7 +167,7 @@ function PerfilRampas({ rampas }) {
                                         <span className="font-semibold">
                                             Rampa {t.orderRamp ?? i + 1}
                                         </span>
-                                        <span className="text-texto-2">
+                                        <span className="text-muted-foreground">
                                             {t.minTemperatureRamp} – {t.maxTemperatureRamp} ºC ·{' '}
                                             {Math.round(dur)} min
                                         </span>
@@ -169,7 +177,7 @@ function PerfilRampas({ rampas }) {
                         })}
                     </div>
                     <div
-                        className="flex justify-between text-xs tabular-nums text-texto-2"
+                        className="flex justify-between text-xs tabular-nums text-muted-foreground"
                         aria-hidden="true"
                     >
                         {tempos.map((m) => (
@@ -187,13 +195,13 @@ function LinhaRampa({ rampa, ordem, recipeId, onExcluir }) {
         <span
             className={`max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm ${coluna} lg:row-start-1`}
         >
-            <span className="text-texto-2 lg:hidden">{rotulo}</span>
+            <span className="text-muted-foreground lg:hidden">{rotulo}</span>
             <span>{valor}</span>
         </span>
     );
     return (
-        <div className="tabela-linha grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-6 py-4 max-lg:mb-3 max-lg:rounded-xl max-lg:border max-lg:bg-superficie max-lg:px-4 max-lg:pb-4 max-lg:pt-3 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:gap-x-4 lg:py-0">
-            <span className="grid size-8 place-items-center rounded-full bg-fundo font-display text-[13px] font-semibold">
+        <div className="list-row grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 px-6 py-4 max-lg:mb-3 max-lg:rounded-xl max-lg:border max-lg:bg-surface max-lg:px-4 max-lg:pb-4 max-lg:pt-3 lg:min-h-[68px] lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px] lg:gap-x-4 lg:py-0">
+            <span className="grid size-8 place-items-center rounded-full bg-background font-display text-[13px] font-semibold">
                 {ordem}
             </span>
             <span className="font-semibold max-lg:text-[17px]">
@@ -202,14 +210,14 @@ function LinhaRampa({ rampa, ordem, recipeId, onExcluir }) {
             <span className="flex gap-1 max-lg:col-start-3 max-lg:row-start-1 lg:col-start-7 lg:justify-end">
                 <Link
                     href={`/recipes/${recipeId}/temperatures/${rampa.id}/edit`}
-                    className="btn-icone"
+                    className="btn-icon"
                     aria-label={`Editar rampa ${ordem}`}
                 >
                     <i className="ph ph-pencil-simple" aria-hidden="true" />
                 </Link>
                 <button
                     type="button"
-                    className="btn-icone-perigo"
+                    className="btn-icon-danger"
                     onClick={onExcluir}
                     aria-label={`Excluir rampa ${ordem}`}
                 >
@@ -219,7 +227,7 @@ function LinhaRampa({ rampa, ordem, recipeId, onExcluir }) {
             {celula(
                 'Limites',
                 `${rampa.minTemperatureLimit} – ${rampa.maxTemperatureLimit} ºC`,
-                'lg:col-start-3 lg:text-texto-2'
+                'lg:col-start-3 lg:text-muted-foreground'
             )}
             {celula('Temporizador', rampa.timer, 'lg:col-start-4')}
             {celula('Início do timer', rampa.initialization, 'lg:col-start-5')}
@@ -228,7 +236,7 @@ function LinhaRampa({ rampa, ordem, recipeId, onExcluir }) {
     );
 }
 
-function Receita({ edit, onNome }) {
+export default function RecipeContent({ edit = false, onNome }) {
     const router = useRouter();
     const { id, recipe, rampas, erro, carregar } = useReceita();
     const [renomeando, setRenomeando] = useState(false);
@@ -237,7 +245,7 @@ function Receita({ edit, onNome }) {
 
     useEffect(() => {
         if (!id) return;
-        api.get('/lots')
+        api.get('/lots', getAxiosConfig())
             .then(({ data }) =>
                 setLotes((data.lots ?? []).filter((lote) => String(lote.recipeId) === id))
             )
@@ -253,7 +261,7 @@ function Receita({ edit, onNome }) {
     }, [edit, router.query.edit]);
 
     if (erro) return <ServerError message={erro} />;
-    if (!recipe) return <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />;
+    if (!recipe) return <div className="skeleton h-40 rounded-xl" aria-label="Carregando" />;
 
     const fecharRenomear = () => {
         setRenomeando(false);
@@ -262,7 +270,7 @@ function Receita({ edit, onNome }) {
 
     const renomear = async (name) => {
         try {
-            const { data } = await api.put(`/recipes/${id}`, { name });
+            const { data } = await api.put(`/recipes/${id}`, { name }, getAxiosConfig());
             flash('success', data?.message ?? 'Receita atualizada com sucesso.');
             fecharRenomear();
             carregar();
@@ -273,7 +281,7 @@ function Receita({ edit, onNome }) {
 
     const excluir = async () => {
         try {
-            await api.delete(`/recipes/${id}`);
+            await api.delete(`/recipes/${id}`, getAxiosConfig());
             flash('success', 'Receita excluída.');
             router.push('/recipes');
         } catch (error) {
@@ -283,7 +291,7 @@ function Receita({ edit, onNome }) {
 
     const excluirRampa = async (rampaId) => {
         try {
-            await api.delete(`/temperatures/${rampaId}`);
+            await api.delete(`/temperatures/${rampaId}`, getAxiosConfig());
             flash('success', 'Rampa excluída.');
             carregar();
         } catch (error) {
@@ -300,7 +308,7 @@ function Receita({ edit, onNome }) {
     return (
         <>
             <div className="flex flex-col gap-2">
-                <Link href="/recipes" className="btn-voltar self-start max-lg:hidden">
+                <Link href="/recipes" className="btn-back self-start max-lg:hidden">
                     <i className="ph ph-arrow-left" aria-hidden="true" />
                     Todas as receitas
                 </Link>
@@ -312,15 +320,15 @@ function Receita({ edit, onNome }) {
                         >
                             {recipe.name}
                         </h1>
-                        <p id="recipeResumo" className="text-texto-2">
+                        <p id="recipeSummary" className="text-muted-foreground">
                             {resumo}
                         </p>
                     </div>
-                    <div className="acoes">
+                    <div className="actions">
                         <button
                             type="button"
-                            id="btnExcluirReceita"
-                            className="btn-perigo max-lg:order-1"
+                            id="btnDeleteRecipe"
+                            className="btn-danger max-lg:order-1"
                             onClick={() =>
                                 setConfirmacao(
                                     pedidoExcluirReceita(
@@ -335,7 +343,7 @@ function Receita({ edit, onNome }) {
                         </button>
                         <button
                             type="button"
-                            className="btn-secundario"
+                            className="btn-secondary"
                             onClick={() => setRenomeando(true)}
                         >
                             <i className="ph ph-pencil-simple" aria-hidden="true" />
@@ -344,7 +352,7 @@ function Receita({ edit, onNome }) {
                         <Link
                             id="newTemperatureLink"
                             href={novaRampa}
-                            className="btn-primario max-lg:hidden"
+                            className="btn-primary max-lg:hidden"
                         >
                             <i className="ph ph-plus" aria-hidden="true" />
                             Adicionar rampa
@@ -354,19 +362,19 @@ function Receita({ edit, onNome }) {
             </div>
 
             {/* lado a lado só quando as colunas fixas da tabela (~800px) cabem ao lado do card */}
-            <div className="grid gap-6 min-[1760px]:grid-cols-[minmax(0,1fr)_440px] min-[1760px]:items-start">
+            <div className="grid gap-6 min-[1760px]:grid-cols-[minmax(0,1fr)_440px]">
                 <section
                     className="card overflow-hidden max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent"
-                    aria-labelledby="tituloRampas"
+                    aria-labelledby="rampsTitle"
                 >
                     <h2
-                        id="tituloRampas"
-                        className="border-b border-linha px-6 py-5 text-lg font-semibold max-lg:border-0 max-lg:px-0 max-lg:pb-3 max-lg:pt-0"
+                        id="rampsTitle"
+                        className="border-b border-border px-6 py-5 text-lg font-semibold max-lg:border-0 max-lg:px-0 max-lg:pb-3 max-lg:pt-0"
                     >
                         Rampas de temperatura
                     </h2>
                     <div
-                        className="tabela-cabecalho hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]"
+                        className="list-header hidden min-h-11 items-center gap-4 px-6 lg:grid lg:grid-cols-[56px_minmax(0,1fr)_150px_130px_140px_130px_96px]"
                         aria-hidden="true"
                     >
                         <span>Ordem</span>
@@ -377,7 +385,7 @@ function Receita({ edit, onNome }) {
                         <span>Tempo ideal</span>
                         <span className="text-right">Ações</span>
                     </div>
-                    <div id="detalheRampas" aria-live="polite">
+                    <div id="rampDetails" aria-live="polite">
                         {rampas === null && (
                             <EmptyState
                                 icon="ph-cloud-slash"
@@ -416,26 +424,36 @@ function Receita({ edit, onNome }) {
                     </div>
                 </section>
 
-                <section className="card overflow-hidden" aria-labelledby="tituloLotesReceita">
+                <section
+                    className="card flex flex-col overflow-hidden"
+                    aria-labelledby="recipeLotsTitle"
+                >
                     <h2
-                        id="tituloLotesReceita"
-                        className="border-b border-linha px-6 py-5 text-lg font-semibold"
+                        id="recipeLotsTitle"
+                        className="border-b border-border px-6 py-5 text-lg font-semibold"
                     >
                         Lotes desta receita
                     </h2>
                     {!lotes && (
-                        <div className="esqueleto m-5 h-16 rounded-xl" aria-label="Carregando" />
+                        <div className="skeleton m-5 h-16 rounded-xl" aria-label="Carregando" />
                     )}
                     {lotes?.length === 0 && (
-                        <EmptyState icon="ph-cube" title="Nenhum lote ainda" compact />
+                        <div className="grid flex-1 place-items-center">
+                            <EmptyState icon="ph-cube" title="Nenhum lote ainda" compact />
+                        </div>
                     )}
                     {lotes?.map((lote) => (
                         <Link
                             key={lote.id}
                             href={`/lots/${lote.id}`}
-                            className="tabela-linha flex min-h-14 items-center justify-between gap-3 px-6 hover:bg-hover-neutro"
+                            className="list-row flex min-h-16 items-center justify-between gap-3 px-6 py-3 hover:bg-hover-neutral"
                         >
-                            <span className="truncate font-semibold">{lote.name}</span>
+                            <span className="flex min-w-0 flex-col gap-0.5">
+                                <span className="truncate font-semibold">{lote.name}</span>
+                                <span className="text-[13px] text-muted-foreground">
+                                    {inicioLote(lote.mashStart)}
+                                </span>
+                            </span>
                             <SeloLote status={lote.status} />
                         </Link>
                     ))}
@@ -444,20 +462,16 @@ function Receita({ edit, onNome }) {
 
             {rampas && <PerfilRampas rampas={rampas} />}
 
-            <div className="barra-mobile lg:hidden">
-                <Link
-                    id="newTemperatureLinkMobile"
-                    href={novaRampa}
-                    className="btn-primario w-full"
-                >
+            <div className="mobile-bar lg:hidden">
+                <Link id="newTemperatureLinkMobile" href={novaRampa} className="btn-primary w-full">
                     <i className="ph ph-plus" aria-hidden="true" />
                     Adicionar rampa
                 </Link>
             </div>
 
             <RecipeNameModal
-                id="modalRenomear"
-                formId="formEditarReceita"
+                id="renameModal"
+                formId="editRecipeForm"
                 open={renomeando}
                 onClose={fecharRenomear}
                 title="Renomear receita"
@@ -468,14 +482,5 @@ function Receita({ edit, onNome }) {
             />
             <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
         </>
-    );
-}
-
-export default function RecipeContent({ edit = false }) {
-    const [nome, setNome] = useState('Receita');
-    return (
-        <AppShell title={nome} trail={['Receitas', nome]} back="/recipes">
-            <Receita edit={edit} onNome={setNome} />
-        </AppShell>
     );
 }

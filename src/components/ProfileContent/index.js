@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import AppShell, { useUser } from '@/components/AppShell';
+import { useUser } from '@/components/AppShell';
 import { ConfirmDialog, dataBr, Field, flash, PasswordInput } from '@/components/Feedback';
 import { api, mensagemErro } from '@/services/api';
-import { signOut } from '@/services/auth';
+import { getAxiosConfig, logout } from '@/services/auth';
 
 // GET /user/login-history ainda não existe no Back-End (conloq/mash#102): 404 vira lista vazia.
 function useAcessos() {
     const [estado, setEstado] = useState({ acessos: [], erro: false });
     useEffect(() => {
-        api.get('/user/login-history')
+        api.get('/user/login-history', getAxiosConfig())
             .then(({ data }) => setEstado({ acessos: data.loginHistory ?? [], erro: false }))
             .catch((error) => setEstado({ acessos: [], erro: error.response?.status !== 404 }));
     }, []);
@@ -22,40 +22,40 @@ function CardAcessos({ className = '' }) {
     return (
         <section
             className={`card flex flex-col p-6 max-lg:px-4 max-lg:py-1 ${className}`}
-            aria-labelledby="tituloAcessos"
+            aria-labelledby="accessTitle"
         >
             <div className="flex flex-col gap-0.5 pb-2 max-lg:sr-only">
-                <h2 id="tituloAcessos" className="text-lg font-semibold">
+                <h2 id="accessTitle" className="text-lg font-semibold">
                     Últimos acessos
                 </h2>
-                <p className="text-sm text-texto-2">Entradas recentes na sua conta.</p>
+                <p className="text-sm text-muted-foreground">Entradas recentes na sua conta.</p>
             </div>
-            <div id="listaAcessos" className="flex flex-col" role="list" aria-live="polite">
+            <div id="accessList" className="flex flex-col" role="list" aria-live="polite">
                 {erro && (
-                    <p className="py-4 text-sm text-perigo">
+                    <p className="py-4 text-sm text-danger">
                         Não foi possível carregar os acessos. Tente novamente.
                     </p>
                 )}
                 {!erro && !acessos.length && (
-                    <p className="py-4 text-sm text-texto-2">Nenhum acesso registrado</p>
+                    <p className="py-4 text-sm text-muted-foreground">Nenhum acesso registrado</p>
                 )}
                 {acessos.map((acesso, i) => {
                     const data = new Date(acesso.loggedAt);
                     return (
                         <div
                             key={i}
-                            className="flex items-center gap-3 border-b border-linha py-3 last:border-b-0"
+                            className="flex items-center gap-3 border-b border-border py-3 last:border-b-0"
                             role="listitem"
                         >
-                            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-fundo max-lg:hidden">
+                            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-background max-lg:hidden">
                                 <i
-                                    className="ph ph-map-pin text-lg text-texto-2"
+                                    className="ph ph-map-pin text-lg text-muted-foreground"
                                     aria-hidden="true"
                                 />
                             </span>
                             <span className="flex min-w-0 flex-1 flex-col">
                                 <span className="text-sm font-semibold">{acesso.location}</span>
-                                <span className="text-[13px] text-texto-2">
+                                <span className="text-[13px] text-muted-foreground">
                                     {data.toLocaleDateString('pt-BR')} ·{' '}
                                     {data.toLocaleTimeString('pt-BR', {
                                         hour: '2-digit',
@@ -65,7 +65,7 @@ function CardAcessos({ className = '' }) {
                                 </span>
                             </span>
                             {acesso.status != null && (
-                                <span className={acesso.status ? 'selo-sucesso' : 'selo-aviso'}>
+                                <span className={acesso.status ? 'badge-success' : 'badge-warning'}>
                                     {acesso.status ? 'Dispositivo conhecido' : 'Novo dispositivo'}
                                 </span>
                             )}
@@ -80,11 +80,11 @@ function CardAcessos({ className = '' }) {
 export function AccessHistory() {
     return (
         <>
-            <Link href="/profile" className="btn-voltar self-start max-lg:hidden">
+            <Link href="/profile" className="btn-back self-start max-lg:hidden">
                 <i className="ph ph-arrow-left" aria-hidden="true" />
                 Perfil
             </Link>
-            <p className="text-sm text-texto-2 lg:hidden">
+            <p className="text-sm text-muted-foreground lg:hidden">
                 Entradas recentes na sua conta. Se não reconhecer alguma, troque a senha.
             </p>
             <CardAcessos className="max-w-2xl" />
@@ -97,10 +97,10 @@ const valoresIniciais = (user) => ({
     email: user.email ?? '',
     phone: user.phone ?? '',
     password: '',
-    confirmarSenha: '',
+    confirmPassword: '',
 });
 
-function Perfil() {
+export default function ProfileContent() {
     const router = useRouter();
     const { user, recarregar } = useUser();
     const [valores, setValores] = useState(() => valoresIniciais(user));
@@ -115,26 +115,30 @@ function Perfil() {
 
     const salvar = async (event) => {
         event.preventDefault();
-        const { name, email, phone, password, confirmarSenha } = valores;
+        const { name, email, phone, password, confirmPassword } = valores;
         const novos = {};
         if (!name.trim()) novos.name = 'Informe seu nome.';
         if (!email.trim()) novos.email = 'Informe seu e-mail.';
         if (password && /\s/.test(password)) novos.password = 'A senha não pode conter espaços';
-        if (password && password !== confirmarSenha)
-            novos.confirmarSenha = 'As senhas não conferem';
+        if (password && password !== confirmPassword)
+            novos.confirmPassword = 'As senhas não conferem';
         setErros(novos);
         if (Object.keys(novos).length) {
             return event.target.querySelector(`[name="${Object.keys(novos)[0]}"]`)?.focus();
         }
         try {
-            const { data } = await api.put('/user', {
-                name,
-                email,
-                phone,
-                ...(password && { password }),
-            });
+            const { data } = await api.put(
+                '/user',
+                {
+                    name,
+                    email,
+                    phone,
+                    ...(password && { password }),
+                },
+                getAxiosConfig()
+            );
             flash('success', data?.message ?? 'Usuário atualizado com sucesso.');
-            setValores({ ...valores, password: '', confirmarSenha: '' });
+            setValores({ ...valores, password: '', confirmPassword: '' });
             recarregar();
         } catch (error) {
             flash('danger', mensagemErro(error, 'Não foi possível salvar os dados.'));
@@ -147,7 +151,7 @@ function Perfil() {
         const corpo = new FormData();
         corpo.append('image', arquivo);
         try {
-            const { data } = await api.put('/user/upload', corpo);
+            const { data } = await api.put('/user/upload', corpo, getAxiosConfig());
             flash('success', data?.message ?? 'Imagem enviada com sucesso.');
             recarregar();
         } catch (error) {
@@ -158,10 +162,9 @@ function Perfil() {
 
     const excluirConta = async () => {
         try {
-            await api.delete('/user');
-            signOut();
+            await api.delete('/user', getAxiosConfig());
             flash('success', 'Conta excluída.');
-            router.push('/login');
+            logout(router);
         } catch (error) {
             flash('danger', mensagemErro(error, 'Não foi possível excluir a conta.'));
         }
@@ -182,7 +185,7 @@ function Perfil() {
         <>
             <div className="flex flex-col gap-1.5 max-lg:contents">
                 <h1 className="text-[30px] font-semibold max-lg:sr-only">Perfil</h1>
-                <p className="text-texto-2 max-lg:hidden">
+                <p className="text-muted-foreground max-lg:hidden">
                     Conta criada em {dataBr(user.createdAt)}.
                 </p>
             </div>
@@ -190,28 +193,28 @@ function Perfil() {
                 <div className="flex flex-col gap-6 max-xl:contents">
                     <section
                         className="card flex flex-col items-center gap-5 p-6 max-xl:order-1 max-lg:border-0 max-lg:bg-transparent max-lg:p-0"
-                        aria-labelledby="tituloFoto"
+                        aria-labelledby="photoTitle"
                     >
                         <div className="flex w-full flex-col gap-0.5 max-lg:sr-only">
-                            <h2 id="tituloFoto" className="text-lg font-semibold">
+                            <h2 id="photoTitle" className="text-lg font-semibold">
                                 Foto do perfil
                             </h2>
-                            <p className="text-sm text-texto-2">
+                            <p className="text-sm text-muted-foreground">
                                 JPEG ou PNG. Aparece no topo das telas.
                             </p>
                         </div>
-                        <form id="formFoto" className="flex w-full items-center gap-4 lg:flex-col">
+                        <form id="photoForm" className="flex w-full items-center gap-4 lg:flex-col">
                             <img
-                                id="previewFoto"
+                                id="photoPreview"
                                 src={user.urlImage || '/img/foto-perfil.png'}
                                 alt="Sua foto de perfil"
-                                className="size-[72px] rounded-full border-linha object-cover lg:size-32 lg:border-4"
+                                className="size-[72px] rounded-full border-border object-cover lg:size-32 lg:border-4"
                             />
-                            <label className="btn-secundario cursor-pointer focus-within:outline-3 focus-within:outline-foco lg:w-full">
+                            <label className="btn-secondary cursor-pointer focus-within:outline-3 focus-within:outline-focus lg:w-full">
                                 <i className="ph ph-upload-simple" aria-hidden="true" />
                                 Trocar foto
                                 <input
-                                    id="inputFoto"
+                                    id="photoInput"
                                     name="image"
                                     type="file"
                                     accept="image/jpeg,image/png"
@@ -225,37 +228,37 @@ function Perfil() {
                     <CardAcessos className="max-lg:hidden max-xl:order-3" />
                     <Link
                         href="/profile/access-history"
-                        className="card flex min-h-11 items-center gap-3 p-4 transition-colors hover:bg-fundo max-xl:order-3 lg:hidden"
+                        className="card flex min-h-11 items-center gap-3 p-4 transition-colors hover:bg-background max-xl:order-3 lg:hidden"
                     >
                         <i
-                            className="ph ph-clock-counter-clockwise text-xl text-texto-2"
+                            className="ph ph-clock-counter-clockwise text-xl text-muted-foreground"
                             aria-hidden="true"
                         />
                         <span className="flex min-w-0 flex-1 flex-col">
                             <span className="font-semibold">Últimos acessos</span>
-                            <span className="text-[13px] text-texto-2">
+                            <span className="text-[13px] text-muted-foreground">
                                 Entradas recentes na sua conta.
                             </span>
                         </span>
-                        <i className="ph ph-caret-right text-texto-2" aria-hidden="true" />
+                        <i className="ph ph-caret-right text-muted-foreground" aria-hidden="true" />
                     </Link>
 
                     <section
                         className="card flex flex-col gap-5 border-[#f2c9c4] p-6 max-xl:order-4 max-lg:border-0 max-lg:bg-transparent max-lg:p-0"
-                        aria-labelledby="tituloExcluirConta"
+                        aria-labelledby="deleteAccountTitle"
                     >
                         <div className="flex flex-col gap-0.5 max-lg:sr-only">
-                            <h2 id="tituloExcluirConta" className="text-lg font-semibold">
+                            <h2 id="deleteAccountTitle" className="text-lg font-semibold">
                                 Excluir conta
                             </h2>
-                            <p className="text-sm text-texto-2">
+                            <p className="text-sm text-muted-foreground">
                                 Apaga sua conta e sai do MASH. Não dá para desfazer.
                             </p>
                         </div>
                         <button
                             type="button"
-                            id="btnExcluir"
-                            className="btn-perigo w-full"
+                            id="btnDelete"
+                            className="btn-danger w-full"
                             onClick={() =>
                                 setConfirmacao({
                                     titulo: 'Excluir sua conta?',
@@ -273,7 +276,7 @@ function Perfil() {
                 </div>
 
                 <form
-                    id="formPerfil"
+                    id="profileForm"
                     className="card flex flex-col gap-5 self-start p-6 max-xl:order-2 max-lg:border-0 max-lg:bg-transparent max-lg:p-0"
                     noValidate
                     onSubmit={salvar}
@@ -303,23 +306,23 @@ function Perfil() {
                             required: true,
                         })}
                     </Field>
-                    <hr className="border-linha max-lg:hidden" />
+                    <hr className="border-border max-lg:hidden" />
                     <div className="flex flex-col gap-0.5 max-lg:sr-only">
                         <h2 className="text-lg font-semibold">Trocar senha</h2>
-                        <p className="text-sm text-texto-2">
+                        <p className="text-sm text-muted-foreground">
                             Deixe em branco para manter a senha atual.
                         </p>
                     </div>
                     <div className="grid gap-5 md:grid-cols-2">
                         <Field
                             name="password"
-                            inputId="senha"
+                            inputId="password"
                             label="Nova senha"
                             help="Sem espaços."
                             error={erros.password}
                         >
                             <PasswordInput
-                                id="senha"
+                                id="password"
                                 name="password"
                                 value={valores.password}
                                 onChange={mudar}
@@ -328,32 +331,32 @@ function Perfil() {
                             />
                         </Field>
                         <Field
-                            name="confirmarSenha"
+                            name="confirmPassword"
                             label="Confirmar nova senha"
-                            error={erros.confirmarSenha}
+                            error={erros.confirmPassword}
                         >
                             <PasswordInput
-                                id="confirmarSenha"
-                                value={valores.confirmarSenha}
+                                id="confirmPassword"
+                                value={valores.confirmPassword}
                                 onChange={mudar}
                                 autoComplete="new-password"
                                 placeholder="Confirme a nova senha"
                             />
                         </Field>
                     </div>
-                    <div className="acoes pt-2 sm:self-end">
+                    <div className="actions pt-2 sm:self-end">
                         <button
                             type="button"
-                            id="btnDescartar"
-                            className="btn-secundario max-lg:hidden"
+                            id="btnDiscard"
+                            className="btn-secondary max-lg:hidden"
                             onClick={descartar}
                         >
                             Descartar
                         </button>
                         <button
                             type="submit"
-                            id="btnSalvar"
-                            className="btn-primario max-lg:col-span-2"
+                            id="btnSave"
+                            className="btn-primary max-lg:col-span-2"
                         >
                             Salvar alterações
                         </button>
@@ -362,13 +365,5 @@ function Perfil() {
             </div>
             <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
         </>
-    );
-}
-
-export default function ProfileContent() {
-    return (
-        <AppShell title="Perfil" trail={['Conta', 'Perfil']}>
-            <Perfil />
-        </AppShell>
     );
 }

@@ -44,10 +44,10 @@ export function Messages() {
 
     const sucesso = mensagem?.tipo === 'success';
     return (
-        <div id="mensagens" ref={ref} className="empty:absolute" aria-live="polite">
+        <div id="messages" ref={ref} className="empty:absolute" aria-live="polite">
             {mensagem && (
                 <div
-                    className={`${sucesso ? 'bg-sucesso-suave text-sucesso' : 'bg-perigo-suave text-perigo'} flex items-center gap-3 rounded-[10px] px-4 py-3`}
+                    className={`${sucesso ? 'bg-success-soft text-success' : 'bg-danger-soft text-danger'} flex items-center gap-3 rounded-[10px] px-4 py-3`}
                     role={sucesso ? 'status' : 'alert'}
                 >
                     <i
@@ -66,16 +66,23 @@ export function EmptyState({ icon, title, text, action, compact }) {
         <div
             className={`flex flex-col items-center gap-3 px-6 text-center ${compact ? 'py-10' : 'py-16'}`}
         >
-            <i className={`ph ${icon} text-4xl text-texto-2`} aria-hidden="true" />
+            <i className={`ph ${icon} text-4xl text-muted-foreground`} aria-hidden="true" />
             <p className={`font-display ${compact ? 'text-lg' : 'text-xl'} font-semibold`}>
                 {title}
             </p>
-            {text && <p className="max-w-md leading-relaxed text-texto-2">{text}</p>}
-            {action && (
-                <Link href={action.href} className="btn-primario mt-2">
+            {text && <p className="max-w-md leading-relaxed text-muted-foreground">{text}</p>}
+            {/* ação com href navega; com onClick abre algo na própria tela (ex.: modal) */}
+            {action?.href && (
+                <Link href={action.href} className="btn-primary mt-2">
                     <i className={`ph ${action.icon}`} aria-hidden="true" />
                     {action.text}
                 </Link>
+            )}
+            {action?.onClick && (
+                <button type="button" className="btn-primary mt-2" onClick={action.onClick}>
+                    <i className={`ph ${action.icon}`} aria-hidden="true" />
+                    {action.text}
+                </button>
             )}
         </div>
     );
@@ -87,12 +94,12 @@ export function ServerError({ message }) {
             role="alert"
             className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center gap-4 p-6 text-center"
         >
-            <i className="ph ph-cloud-slash text-5xl text-perigo" aria-hidden="true" />
+            <i className="ph ph-cloud-slash text-5xl text-danger" aria-hidden="true" />
             <h1 className="font-display text-2xl font-semibold">
                 Não foi possível carregar esta página
             </h1>
-            <p className="text-texto-2">{message}</p>
-            <Link href="/recipes" className="btn-primario">
+            <p className="text-muted-foreground">{message}</p>
+            <Link href="/recipes" className="btn-primary">
                 Voltar às receitas
             </Link>
         </div>
@@ -140,28 +147,30 @@ export function Modal({ id, open, onClose, title, subtitle, width = 'max-w-[520p
         <div
             id={id}
             ref={ref}
-            className="js-modal folha fixed inset-0 z-50 bg-texto/60 p-4"
+            className="js-modal sheet fixed inset-0 z-50 bg-foreground/60 p-4"
             // clique no fundo fecha; pelo teclado, o Escape de useDialogo
             role="presentation"
             onMouseDown={(event) => event.target === event.currentTarget && onClose()}
         >
             <div className="flex min-h-full items-center justify-center">
                 <div
-                    className={`w-full ${width} overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]`}
+                    className={`w-full ${width} overflow-hidden rounded-2xl bg-surface shadow-[0_24px_48px_rgba(31,26,23,0.25)]`}
                     role="dialog"
                     aria-modal="true"
-                    aria-labelledby={`${id}Titulo`}
+                    aria-labelledby={`${id}Title`}
                 >
                     <div className="flex items-start gap-2 px-6 pb-0 pr-4 pt-6">
                         <div className="flex flex-1 flex-col gap-1">
-                            <h2 id={`${id}Titulo`} className="text-[22px] font-semibold">
+                            <h2 id={`${id}Title`} className="text-[22px] font-semibold">
                                 {title}
                             </h2>
-                            {subtitle && <p className="text-sm text-texto-2">{subtitle}</p>}
+                            {subtitle && (
+                                <p className="text-sm text-muted-foreground">{subtitle}</p>
+                            )}
                         </div>
                         <button
                             type="button"
-                            className="btn-icone"
+                            className="btn-icon"
                             onClick={onClose}
                             aria-label="Fechar"
                         >
@@ -177,11 +186,11 @@ export function Modal({ id, open, onClose, title, subtitle, width = 'max-w-[520p
 
 export function ModalActions({ onClose, submit }) {
     return (
-        <div className="acoes border-t border-linha bg-[#faf8f6] px-6 py-4">
-            <button type="button" className="btn-secundario" onClick={onClose}>
+        <div className="actions border-t border-border bg-[#faf8f6] px-6 py-4">
+            <button type="button" className="btn-secondary" onClick={onClose}>
                 Cancelar
             </button>
-            <button type="submit" className="btn-primario">
+            <button type="submit" className="btn-primary">
                 {submit}
             </button>
         </div>
@@ -195,42 +204,42 @@ export function ConfirmDialog({ pedido, onClose }) {
     if (!pedido) return null;
     return (
         <div
-            id="dialogoConfirmar"
+            id="confirmDialog"
             ref={ref}
-            className="folha fixed inset-0 z-[70] flex items-center justify-center bg-texto/60 p-4"
+            className="sheet fixed inset-0 z-[70] flex items-center justify-center bg-foreground/60 p-4"
             // clique no fundo fecha; pelo teclado, o Escape de useDialogo
             role="presentation"
             onMouseDown={(event) => event.target === event.currentTarget && onClose()}
         >
             <div
-                className="w-full max-w-[440px] overflow-hidden rounded-2xl bg-superficie shadow-[0_24px_48px_rgba(31,26,23,0.25)]"
+                className="w-full max-w-[440px] overflow-hidden rounded-2xl bg-surface shadow-[0_24px_48px_rgba(31,26,23,0.25)]"
                 role="alertdialog"
                 aria-modal="true"
-                aria-labelledby="dialogoConfirmarTitulo"
-                aria-describedby="dialogoConfirmarMensagem"
+                aria-labelledby="confirmDialogTitle"
+                aria-describedby="confirmDialogMessage"
             >
                 <div className="flex flex-col gap-1.5 p-6 pb-5">
-                    <h2 id="dialogoConfirmarTitulo" className="text-xl font-semibold">
+                    <h2 id="confirmDialogTitle" className="text-xl font-semibold">
                         {pedido.titulo}
                     </h2>
-                    <p id="dialogoConfirmarMensagem" className="leading-relaxed text-texto-2">
+                    <p id="confirmDialogMessage" className="leading-relaxed text-muted-foreground">
                         {pedido.mensagem}
                     </p>
                 </div>
-                <div className="acoes border-t border-linha bg-[#faf8f6] px-6 py-4">
-                    <button type="button" className="btn-secundario" onClick={onClose}>
+                <div className="actions border-t border-border bg-[#faf8f6] px-6 py-4">
+                    <button type="button" className="btn-secondary" onClick={onClose}>
                         Cancelar
                     </button>
                     <button
                         type="button"
-                        className="btn-perigo"
+                        className="btn-danger"
                         onClick={() => {
                             onClose();
                             pedido.aoConfirmar();
                         }}
                     >
                         <i className="ph ph-trash" aria-hidden="true" />
-                        <span id="dialogoConfirmarBotao">{pedido.botao ?? 'Excluir'}</span>
+                        <span id="confirmDialogButton">{pedido.botao ?? 'Excluir'}</span>
                     </button>
                 </div>
             </div>
@@ -238,7 +247,7 @@ export function ConfirmDialog({ pedido, onClose }) {
     );
 }
 
-// Campo do design system: erro troca a ajuda e marca .campo-erro (antigo erroCampo).
+// Campo do design system: erro troca a ajuda e marca .field-error (antigo erroCampo).
 export function Field({
     name,
     inputId = name,
@@ -250,16 +259,16 @@ export function Field({
     className = '',
 }) {
     return (
-        <div className={`campo ${error ? 'campo-erro' : ''} ${className}`} data-campo={name}>
-            <label className="campo-rotulo" htmlFor={inputId}>
+        <div className={`field ${error ? 'field-error' : ''} ${className}`} data-field={name}>
+            <label className="field-label" htmlFor={inputId}>
                 {label}
             </label>
-            <span className="campo-caixa relative">
+            <span className="field-box relative">
                 {children}
-                {unit && <span className="campo-unidade">{unit}</span>}
+                {unit && <span className="field-unit">{unit}</span>}
             </span>
             {(error || help) && (
-                <span className="campo-ajuda" data-erro>
+                <span className="field-help" data-error>
                     {error ?? help}
                 </span>
             )}
@@ -274,8 +283,8 @@ export function PasswordInput({ id, ...props }) {
             <input id={id} name={id} type={visivel ? 'text' : 'password'} {...props} />
             <button
                 type="button"
-                className="btn-icone -mr-2"
-                data-toggle-senha={id}
+                className="btn-icon -mr-2"
+                data-toggle-password={id}
                 aria-label={visivel ? 'Ocultar senha' : 'Mostrar senha'}
                 onClick={() => setVisivel(!visivel)}
             >

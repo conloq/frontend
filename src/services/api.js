@@ -17,13 +17,6 @@ export const api = axios.create({
     timeout: 15000,
 });
 
-// A API autentica por Bearer (authMiddleware do Back-End); o token fica no navegador.
-api.interceptors.request.use((config) => {
-    const token = lerToken();
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-});
-
 // 401 em rota autenticada: sessão vencida, volta para o login. O 401 do próprio login é só mensagem.
 api.interceptors.response.use(undefined, (error) => {
     if (error.response?.status === 401 && error.config?.url !== '/login') {

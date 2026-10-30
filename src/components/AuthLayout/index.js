@@ -17,7 +17,7 @@ export default function AuthLayout({ title, children }) {
             <Head>
                 <title>{`${title} · MASH`}</title>
             </Head>
-            <div className="flex min-h-screen bg-superficie">
+            <div className="flex min-h-screen bg-surface">
                 <section
                     className="relative hidden overflow-hidden bg-mash-brown lg:flex lg:flex-1 lg:flex-col lg:px-[72px] lg:pt-[59vh]"
                     aria-label="Sobre o MASH"
@@ -32,7 +32,7 @@ export default function AuthLayout({ title, children }) {
                         <p className="font-display text-[52px] font-bold leading-tight tracking-tight text-white">
                             {CHAMADA}
                         </p>
-                        <p className="max-w-2xl text-lg leading-relaxed text-header-texto-2">
+                        <p className="max-w-2xl text-lg leading-relaxed text-header-muted-foreground">
                             Cadastre as rampas de cada receita e registre os testes de iodo de cada
                             lote, com hora e temperatura, para saber quando o mosto pode seguir para
                             a fervura.
@@ -62,7 +62,7 @@ export default function AuthLayout({ title, children }) {
                         <Messages />
                         {children}
                     </div>
-                    <p className="text-[13px] text-texto-2 max-lg:hidden">
+                    <p className="text-[13px] text-muted-foreground max-lg:hidden">
                         © 2026 Conloq · FATEC Registro
                     </p>
                 </main>

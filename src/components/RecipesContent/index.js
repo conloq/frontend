@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import AppShell from '@/components/AppShell';
 import {
     ConfirmDialog,
     dataBr,
@@ -12,6 +11,7 @@ import {
     plural,
 } from '@/components/Feedback';
 import { api, mensagemErro } from '@/services/api';
+import { getAxiosConfig } from '@/services/auth';
 
 export function faixaRampas(rampas) {
     if (!rampas.length) return '—';
@@ -67,13 +67,13 @@ export function RecipeNameModal({
                 <div className="flex flex-col gap-4 p-6">
                     <Field
                         name="name"
-                        inputId={`${id}Nome`}
+                        inputId={`${id}Name`}
                         label="Nome da receita"
                         help={help}
                         error={erro}
                     >
                         <input
-                            id={`${id}Nome`}
+                            id={`${id}Name`}
                             name="name"
                             value={nome}
                             onChange={(event) => setNome(event.target.value)}
@@ -98,13 +98,13 @@ export default function RecipesContent() {
 
     const carregar = useCallback(async () => {
         try {
-            const { data } = await api.get('/recipes');
+            const { data } = await api.get('/recipes', getAxiosConfig());
             const lista = await Promise.all(
                 (data.recipes ?? []).map(async (receita) => {
                     try {
                         const rampas =
-                            (await api.get(`/recipes/${receita.id}/temperatures`)).data
-                                .temperatures ?? [];
+                            (await api.get(`/recipes/${receita.id}/temperatures`, getAxiosConfig()))
+                                .data.temperatures ?? [];
                         return { ...receita, rampas, faixa: faixaRampas(rampas) };
                     } catch {
                         return { ...receita, rampas: null, faixa: 'Não foi possível carregar' };
@@ -124,7 +124,7 @@ export default function RecipesContent() {
 
     const criar = async (name) => {
         try {
-            const { data } = await api.post('/recipes', { name });
+            const { data } = await api.post('/recipes', { name }, getAxiosConfig());
             flash('success', data?.message ?? 'Receita criada com sucesso.');
             setCriando(false);
             carregar();
@@ -135,7 +135,7 @@ export default function RecipesContent() {
 
     const excluir = async (id) => {
         try {
-            await api.delete(`/recipes/${id}`);
+            await api.delete(`/recipes/${id}`, getAxiosConfig());
             flash('success', 'Receita excluída.');
             carregar();
         } catch (error) {
@@ -149,12 +149,12 @@ export default function RecipesContent() {
     );
 
     return (
-        <AppShell title="Receitas" trail={['Receitas', 'Todas as receitas']}>
+        <>
             <div className="flex flex-wrap items-end justify-between gap-4 max-md:contents">
                 <h1 className="text-[30px] font-semibold max-md:sr-only">Receitas</h1>
                 <button
                     type="button"
-                    className="btn-primario max-md:hidden"
+                    className="btn-primary max-md:hidden"
                     onClick={() => setCriando(true)}
                 >
                     <i className="ph ph-plus" aria-hidden="true" />
@@ -164,17 +164,17 @@ export default function RecipesContent() {
 
             <section
                 className="card overflow-hidden max-md:overflow-visible max-md:border-0 max-md:bg-transparent"
-                aria-labelledby="tituloTabelaReceitas"
+                aria-labelledby="recipeTableTitle"
             >
-                <h2 id="tituloTabelaReceitas" className="sr-only">
+                <h2 id="recipeTableTitle" className="sr-only">
                     Lista de receitas
                 </h2>
-                <div className="flex flex-wrap items-center gap-3 border-b border-linha px-5 py-4 max-md:border-0 max-md:px-0 max-md:pt-0">
-                    <label className="campo-caixa min-h-11 flex-1 sm:w-[360px] sm:flex-none">
+                <div className="flex flex-wrap items-center gap-3 border-b border-border px-5 py-4 max-md:border-0 max-md:px-0 max-md:pt-0">
+                    <label className="field-box min-h-11 flex-1 sm:w-[360px] sm:flex-none">
                         <i className="ph ph-magnifying-glass" aria-hidden="true" />
                         <span className="sr-only">Buscar receita</span>
                         <input
-                            id="buscaReceitas"
+                            id="recipeSearch"
                             type="search"
                             placeholder="Buscar por nome da receita"
                             autoComplete="off"
@@ -184,7 +184,7 @@ export default function RecipesContent() {
                     </label>
                     <button
                         type="button"
-                        className="grid size-12 shrink-0 place-items-center rounded-[10px] bg-acao text-2xl text-white hover:bg-acao-hover md:hidden"
+                        className="grid size-12 shrink-0 place-items-center rounded-[10px] bg-action text-2xl text-white hover:bg-action-hover md:hidden"
                         onClick={() => setCriando(true)}
                         aria-label="Nova receita"
                     >
@@ -192,15 +192,15 @@ export default function RecipesContent() {
                     </button>
                     {receitas && (
                         <span
-                            id="contagemReceitas"
-                            className="ml-auto text-sm text-texto-2 max-md:hidden"
+                            id="recipeCount"
+                            className="ml-auto text-sm text-muted-foreground max-md:hidden"
                         >
                             {plural(receitas.length, 'receita', 'receitas')}
                         </span>
                     )}
                 </div>
                 <div
-                    className="tabela-cabecalho hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px]"
+                    className="list-header hidden min-h-11 items-center gap-4 px-5 md:grid md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px]"
                     aria-hidden="true"
                 >
                     <span>Receita</span>
@@ -210,33 +210,38 @@ export default function RecipesContent() {
                     <span className="text-right">Ações</span>
                 </div>
                 <div
-                    id="listaReceitas"
-                    className="max-md:overflow-hidden max-md:rounded-xl max-md:border max-md:border-linha max-md:bg-superficie"
+                    id="recipeList"
+                    className="max-md:overflow-hidden max-md:rounded-xl max-md:border max-md:border-border max-md:bg-surface"
                     aria-live="polite"
                 >
                     {!receitas && (
-                        <div className="esqueleto m-5 h-24 rounded-xl" aria-label="Carregando" />
+                        <div className="skeleton m-5 h-24 rounded-xl" aria-label="Carregando" />
                     )}
                     {receitas && !receitas.length && (
                         <EmptyState
                             icon="ph-bowl-food"
                             title="Nenhuma receita ainda"
                             text="Crie uma receita para começar a organizar as rampas de temperatura."
+                            action={{
+                                onClick: () => setCriando(true),
+                                icon: 'ph-plus',
+                                text: 'Criar primeira receita',
+                            }}
                         />
                     )}
                     {visiveis.map((receita) => (
                         <div
                             key={receita.id}
-                            className="tabela-linha relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-3.5 max-md:hover:bg-hover-neutro md:min-h-[68px] md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px] md:px-5 md:py-0"
+                            className="list-row relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-0.5 px-4 py-3.5 max-md:hover:bg-hover-neutral md:min-h-[68px] md:grid-cols-[minmax(0,1fr)_120px_200px_150px_148px] md:px-5 md:py-0"
                         >
                             <Link
                                 href={`/recipes/${receita.id}`}
-                                className="truncate font-semibold max-md:text-[17px] max-md:after:absolute max-md:after:inset-0 hover:text-acao md:hover:underline"
+                                className="truncate font-semibold max-md:text-[17px] max-md:after:absolute max-md:after:inset-0 hover:text-action md:hover:underline"
                             >
                                 {receita.name}
                             </Link>
-                            <span className="flex gap-1 text-sm text-texto-2 max-md:col-start-1 md:contents md:text-[15px]">
-                                <span className="md:text-texto">
+                            <span className="flex gap-1 text-sm text-muted-foreground max-md:col-start-1 md:contents md:text-[15px]">
+                                <span className="md:text-foreground">
                                     {receita.rampas
                                         ? plural(receita.rampas.length, 'rampa', 'rampas')
                                         : '—'}
@@ -244,7 +249,7 @@ export default function RecipesContent() {
                                 <span className="md:hidden" aria-hidden="true">
                                     ·
                                 </span>
-                                <span className="md:font-medium md:text-texto">
+                                <span className="md:font-medium md:text-foreground">
                                     {receita.faixa}
                                 </span>
                             </span>
@@ -252,27 +257,27 @@ export default function RecipesContent() {
                                 {dataBr(receita.createdAt)}
                             </span>
                             <i
-                                className="ph ph-caret-right col-start-2 row-span-2 row-start-1 text-xl text-texto-2 md:hidden"
+                                className="ph ph-caret-right col-start-2 row-span-2 row-start-1 text-xl text-muted-foreground md:hidden"
                                 aria-hidden="true"
                             />
                             <span className="-mr-2 flex justify-end gap-1 max-md:hidden">
                                 <Link
                                     href={`/recipes/${receita.id}/temperatures/new`}
-                                    className="btn-icone"
+                                    className="btn-icon"
                                     title="Adicionar rampa"
                                 >
                                     <i className="ph ph-thermometer-simple" aria-hidden="true" />
                                 </Link>
                                 <Link
                                     href={`/recipes/${receita.id}/edit`}
-                                    className="btn-icone"
+                                    className="btn-icon"
                                     title="Editar"
                                 >
                                     <i className="ph ph-pencil-simple" aria-hidden="true" />
                                 </Link>
                                 <button
                                     type="button"
-                                    className="btn-icone-perigo"
+                                    className="btn-icon-danger"
                                     title="Excluir"
                                     onClick={() =>
                                         setConfirmacao(
@@ -291,8 +296,8 @@ export default function RecipesContent() {
             </section>
 
             <RecipeNameModal
-                id="modalReceita"
-                formId="formReceita"
+                id="recipeModal"
+                formId="recipeForm"
                 open={criando}
                 onClose={() => setCriando(false)}
                 title="Nova receita"
@@ -302,6 +307,6 @@ export default function RecipesContent() {
                 onSubmit={criar}
             />
             <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
-        </AppShell>
+        </>
     );
 }

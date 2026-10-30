@@ -14,7 +14,7 @@ export default function Document() {
                 <link rel="stylesheet" href="/css/style.css" />
                 <link rel="icon" type="image/png" href="/img/logo-mash.png" />
             </Head>
-            <body className="min-h-screen bg-fundo text-texto antialiased">
+            <body className="min-h-screen bg-background text-foreground antialiased">
                 {/* aplica a sidebar recolhida antes da primeira pintura, sem piscar entre páginas */}
                 <script
                     dangerouslySetInnerHTML={{
