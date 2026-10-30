@@ -588,7 +588,7 @@ function Leitura({ onEncerrar }) {
                                     'ph-timer',
                                     'Mosturação',
                                     `${atual?.mostura ?? 0} min`,
-                                    'Desde 14:05',
+                                    'Desde 14:00',
                                 ],
                                 ['ph-stairs', 'Rampa', '2 de 3', 'Sacarificação'],
                                 [

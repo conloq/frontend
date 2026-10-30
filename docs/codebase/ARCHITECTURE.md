@@ -28,5 +28,5 @@ O frontend e o Back-End continuam em repositórios separados. O Next.js (Pages R
 | `src/components/XContent/` | Tela: busca de dados, estado, formulários e marcação |
 | `src/components/AppShell` | Sidebar, top bar, guarda de sessão (`GET /user`) e `useUser()` |
 | `src/components/Feedback` | Mensagens (`flash`, `#messages`), `EmptyState`, `Modal`, `ConfirmDialog`, `Field`, `PasswordInput`, `ServerError` |
-| `src/services/` | `api.js` (axios, Bearer, 401), `auth.js` (login, cadastro, usuário, sair), `rampa.js` (validação pura) |
+| `src/services/` | `api.js` (axios, 401), `auth.js` (`getAxiosConfig` com o Bearer, login, cadastro, usuário, sair), `rampa.js` (validação pura) |
 | `public/css/` | Tailwind v4: tokens e classes de componente |

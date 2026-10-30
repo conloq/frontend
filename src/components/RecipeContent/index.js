@@ -49,12 +49,12 @@ export function useReceita() {
 
 // "HH:MM:SS" em minutos; NaN quando o formato não bate
 // Início da mosturação do lote, como no Figma: "12/03/2026 · 14:05"
-const inicioLote = (iso) =>
-    iso
-        ? new Date(iso)
-              .toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
-              .replace(', ', ' · ')
-        : 'Sem início registrado';
+const inicioLote = (iso) => {
+    if (!iso) return 'Sem início registrado';
+    const data = new Date(iso);
+    const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    return `${data.toLocaleDateString('pt-BR')} · ${hora}`;
+};
 
 export const minutos = (hms) => {
     const [h, m, seg] = String(hms ?? '')

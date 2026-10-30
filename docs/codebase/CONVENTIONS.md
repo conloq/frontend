@@ -10,8 +10,8 @@
 | Functions e estado | pt-BR em camelCase, verbo + alvo; componentes em PascalCase | `carregar`, `salvar`, `mensagemErro`, `LinhaRampa` | `src/components/` |
 | Constants/env vars | `UPPER_SNAKE` para constantes de módulo; `NEXT_PUBLIC_*` no ambiente | `TOKEN_KEY`, `NEXT_PUBLIC_API_URL` | `src/services/api.js` |
 | Rotas | inglês, minúsculas, plural nas coleções | `/recipes`, `/recipes/:id/temperatures/new` | `src/pages/` |
-| Campos de formulário | os que vão para a API seguem o nome da API em camelCase (decisão de 08/10/2026, #86); ids em pt-BR | `name="minTemperatureRamp"`, `id="senha"` | `TemperatureContent`, `LoginContent` |
-| Tokens de tema | `--color-*` em pt-BR por função; prefixo `mash-` só nas cores de marca | `--color-action`, `--color-mash-brown` | `public/css/tailwind.css` |
+| Campos de formulário | os que vão para a API seguem o nome da API em camelCase (decisão de 08/10/2026, #86); ids em inglês | `name="minTemperatureRamp"`, `id="password"` | `TemperatureContent`, `LoginContent` |
+| Tokens de tema | `--color-*` em inglês, por função; prefixo `mash-` só nas cores de marca | `--color-action`, `--color-mash-brown` | `public/css/tailwind.css` |
 
 ## 2) Formatting and Linting
 
