@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import AppShell from '@/components/AppShell';
 import { ConfirmDialog, Field, flash, ServerError } from '@/components/Feedback';
 import { useReceita } from '@/components/RecipeContent';
 import { api, mensagemErro } from '@/services/api';
+import { getAxiosConfig } from '@/services/auth';
 import { comSegundos, HORARIOS, TEMPERATURAS, validarRampa } from '@/services/rampa';
 
 const CAMPOS = [...TEMPERATURAS, ...HORARIOS, 'orderRamp'];
 
-function Formulario() {
+export default function TemperatureContent() {
     const router = useRouter();
     const { id, recipe, rampas, erro } = useReceita();
     const idRampa = router.query.temperatureId;
@@ -28,7 +28,7 @@ function Formulario() {
     if (editando && rampas && !rampa)
         return <ServerError message="Não foi possível carregar esta rampa." />;
     if (!recipe || (editando && !rampa))
-        return <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />;
+        return <div className="skeleton h-40 rounded-xl" aria-label="Carregando" />;
 
     const salvar = async (event) => {
         event.preventDefault();
@@ -45,8 +45,8 @@ function Formulario() {
         };
         try {
             const { data } = editando
-                ? await api.put(`/temperatures/${idRampa}`, corpo)
-                : await api.post(`/recipes/${id}/temperatures`, corpo);
+                ? await api.put(`/temperatures/${idRampa}`, corpo, getAxiosConfig())
+                : await api.post(`/recipes/${id}/temperatures`, corpo, getAxiosConfig());
             flash('success', data?.message ?? 'Temperatura criada com sucesso.');
             router.push(`/recipes/${id}`);
         } catch (error) {
@@ -56,7 +56,7 @@ function Formulario() {
 
     const excluir = async () => {
         try {
-            await api.delete(`/temperatures/${idRampa}`);
+            await api.delete(`/temperatures/${idRampa}`, getAxiosConfig());
             flash('success', 'Rampa excluída.');
             router.push(`/recipes/${id}`);
         } catch (error) {
@@ -105,7 +105,7 @@ function Formulario() {
     const legenda = (titulo, texto) => (
         <legend className="mb-4 max-lg:sr-only">
             <span className="block font-display text-lg font-semibold">{titulo}</span>
-            <span className="text-sm text-texto-2">{texto}</span>
+            <span className="text-sm text-muted-foreground">{texto}</span>
         </legend>
     );
     const titulo = editando
@@ -116,21 +116,21 @@ function Formulario() {
 
     return (
         <form
-            id="formTemperatura"
+            id="temperatureForm"
             className="flex flex-1 flex-col gap-6"
             noValidate
             onSubmit={salvar}
         >
             <div className="flex flex-col gap-1 max-lg:contents">
                 <Link
-                    id="voltarReceita"
+                    id="backToRecipe"
                     href={`/recipes/${id}`}
-                    className="btn-voltar self-start max-lg:hidden"
+                    className="btn-back self-start max-lg:hidden"
                 >
                     <i className="ph ph-arrow-left" aria-hidden="true" />
                     <span>{recipe.name}</span>
                 </Link>
-                <h1 id="tituloRampa" className="text-[30px] font-semibold max-lg:sr-only">
+                <h1 id="rampTitle" className="text-[30px] font-semibold max-lg:sr-only">
                     {titulo}
                 </h1>
             </div>
@@ -147,7 +147,7 @@ function Formulario() {
                             {temperatura('maxTemperatureRamp', 'Temperatura máxima', 'Máxima')}
                         </div>
                     </fieldset>
-                    <hr className="border-linha max-lg:hidden" />
+                    <hr className="border-border max-lg:hidden" />
                     <fieldset className="flex flex-col gap-4">
                         {legenda('Tempo', 'Horários no formato hh:min:s.')}
                         <div className="grid gap-5 md:grid-cols-3">
@@ -160,7 +160,7 @@ function Formulario() {
                             {horario('idealTime', 'Tempo ideal', 'Tempo esperado nesta rampa.')}
                         </div>
                     </fieldset>
-                    <hr className="border-linha max-lg:hidden" />
+                    <hr className="border-border max-lg:hidden" />
                     <fieldset className="flex flex-col gap-4">
                         {legenda(
                             'Limites aceitáveis',
@@ -189,12 +189,12 @@ function Formulario() {
 
                 <aside
                     className="card flex flex-col gap-3.5 self-start p-6 max-lg:hidden"
-                    aria-labelledby="tituloComoPreencher"
+                    aria-labelledby="howToFillTitle"
                 >
-                    <h2 id="tituloComoPreencher" className="text-lg font-semibold">
+                    <h2 id="howToFillTitle" className="text-lg font-semibold">
                         Como preencher
                     </h2>
-                    <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed marker:text-texto-2">
+                    <ul className="flex list-disc flex-col gap-2 pl-5 text-sm leading-relaxed marker:text-muted-foreground">
                         <li>Temperaturas em números inteiros, de 0 a 100&nbsp;ºC.</li>
                         <li>A mínima nunca passa da máxima, na faixa e nos limites.</li>
                         <li>Horários com hora, minuto e segundo, como 00:40:00.</li>
@@ -203,12 +203,12 @@ function Formulario() {
                 </aside>
             </div>
 
-            <div className="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+            <div className="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-surface px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
                 {editando && (
                     <button
                         type="button"
-                        id="btnExcluir"
-                        className="btn-perigo max-sm:w-full"
+                        id="btnDelete"
+                        className="btn-danger max-sm:w-full"
                         onClick={() =>
                             setConfirmacao({
                                 titulo: 'Excluir esta rampa?',
@@ -222,31 +222,16 @@ function Formulario() {
                         Excluir rampa
                     </button>
                 )}
-                <div className="acoes sm:ml-auto">
-                    <Link id="cancelarRampa" href={`/recipes/${id}`} className="btn-secundario">
+                <div className="actions sm:ml-auto">
+                    <Link id="cancelRamp" href={`/recipes/${id}`} className="btn-secondary">
                         Cancelar
                     </Link>
-                    <button type="submit" className="btn-primario">
+                    <button type="submit" className="btn-primary">
                         {editando ? 'Salvar alterações' : 'Salvar rampa'}
                     </button>
                 </div>
             </div>
             <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
         </form>
-    );
-}
-
-export default function TemperatureContent() {
-    const router = useRouter();
-    const editando = Boolean(router.query.temperatureId);
-    const titulo = editando ? 'Editar rampa' : 'Nova rampa';
-    return (
-        <AppShell
-            title={titulo}
-            trail={['Receitas', titulo]}
-            back={router.query.id ? `/recipes/${router.query.id}` : '/recipes'}
-        >
-            <Formulario />
-        </AppShell>
     );
 }

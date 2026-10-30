@@ -8,7 +8,7 @@
 | Cliente | `axios.create` em `src/services/api.js`, timeout de 15 s |
 | Login | `POST /login`; o JWT retornado fica no `localStorage` (`mash_token`) |
 | Cadastro | `POST /user`; em sucesso vai para `/login` com mensagem |
-| Autenticação | interceptor envia `Authorization: Bearer <JWT>`; `401` (fora do login) apaga o token e vai para `/login` |
+| Autenticação | cada chamada passa `getAxiosConfig()` (`Authorization: Bearer <JWT>`); o interceptor de resposta trata o `401` (fora do login): apaga o token e vai para `/login` |
 | Logout | sem rota na API; só apaga o token |
 | CORS | obrigatório: o Back-End libera `FRONTEND_URL` com `Content-Type` e `Authorization` |
 | Banco | nenhum acesso; o frontend não conecta ao MySQL |

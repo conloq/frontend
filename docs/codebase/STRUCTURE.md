@@ -50,4 +50,4 @@
 
 - Telas em `src/components/<Nome>Content/index.js`; compartilhados sem o sufixo.
 - Imports com o alias `@/` (`jsconfig.json`).
-- Os ids e atributos herdados do design (`#formPerfil`, `#listaReceitas`, `#detalheRampas`, `#mensagens`, `#appSidebar`) ficam estáveis; a lista completa está no `AGENTS.md`.
+- Os ids e atributos herdados do design (`#profileForm`, `#recipeList`, `#rampDetails`, `#messages`, `#appSidebar`) ficam estáveis; a lista completa está no `AGENTS.md`.

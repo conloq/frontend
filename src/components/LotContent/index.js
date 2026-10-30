@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import AppShell from '@/components/AppShell';
 import { ConfirmDialog, EmptyState, flash, ServerError } from '@/components/Feedback';
 import { LotForm, SeloLote } from '@/components/LotsContent';
 import { api, mensagemErro } from '@/services/api';
+import { getAxiosConfig } from '@/services/auth';
 
 // Telas do lote: o lote e a receita vêm da API; leituras de iodo e de temperatura ainda não têm rota, ficam no estado vazio.
 
 function Cabecalho({ id, titulo, descricao, children }) {
     return (
-        <div className="flex flex-col gap-0.5 border-b border-linha px-6 py-5" id={id}>
+        <div className="flex flex-col gap-0.5 border-b border-border px-6 py-5" id={id}>
             <h2 className="text-lg font-semibold">{titulo}</h2>
-            {descricao && <p className="text-sm text-texto-2">{descricao}</p>}
+            {descricao && <p className="text-sm text-muted-foreground">{descricao}</p>}
             {children}
         </div>
     );
@@ -20,7 +20,7 @@ function Cabecalho({ id, titulo, descricao, children }) {
 
 function VoltarLotes() {
     return (
-        <Link href="/lots" className="btn-voltar self-start max-lg:hidden">
+        <Link href="/lots" className="btn-back self-start max-lg:hidden">
             <i className="ph ph-arrow-left" aria-hidden="true" />
             Todos os lotes
         </Link>
@@ -29,8 +29,8 @@ function VoltarLotes() {
 
 function IniciarIodoMobile({ lote }) {
     return (
-        <div className="barra-mobile lg:hidden">
-            <Link href={`${lote}/iodine`} className="btn-primario w-full">
+        <div className="mobile-bar lg:hidden">
+            <Link href={`${lote}/iodine`} className="btn-primary w-full">
                 <i className="ph ph-video-camera" aria-hidden="true" />
                 Iniciar leitura do iodo
             </Link>
@@ -57,10 +57,10 @@ function useLote(id) {
     const [estado, setEstado] = useState({ lote: null, receita: null, erro: null });
     useEffect(() => {
         if (!id) return;
-        api.get(`/lots/${id}`)
+        api.get(`/lots/${id}`, getAxiosConfig())
             .then(async ({ data }) => {
                 const receita = await api
-                    .get(`/recipes/${data.lot.recipeId}`)
+                    .get(`/recipes/${data.lot.recipeId}`, getAxiosConfig())
                     .then((r) => r.data.recipe)
                     .catch(() => null);
                 setEstado({ lote: data.lot, receita, erro: null });
@@ -76,15 +76,19 @@ function useLote(id) {
     return estado;
 }
 
-export function LotDetail({ editando = false }) {
+export function LotDetail({ editando = false, onNome }) {
     const router = useRouter();
     const lote = `/lots/${router.query.id}`;
     const { lote: dados, receita, erro } = useLote(router.query.id);
     const [confirmacao, setConfirmacao] = useState(null);
 
+    useEffect(() => {
+        if (dados) onNome(dados.name);
+    }, [dados, onNome]);
+
     const excluir = async () => {
         try {
-            await api.delete(lote);
+            await api.delete(lote, getAxiosConfig());
             flash('success', 'Lote excluído.');
             router.push('/lots');
         } catch (error) {
@@ -93,14 +97,10 @@ export function LotDetail({ editando = false }) {
     };
 
     return (
-        <AppShell
-            title={dados?.name ?? 'Lote'}
-            trail={['Lotes', dados?.name ?? 'Lote']}
-            back="/lots"
-        >
+        <>
             {erro && <ServerError message={erro} />}
             {!erro && !dados && (
-                <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />
+                <div className="skeleton h-40 rounded-xl" aria-label="Carregando" />
             )}
             {dados && (
                 <>
@@ -113,11 +113,11 @@ export function LotDetail({ editando = false }) {
                                 </h1>
                                 <SeloLote status={dados.status} />
                             </div>
-                            <div className="acoes">
+                            <div className="actions">
                                 <button
                                     type="button"
-                                    id="btnExcluir"
-                                    className="btn-perigo max-lg:order-1"
+                                    id="btnDelete"
+                                    className="btn-danger max-lg:order-1"
                                     onClick={() =>
                                         setConfirmacao({
                                             titulo: `Excluir o lote ${dados.name}?`,
@@ -130,22 +130,19 @@ export function LotDetail({ editando = false }) {
                                     <i className="ph ph-trash" aria-hidden="true" />
                                     Excluir
                                 </button>
-                                <Link href={`${lote}/edit`} className="btn-secundario">
+                                <Link href={`${lote}/edit`} className="btn-secondary">
                                     <i className="ph ph-pencil-simple" aria-hidden="true" />
                                     Editar
                                 </Link>
                                 <Link
                                     href={`${lote}/monitoring`}
-                                    className="btn-secundario max-lg:order-2 max-lg:col-span-2"
+                                    className="btn-secondary max-lg:order-2 max-lg:col-span-2"
                                 >
                                     <i className="ph ph-chart-line" aria-hidden="true" />
                                     <span className="lg:hidden">Ver monitoramento</span>
                                     <span className="max-lg:hidden">Monitoramento</span>
                                 </Link>
-                                <Link
-                                    href={`${lote}/iodine`}
-                                    className="btn-primario max-lg:hidden"
-                                >
+                                <Link href={`${lote}/iodine`} className="btn-primary max-lg:hidden">
                                     <i className="ph ph-video-camera" aria-hidden="true" />
                                     Iniciar leitura do iodo
                                 </Link>
@@ -168,13 +165,13 @@ export function LotDetail({ editando = false }) {
                         <section className="card overflow-hidden" aria-label="Receita do lote">
                             <Cabecalho titulo="Receita do lote" />
                             <dl className="flex flex-col px-6 py-2 text-sm">
-                                <div className="flex justify-between gap-4 border-b border-linha py-3">
-                                    <dt className="text-texto-2">Receita</dt>
+                                <div className="flex justify-between gap-4 border-b border-border py-3">
+                                    <dt className="text-muted-foreground">Receita</dt>
                                     <dd className="font-semibold">
                                         {receita ? (
                                             <Link
                                                 href={`/recipes/${receita.id}`}
-                                                className="text-acao hover:underline"
+                                                className="text-action hover:underline"
                                             >
                                                 {receita.name}
                                             </Link>
@@ -184,7 +181,7 @@ export function LotDetail({ editando = false }) {
                                     </dd>
                                 </div>
                                 <div className="flex justify-between gap-4 py-3">
-                                    <dt className="text-texto-2">Início da mosturação</dt>
+                                    <dt className="text-muted-foreground">Início da mosturação</dt>
                                     <dd className="font-semibold">
                                         {new Date(dados.mashStart).toLocaleString('pt-BR', {
                                             dateStyle: 'short',
@@ -207,7 +204,7 @@ export function LotDetail({ editando = false }) {
                 />
             )}
             <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
-        </AppShell>
+        </>
     );
 }
 
@@ -215,12 +212,12 @@ export function LotMonitoring() {
     const router = useRouter();
     const lote = `/lots/${router.query.id}`;
     return (
-        <AppShell title="Monitoramento" trail={['Lotes', 'Monitoramento']} back={lote}>
+        <>
             <div className="flex flex-col gap-2 max-lg:contents">
                 <VoltarLotes />
                 <div className="flex flex-wrap items-end justify-between gap-4 max-lg:contents">
                     <h1 className="text-[30px] font-semibold max-lg:sr-only">Monitoramento</h1>
-                    <Link href={`${lote}/iodine`} className="btn-primario max-lg:hidden">
+                    <Link href={`${lote}/iodine`} className="btn-primary max-lg:hidden">
                         <i className="ph ph-video-camera" aria-hidden="true" />
                         Iniciar leitura do iodo
                     </Link>
@@ -245,7 +242,7 @@ export function LotMonitoring() {
             </div>
             <CardTemperatura compact />
             <IniciarIodoMobile lote={lote} />
-        </AppShell>
+        </>
     );
 }
 
@@ -261,11 +258,11 @@ function SemCamera({ className, rotulo }) {
                 </span>
             )}
             <i
-                className="ph ph-video-camera-slash text-4xl text-header-texto-2"
+                className="ph ph-video-camera-slash text-4xl text-header-muted-foreground"
                 aria-hidden="true"
             />
             <p className="font-display text-xl font-semibold text-white">Sem imagem da câmera</p>
-            <p className="max-w-sm text-sm text-header-texto-2">
+            <p className="max-w-sm text-sm text-header-muted-foreground">
                 Confira o cabo USB e a energia da bancada. A imagem aparece aqui quando a câmera
                 responder.
             </p>
@@ -293,14 +290,14 @@ function Preparar({ lote }) {
                     aria-label="Câmera da bancada"
                 >
                     <SemCamera className="min-h-72 lg:min-h-[480px]" />
-                    <div className="flex flex-wrap items-center gap-4 border-t border-linha px-6 py-4">
+                    <div className="flex flex-wrap items-center gap-4 border-t border-border px-6 py-4">
                         <div className="flex flex-1 flex-col gap-0.5">
                             <p className="font-semibold max-lg:hidden">Câmera desligada</p>
-                            <p className="text-sm text-texto-2">
+                            <p className="text-sm text-muted-foreground">
                                 Com a câmera ligada, a calibração começa pelo padrão branco.
                             </p>
                         </div>
-                        <button type="button" className="btn-primario max-lg:hidden" disabled>
+                        <button type="button" className="btn-primary max-lg:hidden" disabled>
                             <i className="ph ph-camera" aria-hidden="true" />
                             Capturar padrão branco
                         </button>
@@ -309,12 +306,12 @@ function Preparar({ lote }) {
                 <div className="flex flex-col gap-4">
                     <section
                         className="card flex flex-col gap-3 p-5 max-lg:border-0 max-lg:bg-transparent max-lg:p-0"
-                        aria-labelledby="tituloCalibracao"
+                        aria-labelledby="calibrationTitle"
                     >
-                        <h2 id="tituloCalibracao" className="text-lg font-semibold">
+                        <h2 id="calibrationTitle" className="text-lg font-semibold">
                             Calibração da sessão
                         </h2>
-                        <p className="text-sm leading-relaxed text-texto-2 max-lg:hidden">
+                        <p className="text-sm leading-relaxed text-muted-foreground max-lg:hidden">
                             A luz muda de um dia para outro. Os controles desta sessão definem onde
                             fica cada classe.
                         </p>
@@ -322,17 +319,19 @@ function Preparar({ lote }) {
                             {CALIBRACAO.map(([nome, detalhe]) => (
                                 <li
                                     key={nome}
-                                    className="flex items-center gap-3.5 rounded-xl border border-linha bg-superficie px-4 py-3"
+                                    className="flex items-center gap-3.5 rounded-xl border border-border bg-surface px-4 py-3"
                                 >
-                                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-fundo">
+                                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-background">
                                         <i
-                                            className="ph ph-circle text-texto-2"
+                                            className="ph ph-circle text-muted-foreground"
                                             aria-hidden="true"
                                         />
                                     </span>
                                     <span className="flex flex-col">
                                         <span className="font-semibold">{nome}</span>
-                                        <span className="text-[13px] text-texto-2">{detalhe}</span>
+                                        <span className="text-[13px] text-muted-foreground">
+                                            {detalhe}
+                                        </span>
                                     </span>
                                     <span className="sr-only">Pendente</span>
                                 </li>
@@ -347,29 +346,29 @@ function Preparar({ lote }) {
                             {CONFIGURACAO.map(([icone, rotulo]) => (
                                 <div
                                     key={rotulo}
-                                    className="flex items-center gap-3 border-b border-linha py-3 text-sm"
+                                    className="flex items-center gap-3 border-b border-border py-3 text-sm"
                                 >
                                     <i
-                                        className={`ph ${icone} text-lg text-texto-2`}
+                                        className={`ph ${icone} text-lg text-muted-foreground`}
                                         aria-hidden="true"
                                     />
-                                    <dt className="flex-1 text-texto-2">{rotulo}</dt>
+                                    <dt className="flex-1 text-muted-foreground">{rotulo}</dt>
                                     <dd className="font-semibold">—</dd>
                                 </div>
                             ))}
                         </dl>
                         <Link
                             href="/recipes"
-                            className="py-3 text-sm font-semibold text-acao hover:underline"
+                            className="py-3 text-sm font-semibold text-action hover:underline"
                         >
                             Alterar na receita
                         </Link>
                     </section>
                     <section
                         className="card flex flex-col gap-3 p-5 max-lg:hidden"
-                        aria-labelledby="tituloEscala"
+                        aria-labelledby="scaleTitle"
                     >
-                        <h2 id="tituloEscala" className="text-lg font-semibold">
+                        <h2 id="scaleTitle" className="text-lg font-semibold">
                             Escala desta sessão
                         </h2>
                         <div className="grid grid-cols-2 gap-3">
@@ -379,20 +378,22 @@ function Preparar({ lote }) {
                             ].map(([nome, estado]) => (
                                 <div
                                     key={nome}
-                                    className="flex items-center gap-2.5 rounded-[10px] bg-fundo p-2.5"
+                                    className="flex items-center gap-2.5 rounded-[10px] bg-background p-2.5"
                                 >
                                     <span
-                                        className="size-8 shrink-0 rounded-md border border-linha bg-superficie"
+                                        className="size-8 shrink-0 rounded-md border border-border bg-surface"
                                         aria-hidden="true"
                                     />
                                     <span className="flex flex-col">
                                         <span className="text-[13px] font-semibold">{nome}</span>
-                                        <span className="text-xs text-texto-2">{estado}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {estado}
+                                        </span>
                                     </span>
                                 </div>
                             ))}
                         </div>
-                        <p className="text-[13px] leading-relaxed text-texto-2">
+                        <p className="text-[13px] leading-relaxed text-muted-foreground">
                             Cada captura é comparada com essas duas cores. Perto do positivo, ainda
                             há amido; perto do negativo, a conversão terminou. O que fica no meio é
                             conversão parcial.
@@ -400,20 +401,20 @@ function Preparar({ lote }) {
                     </section>
                 </div>
             </div>
-            <div className="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
-                <p className="text-sm text-texto-2 max-lg:hidden lg:ml-auto">
+            <div className="sticky bottom-0 -mx-4 mt-auto flex flex-wrap items-center gap-3 border-t border-border bg-surface px-4 py-4 sm:-mx-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+                <p className="text-sm text-muted-foreground max-lg:hidden lg:ml-auto">
                     Faltam 3 etapas da calibração
                 </p>
-                <div className="acoes max-lg:hidden">
-                    <Link href={lote} className="btn-secundario">
+                <div className="actions max-lg:hidden">
+                    <Link href={lote} className="btn-secondary">
                         Cancelar
                     </Link>
-                    <button type="button" className="btn-primario" disabled>
+                    <button type="button" className="btn-primary" disabled>
                         <i className="ph ph-play" aria-hidden="true" />
                         Iniciar leitura automática
                     </button>
                 </div>
-                <button type="button" className="btn-primario w-full lg:hidden" disabled>
+                <button type="button" className="btn-primary w-full lg:hidden" disabled>
                     <i className="ph ph-camera" aria-hidden="true" />
                     Capturar padrão branco
                 </button>
@@ -432,10 +433,10 @@ function Leitura({ lote }) {
     return (
         <>
             <div
-                className="flex items-start gap-3 rounded-[10px] bg-perigo-suave px-4 py-3"
+                className="flex items-start gap-3 rounded-[10px] bg-danger-soft px-4 py-3"
                 role="status"
             >
-                <i className="ph-fill ph-x-circle text-[22px] text-perigo" aria-hidden="true" />
+                <i className="ph-fill ph-x-circle text-[22px] text-danger" aria-hidden="true" />
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <p className="font-semibold">A câmera não está respondendo</p>
                     <p className="text-sm">
@@ -451,11 +452,11 @@ function Leitura({ lote }) {
                 >
                     <SemCamera className="min-h-64" rotulo />
                     <div className="flex flex-col gap-2 px-6 py-5">
-                        <span className="text-sm text-texto-2">Última captura</span>
+                        <span className="text-sm text-muted-foreground">Última captura</span>
                         <p className="font-display text-[26px] font-semibold">
                             Nenhuma captura ainda
                         </p>
-                        <p className="text-sm text-texto-2">
+                        <p className="text-sm text-muted-foreground">
                             A classe da primeira captura aparece aqui, entre o controle positivo e o
                             negativo.
                         </p>
@@ -475,14 +476,14 @@ function Leitura({ lote }) {
                 </section>
             </div>
             <section className="card overflow-hidden" aria-label="Temperatura e capturas">
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-linha px-6 py-5">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-6 py-5">
                     <div className="flex flex-col gap-0.5">
                         <h2 className="text-lg font-semibold">Temperatura e capturas</h2>
-                        <p className="text-sm text-texto-2">
+                        <p className="text-sm text-muted-foreground">
                             Cada ponto é uma captura, na cor da classe, sobre a curva da mosturação.
                         </p>
                     </div>
-                    <ul className="flex flex-wrap gap-4 text-[13px] text-texto-2 max-lg:hidden">
+                    <ul className="flex flex-wrap gap-4 text-[13px] text-muted-foreground max-lg:hidden">
                         {CLASSES.map(([cor, nome]) => (
                             <li key={nome} className="flex items-center gap-1.5">
                                 <span
@@ -497,12 +498,12 @@ function Leitura({ lote }) {
                 </div>
                 <EmptyState icon="ph-chart-line" title="Sem leituras" compact />
             </section>
-            <div className="acoes barra-mobile lg:hidden">
-                <Link href={`${lote}/monitoring`} className="btn-secundario">
+            <div className="actions mobile-bar lg:hidden">
+                <Link href={`${lote}/monitoring`} className="btn-secondary">
                     <i className="ph ph-stop" aria-hidden="true" />
                     Encerrar
                 </Link>
-                <Link href={`${lote}/iodine/reading`} className="btn-primario">
+                <Link href={`${lote}/iodine/reading`} className="btn-primary">
                     <i className="ph ph-arrow-clockwise" aria-hidden="true" />
                     Reconectar
                 </Link>
@@ -517,30 +518,26 @@ export function IodineSession({ leitura = false }) {
     const lote = `/lots/${router.query.id}`;
     const titulo = leitura ? 'Leitura automática' : 'Preparar a leitura do iodo';
     return (
-        <AppShell
-            title={leitura ? 'Leitura do iodo' : 'Preparar leitura'}
-            trail={['Teste de iodo', leitura ? 'Leitura automática' : 'Preparar sessão']}
-            back={lote}
-        >
+        <>
             <div className="flex flex-wrap items-end justify-between gap-4">
                 <div className="flex min-w-0 flex-col gap-1.5">
                     <div className="flex flex-wrap items-center gap-3">
                         <h1 className="text-[30px] font-semibold max-lg:sr-only">{titulo}</h1>
-                        <span className="selo-perigo">Câmera desconectada</span>
+                        <span className="badge-danger">Câmera desconectada</span>
                     </div>
-                    <p className="text-texto-2 max-lg:text-sm">
+                    <p className="text-muted-foreground max-lg:text-sm">
                         {leitura
                             ? 'Cada captura é classificada sozinha e registrada no lote com hora e temperatura.'
                             : 'A câmera fica fixa na bancada e as configurações travam até o fim da sessão.'}
                     </p>
                 </div>
                 {leitura && (
-                    <div className="acoes max-lg:hidden">
-                        <Link href={`${lote}/monitoring`} className="btn-secundario">
+                    <div className="actions max-lg:hidden">
+                        <Link href={`${lote}/monitoring`} className="btn-secondary">
                             <i className="ph ph-stop" aria-hidden="true" />
                             Encerrar leitura
                         </Link>
-                        <Link href={`${lote}/iodine/reading`} className="btn-primario">
+                        <Link href={`${lote}/iodine/reading`} className="btn-primary">
                             <i className="ph ph-arrow-clockwise" aria-hidden="true" />
                             Tentar reconectar
                         </Link>
@@ -548,6 +545,6 @@ export function IodineSession({ leitura = false }) {
                 )}
             </div>
             {leitura ? <Leitura lote={lote} /> : <Preparar lote={lote} />}
-        </AppShell>
+        </>
     );
 }

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Messages, ServerError } from '@/components/Feedback';
 import { mensagemErro, temToken } from '@/services/api';
-import { currentUser, signOut } from '@/services/auth';
+import { currentUser, logout } from '@/services/auth';
 
 const UserContext = createContext(null);
 export const useUser = () => useContext(UserContext);
@@ -65,21 +65,20 @@ function Sidebar({ aberto, setAberto }) {
 
     const sair = (event) => {
         event.preventDefault();
-        signOut();
-        router.push('/login');
+        logout(router);
     };
     const link =
-        'menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutro';
+        'menu-link flex min-h-12 items-center gap-3 rounded-[10px] px-3.5 font-medium transition-colors hover:bg-hover-neutral';
 
     return (
         <>
             <aside
                 id="appSidebar"
-                className={`fixed inset-y-0 left-0 z-40 flex shrink-0 flex-col border-r border-linha bg-superficie px-4 pb-5 transition-[width,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:shadow-[8px_0_32px_rgba(31,26,23,0.18)] motion-reduce:transition-none lg:translate-x-0 ${aberto ? '' : '-translate-x-full'}`}
+                className={`fixed inset-y-0 left-0 z-40 flex shrink-0 flex-col border-r border-border bg-surface px-4 pb-5 transition-[width,transform] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] max-lg:shadow-[8px_0_32px_rgba(31,26,23,0.18)] motion-reduce:transition-none lg:translate-x-0 ${aberto ? '' : '-translate-x-full'}`}
                 aria-label="Navegação principal"
                 data-sidebar-state={recolhido ? 'collapsed' : 'expanded'}
             >
-                <div className="sidebar-marca flex min-h-18 items-center justify-between gap-2">
+                <div className="sidebar-brand flex min-h-18 items-center justify-between gap-2">
                     <Link
                         href="/recipes"
                         className="flex min-w-0 items-center gap-2.5 rounded-[10px]"
@@ -96,7 +95,7 @@ function Sidebar({ aberto, setAberto }) {
                     </Link>
                     <button
                         type="button"
-                        className="sidebar-collapse btn-icone hidden lg:inline-flex"
+                        className="sidebar-collapse btn-icon hidden lg:inline-flex"
                         aria-label={recolhido ? 'Expandir menu' : 'Recolher menu'}
                         aria-controls="appSidebar"
                         aria-expanded={!recolhido}
@@ -109,7 +108,7 @@ function Sidebar({ aberto, setAberto }) {
                     </button>
                     <button
                         type="button"
-                        className="sidebar-close btn-icone lg:hidden"
+                        className="sidebar-close btn-icon lg:hidden"
                         aria-label="Fechar menu"
                         onClick={() => setAberto(false)}
                     >
@@ -127,7 +126,7 @@ function Sidebar({ aberto, setAberto }) {
                             onClick={() => setAberto(false)}
                         >
                             <i
-                                className={`ph ${icone} text-[22px] text-texto-2`}
+                                className={`ph ${icone} text-[22px] text-muted-foreground`}
                                 aria-hidden="true"
                             />
                             <span className="sidebar-label">{rotulo}</span>
@@ -135,13 +134,16 @@ function Sidebar({ aberto, setAberto }) {
                     ))}
                 </nav>
                 <a href="/logout" className={`${link} mt-auto`} title="Sair" onClick={sair}>
-                    <i className="ph ph-sign-out text-[22px] text-texto-2" aria-hidden="true" />
+                    <i
+                        className="ph ph-sign-out text-[22px] text-muted-foreground"
+                        aria-hidden="true"
+                    />
                     <span className="sidebar-label">Sair</span>
                 </a>
             </aside>
             <div
                 id="sidebarOverlay"
-                className={`fixed inset-0 z-30 bg-texto/60 transition-opacity duration-300 motion-reduce:transition-none lg:hidden ${aberto ? '' : 'pointer-events-none opacity-0'}`}
+                className={`fixed inset-0 z-30 bg-foreground/60 transition-opacity duration-300 motion-reduce:transition-none lg:hidden ${aberto ? '' : 'pointer-events-none opacity-0'}`}
                 aria-hidden="true"
                 onClick={() => setAberto(false)}
             />
@@ -154,9 +156,9 @@ function TopBar({ title, trail, back, user, setAberto }) {
         <header className="flex h-16 items-center gap-2 bg-mash-brown px-2 text-white sm:px-4 lg:h-18 lg:px-8">
             {back ? (
                 <Link
-                    id="voltarTopo"
+                    id="backTop"
                     href={back}
-                    className="btn-icone text-white hover:bg-white/10 lg:hidden"
+                    className="btn-icon text-white hover:bg-white/10 lg:hidden"
                     aria-label="Voltar"
                 >
                     <i className="ph ph-arrow-left text-2xl" aria-hidden="true" />
@@ -164,7 +166,7 @@ function TopBar({ title, trail, back, user, setAberto }) {
             ) : (
                 <button
                     type="button"
-                    className="sidebar-open btn-icone text-white hover:bg-white/10 lg:hidden"
+                    className="sidebar-open btn-icon text-white hover:bg-white/10 lg:hidden"
                     aria-label="Abrir menu"
                     aria-controls="appSidebar"
                     onClick={() => setAberto(true)}
@@ -186,7 +188,7 @@ function TopBar({ title, trail, back, user, setAberto }) {
                             <li key={i} className="contents">
                                 {i > 0 && (
                                     <i
-                                        className="ph ph-caret-right text-sm text-header-texto-2"
+                                        className="ph ph-caret-right text-sm text-header-muted-foreground"
                                         aria-hidden="true"
                                     />
                                 )}
@@ -194,7 +196,7 @@ function TopBar({ title, trail, back, user, setAberto }) {
                                     className={
                                         ultimo
                                             ? 'truncate font-semibold text-white'
-                                            : 'hidden text-header-texto-2 sm:block'
+                                            : 'hidden text-header-muted-foreground sm:block'
                                     }
                                     aria-current={ultimo ? 'page' : undefined}
                                 >
@@ -219,7 +221,9 @@ function TopBar({ title, trail, back, user, setAberto }) {
                     <span className="block text-[15px] font-semibold leading-tight">
                         {user?.name}
                     </span>
-                    <span className="block text-[13px] text-header-texto-2">{user?.email}</span>
+                    <span className="block text-[13px] text-header-muted-foreground">
+                        {user?.email}
+                    </span>
                 </span>
             </Link>
         </header>
@@ -270,7 +274,7 @@ export default function AppShell({ title, trail = [], back, children }) {
                         {user ? (
                             children
                         ) : (
-                            <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />
+                            <div className="skeleton h-40 rounded-xl" aria-label="Carregando" />
                         )}
                     </main>
                 </div>

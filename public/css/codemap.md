@@ -11,11 +11,11 @@ Mantém a fonte Tailwind e o resultado CSS servido pela aplicação.
 - `@theme` define os tokens do redesign v2 (fonte visual: `docs/design/mash.pen`):
   - fontes: `--font-sans` (Roboto, interface) e `--font-display` (Poppins, títulos);
   - marca: `--color-mash-brown`, `--color-mash-brown-dark` e `--color-mash-orange`;
-  - ação e foco: `--color-acao`, `-hover`, `-pressionado`, `-suave` e `--color-foco`;
-  - superfícies e texto: `--color-fundo`, `--color-superficie`, `--color-linha`, `--color-texto`, `--color-texto-2`, `--color-header-texto-2`, `--color-hover-neutro`, `--color-desativado` e `--color-texto-desativado`;
-  - estados, cada um com a versão `-suave`: `--color-sucesso`, `--color-aviso`, `--color-perigo` e `--color-info`.
-- `@utility btn` e `@utility selo` são as bases que os componentes reutilizam com `@apply`.
-- `@layer components` define as classes que as telas usam em vez de estilos avulsos: `btn-primario`, `btn-secundario`, `btn-perigo`, `btn-voltar` (links de voltar), `acoes` (grupo de botões: duas colunas no mobile), `btn-fantasma`, `btn-icone`, `btn-icone-perigo`; `interruptor`, `segmentado`, `deslizante` (controles da Configuração); `campo`, `campo-rotulo`, `campo-caixa`, `campo-unidade`, `campo-ajuda`, `campo-erro`; `card`; `tabela-cabecalho`, `tabela-linha`; `selo-sucesso`, `selo-aviso`, `selo-perigo`, `selo-info`; `esqueleto`; `folha` (modal que sobe de baixo no mobile); `barra-mobile`; e as do shell (`app-shell-content`, `menu-link-active`, estados da sidebar por `data-sidebar-state` e `body.sidebar-collapsed`).
+  - ação e foco: `--color-action`, `-hover`, `-pressionado`, `-suave` e `--color-focus`;
+  - superfícies e texto: `--color-background`, `--color-surface`, `--color-border`, `--color-foreground`, `--color-muted-foreground`, `--color-header-muted-foreground`, `--color-hover-neutral`, `--color-disabled` e `--color-disabled-foreground`;
+  - estados, cada um com a versão `-suave`: `--color-success`, `--color-warning`, `--color-danger` e `--color-info`.
+- `@utility btn` e `@utility badge` são as bases que os componentes reutilizam com `@apply`.
+- `@layer components` define as classes que as telas usam em vez de estilos avulsos: `btn-primary`, `btn-secondary`, `btn-danger`, `btn-back` (links de voltar), `actions` (grupo de botões: duas colunas no mobile), `btn-ghost`, `btn-icon`, `btn-icon-danger`; `switch`, `segmented`, `slider` (controles da Configuração); `field`, `field-label`, `field-box`, `field-unit`, `field-help`, `field-error`; `card`; `list-header`, `list-row`; `badge-success`, `badge-warning`, `badge-danger`, `badge-info`; `skeleton`; `sheet` (modal que sobe de baixo no mobile); `mobile-bar`; e as do shell (`app-shell-content`, `menu-link-active`, estados da sidebar por `data-sidebar-state` e `body.sidebar-collapsed`).
 
 ## Flow
 

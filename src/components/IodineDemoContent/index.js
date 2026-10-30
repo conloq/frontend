@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import AppShell from '@/components/AppShell';
 
 // Simulação do teste de iodo, sem etiqueta na tela por decisão de 21/10/2026 (conloq/mash#9); a leitura real virá do serviço Python + OpenCV (#34)
 // Telas do Figma: "v2 · Iodo · Preparar sessão" e "v2 · Iodo · Leitura automática"
@@ -10,23 +9,23 @@ const NEGATIVO = '#d9a441';
 const CLASSES = {
     amido: {
         nome: 'Presença de amido',
-        icone: 'ph-x-circle text-perigo',
+        icone: 'ph-x-circle text-danger',
         descricao: 'A amostra ainda reage ao iodo. A mosturação continua.',
     },
     parcial: {
         nome: 'Conversão parcial',
-        icone: 'ph-circle-half text-aviso',
+        icone: 'ph-circle-half text-warning',
         descricao:
             'Ainda há amido em degradação. Mantenha 66 °C; a próxima captura confirma o avanço.',
     },
     inconclusiva: {
         nome: 'Inconclusiva',
-        icone: 'ph-warning text-texto-2',
+        icone: 'ph-warning text-muted-foreground',
         descricao: 'Reflexo forte na amostra. A captura foi repetida em seguida.',
     },
     ausencia: {
         nome: 'Ausência de amido',
-        icone: 'ph-check-circle text-sucesso',
+        icone: 'ph-check-circle text-success',
         descricao: 'A amostra ficou amarela: não há amido detectável.',
     },
 };
@@ -76,7 +75,7 @@ const hora = (minuto) => {
 };
 const mmss = (s) =>
     `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const grau = (t) => `${Math.floor(t)} °C`;
+const grau = (t) => `${t.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} °C`;
 
 function Selo({ className, icone, children }) {
     return (
@@ -95,7 +94,7 @@ function Cabecalho({ titulo, selo, subtitulo, children }) {
                     <h1 className="text-[30px] font-semibold">{titulo}</h1>
                     {selo}
                 </div>
-                <p className="text-texto-2">{subtitulo}</p>
+                <p className="text-muted-foreground">{subtitulo}</p>
             </div>
             {children}
         </div>
@@ -113,15 +112,25 @@ function Rotulo({ icone, children, className = '' }) {
     );
 }
 
-function Amostra({ cor, grande }) {
+// Reflexo da luz da bancada sobre a amostra, só na captura inconclusiva
+const REFLEXO =
+    'radial-gradient(ellipse 58% 44% at 38% 34%, rgba(255,255,255,0.97), rgba(255,255,255,0.6) 45%, rgba(255,255,255,0.12) 80%, transparent 100%)';
+
+function Amostra({ cor, grande, reflexo = false }) {
     return (
         <span
             className={`grid place-items-center border-2 border-[#f5a04d] ${grande ? 'size-56 rounded-[28px] sm:size-70' : 'size-48 rounded-3xl sm:size-59'}`}
         >
             <span
-                className={`rounded-full transition-colors duration-700 motion-reduce:transition-none ${grande ? 'size-40 sm:size-50' : 'size-34 sm:size-42'}`}
+                className={`relative overflow-hidden rounded-full transition-colors duration-700 motion-reduce:transition-none ${grande ? 'size-40 sm:size-50' : 'size-34 sm:size-42'}`}
                 style={{ background: cor ?? '#3a2e29' }}
-            />
+            >
+                <span
+                    className={`absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${reflexo ? '' : 'opacity-0'}`}
+                    style={{ background: REFLEXO }}
+                    aria-hidden="true"
+                />
+            </span>
         </span>
     );
 }
@@ -139,11 +148,11 @@ function Preparar({ onIniciar }) {
                 titulo="Preparar a leitura do iodo"
                 selo={
                     pronto ? (
-                        <Selo className="selo-sucesso" icone="ph-check">
+                        <Selo className="badge-success" icone="ph-check">
                             Calibrada
                         </Selo>
                     ) : (
-                        <Selo className="selo-info" icone="ph-crosshair">
+                        <Selo className="badge-info" icone="ph-crosshair">
                             Calibrando
                         </Selo>
                     )
@@ -166,14 +175,14 @@ function Preparar({ onIniciar }) {
                         <Amostra cor={amostra} grande />
                     </div>
                     <div
-                        className="flex flex-wrap items-center gap-4 border-t border-linha px-6 py-4.5"
+                        className="flex flex-wrap items-center gap-4 border-t border-border px-6 py-4.5"
                         aria-live="polite"
                     >
                         <div className="flex min-w-60 flex-1 flex-col gap-0.5">
                             <p className="font-semibold">
                                 {atual?.suporte ?? 'Calibração concluída'}
                             </p>
-                            <p className="text-sm text-texto-2">
+                            <p className="text-sm text-muted-foreground">
                                 {atual?.instrucao ??
                                     'As duas referências estão salvas. Inicie a leitura automática.'}
                             </p>
@@ -181,8 +190,8 @@ function Preparar({ onIniciar }) {
                         {atual && (
                             <button
                                 type="button"
-                                id="demoCapturarControle"
-                                className="btn-primario max-sm:w-full"
+                                id="demoCaptureControl"
+                                className="btn-primary max-sm:w-full"
                                 onClick={() => setPasso(passo + 1)}
                             >
                                 <i className="ph ph-camera" aria-hidden="true" />
@@ -195,12 +204,12 @@ function Preparar({ onIniciar }) {
                 <div className="flex flex-col gap-4">
                     <section
                         className="card flex flex-col gap-3 p-5"
-                        aria-labelledby="tituloCalibracao"
+                        aria-labelledby="calibrationTitle"
                     >
-                        <h2 id="tituloCalibracao" className="text-lg font-semibold">
+                        <h2 id="calibrationTitle" className="text-lg font-semibold">
                             Calibração da sessão
                         </h2>
-                        <p className="text-sm leading-5 text-texto-2">
+                        <p className="text-sm leading-5 text-muted-foreground">
                             A luz muda de um dia para outro. Os controles desta sessão definem onde
                             fica cada classe.
                         </p>
@@ -210,10 +219,10 @@ function Preparar({ onIniciar }) {
                             return (
                                 <div
                                     key={etapa.nome}
-                                    className={`flex items-center gap-3.5 rounded-xl bg-superficie px-4 py-3.5 ${ativo ? 'border-2 border-acao' : 'border border-linha'}`}
+                                    className={`flex items-center gap-3.5 rounded-xl bg-surface px-4 py-3.5 ${ativo ? 'border-2 border-action' : 'border border-border'}`}
                                 >
                                     <span
-                                        className={`grid size-8 shrink-0 place-items-center rounded-full ${feito ? 'bg-sucesso-suave text-sucesso' : ativo ? 'bg-acao-suave text-acao' : 'bg-fundo text-texto-2'}`}
+                                        className={`grid size-8 shrink-0 place-items-center rounded-full ${feito ? 'bg-success-soft text-success' : ativo ? 'bg-action-soft text-action' : 'bg-background text-muted-foreground'}`}
                                     >
                                         <i
                                             className={`ph ${feito ? 'ph-check' : ativo ? 'ph-camera' : 'ph-circle'}`}
@@ -221,16 +230,16 @@ function Preparar({ onIniciar }) {
                                         />
                                     </span>
                                     <span
-                                        className={`flex flex-1 flex-col gap-0.5 ${feito || ativo ? '' : 'text-texto-2'}`}
+                                        className={`flex flex-1 flex-col gap-0.5 ${feito || ativo ? '' : 'text-muted-foreground'}`}
                                     >
                                         <span className="font-semibold">{etapa.nome}</span>
-                                        <span className="text-[13px] text-texto-2">
+                                        <span className="text-[13px] text-muted-foreground">
                                             {feito ? `Capturado às ${etapa.hora}` : etapa.esperado}
                                         </span>
                                     </span>
                                     {feito && (
                                         <span
-                                            className="size-7 shrink-0 rounded-lg border border-linha"
+                                            className="size-7 shrink-0 rounded-lg border border-border"
                                             style={{ background: etapa.cor }}
                                         />
                                     )}
@@ -250,26 +259,26 @@ function Preparar({ onIniciar }) {
                         ].map(([icone, rotulo, valor]) => (
                             <div
                                 key={rotulo}
-                                className="flex items-center gap-3 border-b border-linha py-3 text-sm"
+                                className="flex items-center gap-3 border-b border-border py-3 text-sm"
                             >
                                 <i
-                                    className={`ph ${icone} text-xl text-texto-2`}
+                                    className={`ph ${icone} text-xl text-muted-foreground`}
                                     aria-hidden="true"
                                 />
-                                <span className="flex-1 text-texto-2">{rotulo}</span>
+                                <span className="flex-1 text-muted-foreground">{rotulo}</span>
                                 <span className="font-semibold">{valor}</span>
                             </div>
                         ))}
-                        <span className="pt-1 pb-3 text-sm font-semibold text-acao">
+                        <span className="pt-1 pb-3 text-sm font-semibold text-action">
                             Alterar na receita
                         </span>
                     </section>
 
                     <section
                         className="card flex flex-col gap-3.5 p-5"
-                        aria-labelledby="tituloEscala"
+                        aria-labelledby="scaleTitle"
                     >
-                        <h2 id="tituloEscala" className="text-lg font-semibold">
+                        <h2 id="scaleTitle" className="text-lg font-semibold">
                             Escala desta sessão
                         </h2>
                         <div className="grid grid-cols-2 gap-3">
@@ -278,17 +287,17 @@ function Preparar({ onIniciar }) {
                                 return (
                                     <div
                                         key={etapa.nome}
-                                        className="flex items-center gap-2.5 rounded-[10px] bg-fundo p-3"
+                                        className="flex items-center gap-2.5 rounded-[10px] bg-background p-3"
                                     >
                                         <span
-                                            className="size-9 shrink-0 rounded-lg border border-linha bg-superficie transition-colors duration-700 motion-reduce:transition-none"
+                                            className="size-9 shrink-0 rounded-lg border border-border bg-surface transition-colors duration-700 motion-reduce:transition-none"
                                             style={feito ? { background: etapa.cor } : undefined}
                                         />
                                         <span className="flex min-w-0 flex-col gap-0.5">
                                             <span className="text-[13px] font-semibold">
                                                 {etapa.nome}
                                             </span>
-                                            <span className="text-xs text-texto-2">
+                                            <span className="text-xs text-muted-foreground">
                                                 {feito
                                                     ? `Capturado às ${etapa.hora}`
                                                     : i === 0 || passo === 2
@@ -300,7 +309,7 @@ function Preparar({ onIniciar }) {
                                 );
                             })}
                         </div>
-                        <p className="text-sm leading-[21px] text-texto-2">
+                        <p className="text-sm leading-[21px] text-muted-foreground">
                             Cada captura é comparada com essas duas cores. Perto do positivo, ainda
                             há amido; perto do negativo, a conversão terminou. O que fica no meio é
                             conversão parcial.
@@ -309,23 +318,23 @@ function Preparar({ onIniciar }) {
                 </div>
             </div>
 
-            <div className="sticky bottom-0 -mx-4 -mb-4 mt-auto flex flex-wrap items-center justify-end gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:-mb-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
-                <p className="text-sm text-texto-2 max-sm:hidden">
+            <div className="sticky bottom-0 -mx-4 -mb-4 mt-auto flex flex-wrap items-center justify-end gap-3 border-t border-border bg-surface px-4 py-4 sm:-mx-6 sm:-mb-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+                <p className="text-sm text-muted-foreground max-sm:hidden">
                     {pronto
                         ? 'Calibração concluída'
                         : `Falta${faltam > 1 ? 'm' : ''} ${faltam} etapa${faltam > 1 ? 's' : ''} da calibração`}
                 </p>
                 <button
                     type="button"
-                    className="btn-secundario max-sm:hidden"
+                    className="btn-secondary max-sm:hidden"
                     onClick={() => setPasso(1)}
                 >
                     Cancelar
                 </button>
                 <button
                     type="button"
-                    id="demoIniciar"
-                    className="btn-primario max-sm:w-full"
+                    id="demoStart"
+                    className="btn-primary max-sm:w-full"
                     disabled={!pronto}
                     onClick={onIniciar}
                 >
@@ -345,17 +354,17 @@ function Grafico({ feitas }) {
     const ultima = feitas.at(-1);
 
     return (
-        <section className="card flex flex-col overflow-hidden" aria-labelledby="tituloGrafico">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linha px-6 py-4.5">
+        <section className="card flex flex-col overflow-hidden" aria-labelledby="chartTitle">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-6 py-4.5">
                 <div className="flex flex-col gap-0.5">
-                    <h2 id="tituloGrafico" className="text-lg font-semibold">
+                    <h2 id="chartTitle" className="text-lg font-semibold">
                         Temperatura e capturas
                     </h2>
-                    <p className="text-sm text-texto-2">
+                    <p className="text-sm text-muted-foreground">
                         Cada ponto é uma captura, na cor da classe, sobre a curva da mosturação
                     </p>
                 </div>
-                <ul className="flex flex-wrap gap-5 text-[13px] text-texto-2">
+                <ul className="flex flex-wrap gap-5 text-[13px] text-muted-foreground">
                     {[
                         [POSITIVO, 'amido'],
                         [PARCIAL, 'parcial'],
@@ -369,7 +378,7 @@ function Grafico({ feitas }) {
                 </ul>
             </div>
             <div className="flex gap-3 px-6 py-4">
-                <div className="flex h-64 flex-col justify-between pb-5.5 text-xs text-texto-2">
+                <div className="flex h-64 flex-col justify-between pb-5.5 text-xs text-muted-foreground">
                     <span>68 °C</span>
                     <span>66 °C</span>
                     <span>64 °C</span>
@@ -383,7 +392,7 @@ function Grafico({ feitas }) {
                         {[0, 50, 100].map((top) => (
                             <span
                                 key={top}
-                                className="absolute inset-x-0 h-px bg-linha"
+                                className="absolute inset-x-0 h-px bg-border"
                                 style={{ top: `${top}%` }}
                             />
                         ))}
@@ -403,14 +412,14 @@ function Grafico({ feitas }) {
                         </svg>
                         {ultima && (
                             <span
-                                className="absolute inset-y-0 w-px bg-acao"
+                                className="absolute inset-y-0 w-px bg-action"
                                 style={{ left: `${x(ultima.minuto)}%` }}
                             />
                         )}
                         {feitas.map((p) => (
                             <span
                                 key={p.minuto}
-                                className={`absolute size-4 -translate-1/2 rounded-full border-2 ${p.cor ? 'border-superficie' : 'border-texto-2 bg-superficie'}`}
+                                className={`absolute size-4 -translate-1/2 rounded-full border-2 ${p.cor ? 'border-surface' : 'border-muted-foreground bg-surface'}`}
                                 style={{
                                     left: `${x(p.minuto)}%`,
                                     top: `${y(p.temp)}%`,
@@ -419,7 +428,7 @@ function Grafico({ feitas }) {
                             />
                         ))}
                     </div>
-                    <div className="flex justify-between text-xs text-texto-2">
+                    <div className="flex justify-between text-xs text-muted-foreground">
                         {[0, 15, 30, 45, 60].map((m) => (
                             <span key={m}>{hora(m)}</span>
                         ))}
@@ -461,22 +470,22 @@ function Leitura({ onEncerrar }) {
                 titulo="Leitura automática"
                 selo={
                     fim ? (
-                        <Selo className="selo-sucesso" icone="ph-check">
+                        <Selo className="badge-success" icone="ph-check">
                             Leitura concluída
                         </Selo>
                     ) : (
-                        <Selo className="selo bg-acao-suave text-acao" icone="ph-camera">
+                        <Selo className="badge bg-action-soft text-action" icone="ph-camera">
                             Capturando a cada 10 min
                         </Selo>
                     )
                 }
                 subtitulo="Lote 12/03 · American Pale Ale · sessão calibrada às 14:05"
             >
-                <div className="acoes">
+                <div className="actions">
                     <button
                         type="button"
-                        id="demoEncerrar"
-                        className="btn-secundario"
+                        id="demoEnd"
+                        className="btn-secondary"
                         onClick={onEncerrar}
                     >
                         <i className="ph ph-stop" aria-hidden="true" />
@@ -484,8 +493,8 @@ function Leitura({ onEncerrar }) {
                     </button>
                     <button
                         type="button"
-                        id="demoCapturar"
-                        className="btn-primario"
+                        id="demoCapture"
+                        className="btn-primary"
                         onClick={capturar}
                         disabled={fim}
                     >
@@ -497,30 +506,36 @@ function Leitura({ onEncerrar }) {
 
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
                 <section
-                    className="card grid overflow-hidden md:grid-cols-[minmax(0,520px)_minmax(0,1fr)]"
+                    className="card flex flex-col overflow-hidden min-[1800px]:flex-row"
                     aria-label="Última captura"
                 >
-                    <div className="relative grid min-h-110 place-items-center bg-[#1e1714]">
+                    <div className="relative grid min-h-96 place-items-center bg-[#1e1714] min-[1800px]:w-[440px] min-[1800px]:shrink-0">
                         <Rotulo icone="ph-video-camera" className="top-4">
                             Câmera da bancada
                         </Rotulo>
-                        <Amostra cor={atual?.cor} />
+                        <Amostra
+                            cor={atual?.cor ?? marcador?.cor}
+                            reflexo={atual?.classe === 'inconclusiva'}
+                        />
                         {!fim && (
                             <Rotulo icone="ph-timer" className="bottom-4">
                                 Próxima captura em {mmss(Math.max(restante, 0))}
                             </Rotulo>
                         )}
                     </div>
-                    <div className="flex flex-col gap-5 p-8" aria-live="polite">
+                    <div
+                        className="flex min-w-0 flex-1 flex-col gap-5 p-6 sm:p-8"
+                        aria-live="polite"
+                    >
                         <div className="flex flex-col gap-1.5">
-                            <p className="text-[13px] text-texto-2">
+                            <p className="text-[13px] text-muted-foreground">
                                 {atual
                                     ? `Última captura · ${hora(atual.minuto)}`
                                     : 'Sessão iniciada · 14:05'}
                             </p>
                             <p
-                                id="demoResultado"
-                                className="flex items-center gap-2.5 font-display text-[32px] font-semibold"
+                                id="demoResult"
+                                className="flex items-center gap-2.5 font-display text-[26px] leading-tight font-semibold sm:text-[32px]"
                             >
                                 {classe && (
                                     <i
@@ -530,7 +545,7 @@ function Leitura({ onEncerrar }) {
                                 )}
                                 {classe?.nome ?? 'Aguardando a primeira captura'}
                             </p>
-                            <p className="leading-[23px] text-texto-2">
+                            <p className="leading-[23px] text-muted-foreground">
                                 {classe?.descricao ??
                                     'A câmera fotografa a amostra a cada 10 minutos e classifica a cor.'}
                             </p>
@@ -541,45 +556,69 @@ function Leitura({ onEncerrar }) {
                                 <span className="absolute inset-x-0 top-1.5 h-3 rounded-full bg-linear-to-r from-[#2e1f4a] via-[#8a4b2a] to-[#d9a441]" />
                                 {marcador && (
                                     <span
-                                        className="absolute top-0 size-6 -translate-x-1/2 rounded-full border-3 border-texto bg-superficie transition-[left] duration-700 motion-reduce:transition-none"
+                                        className="absolute top-0 size-6 -translate-x-1/2 rounded-full border-3 border-foreground bg-surface transition-[left] duration-700 motion-reduce:transition-none"
                                         style={{ left: `${marcador.posicao}%` }}
                                     />
                                 )}
                             </div>
-                            <div className="flex justify-between gap-2 text-xs">
+                            <div className="grid grid-cols-3 gap-3 text-xs">
                                 <span className="flex flex-col gap-0.5">
                                     <strong className="font-semibold">Controle positivo</strong>
-                                    <span className="text-texto-2">com amido</span>
+                                    <span className="text-muted-foreground">com amido</span>
                                 </span>
-                                <strong className="font-semibold">Conversão parcial</strong>
-                                <span className="flex flex-col items-end gap-0.5">
+                                <strong className="text-center font-semibold">
+                                    Conversão parcial
+                                </strong>
+                                <span className="flex flex-col items-end gap-0.5 text-right">
                                     <strong className="font-semibold">Controle negativo</strong>
-                                    <span className="text-texto-2">sem amido</span>
+                                    <span className="text-muted-foreground">sem amido</span>
                                 </span>
                             </div>
                         </div>
 
-                        <dl className="grid grid-cols-2 gap-4 border-t border-linha pt-5 sm:grid-cols-4">
+                        <dl className="grid grid-cols-[repeat(auto-fit,minmax(9rem,1fr))] gap-3 border-t border-border pt-5">
                             {[
-                                ['Temperatura', grau(atual?.temp ?? 64)],
-                                ['Mosturação', `${atual?.mostura ?? 0} min`],
-                                ['Rampa', '2 de 3'],
-                                ['Resposta da análise', atual ? '1,4 s' : '–'],
-                            ].map(([rotulo, valor]) => (
-                                <div key={rotulo} className="flex flex-col gap-1">
-                                    <dt className="text-[13px] text-texto-2">{rotulo}</dt>
+                                [
+                                    'ph-thermometer-simple',
+                                    'Temperatura',
+                                    grau(atual?.temp ?? 64),
+                                    'Alvo da rampa: 66 °C',
+                                ],
+                                [
+                                    'ph-timer',
+                                    'Mosturação',
+                                    `${atual?.mostura ?? 0} min`,
+                                    'Desde 14:00',
+                                ],
+                                ['ph-stairs', 'Rampa', '2 de 3', 'Sacarificação'],
+                                [
+                                    'ph-lightning',
+                                    'Análise da imagem',
+                                    atual ? '1,4 s' : '–',
+                                    'Por captura',
+                                ],
+                            ].map(([icone, rotulo, valor, detalhe]) => (
+                                <div
+                                    key={rotulo}
+                                    className="flex min-w-0 flex-col gap-1 rounded-[10px] bg-background px-3.5 py-3"
+                                >
+                                    <dt className="flex items-center gap-1.5 text-[13px] text-muted-foreground">
+                                        <i className={`ph ${icone} text-base`} aria-hidden="true" />
+                                        {rotulo}
+                                    </dt>
                                     <dd className="font-display text-xl font-semibold">{valor}</dd>
+                                    <dd className="text-xs text-muted-foreground">{detalhe}</dd>
                                 </div>
                             ))}
                         </dl>
 
                         {fim && (
                             <div
-                                id="demoPronto"
-                                className="flex items-center gap-3 rounded-[10px] bg-sucesso-suave px-4 py-3"
+                                id="demoReady"
+                                className="flex items-center gap-3 rounded-[10px] bg-success-soft px-4 py-3"
                             >
                                 <i
-                                    className="ph-fill ph-check-circle text-[22px] text-sucesso"
+                                    className="ph-fill ph-check-circle text-[22px] text-success"
                                     aria-hidden="true"
                                 />
                                 <p>
@@ -595,27 +634,29 @@ function Leitura({ onEncerrar }) {
 
                 <section
                     className="card self-start overflow-hidden"
-                    aria-labelledby="tituloCapturas"
+                    aria-labelledby="capturesTitle"
                 >
-                    <div className="flex flex-col gap-0.5 border-b border-linha px-5 py-4.5">
-                        <h2 id="tituloCapturas" className="text-lg font-semibold">
+                    <div className="flex flex-col gap-0.5 border-b border-border px-5 py-4.5">
+                        <h2 id="capturesTitle" className="text-lg font-semibold">
                             Capturas da sessão
                         </h2>
-                        <p className="text-sm text-texto-2">Da mais recente para a mais antiga</p>
+                        <p className="text-sm text-muted-foreground">
+                            Da mais recente para a mais antiga
+                        </p>
                     </div>
-                    <ol id="demoColetas" className="flex flex-col">
+                    <ol id="demoSamples" className="flex flex-col">
                         {!lista.length && (
-                            <li className="px-5 py-8 text-center text-sm text-texto-2">
+                            <li className="px-5 py-8 text-center text-sm text-muted-foreground">
                                 As capturas aparecem aqui.
                             </li>
                         )}
                         {[...lista].reverse().map((c) => (
                             <li
                                 key={c.minuto}
-                                className="tabela-linha flex items-center gap-3 px-5 py-3"
+                                className="list-row flex items-center gap-3 px-5 py-3"
                             >
                                 <span
-                                    className={`size-8 shrink-0 rounded-lg ${c.cor ? '' : 'border border-linha bg-fundo'}`}
+                                    className={`size-8 shrink-0 rounded-lg ${c.cor ? '' : 'border border-border bg-background'}`}
                                     style={c.cor ? { background: c.cor } : undefined}
                                 />
                                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -626,13 +667,13 @@ function Leitura({ onEncerrar }) {
                                         />
                                         {CLASSES[c.classe].nome}
                                     </span>
-                                    <span className="text-[13px] text-texto-2">
+                                    <span className="text-[13px] text-muted-foreground">
                                         {c.cor
                                             ? `${grau(c.temp)} · ${c.mostura} min`
                                             : 'Reflexo forte · repetida'}
                                     </span>
                                 </span>
-                                <span className="text-sm font-semibold text-texto-2">
+                                <span className="text-sm font-semibold text-muted-foreground">
                                     {hora(c.minuto)}
                                 </span>
                             </li>
@@ -646,22 +687,10 @@ function Leitura({ onEncerrar }) {
     );
 }
 
-export default function IodineDemoContent() {
-    const [lendo, setLendo] = useState(false);
-
-    return (
-        <AppShell
-            title="Teste de iodo"
-            trail={[
-                'Teste de iodo',
-                lendo ? 'Lote 12/03 · Leitura automática' : 'Lote 12/03 · Preparar sessão',
-            ]}
-        >
-            {lendo ? (
-                <Leitura onEncerrar={() => setLendo(false)} />
-            ) : (
-                <Preparar onIniciar={() => setLendo(true)} />
-            )}
-        </AppShell>
+export default function IodineDemoContent({ lendo, onLendo }) {
+    return lendo ? (
+        <Leitura onEncerrar={() => onLendo(false)} />
+    ) : (
+        <Preparar onIniciar={() => onLendo(true)} />
     );
 }
