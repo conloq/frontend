@@ -9,7 +9,7 @@ const CHAMADA = 'Do teste de iodo à fervura';
 export default function AuthLayout({ title, children }) {
     const router = useRouter();
     useEffect(() => {
-        if (temToken()) router.replace('/dashboard');
+        if (temToken()) router.replace('/recipes');
     }, [router]);
 
     return (

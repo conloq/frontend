@@ -15,7 +15,7 @@ export default function LoginContent() {
         setEnviando(true);
         try {
             await signIn(email, password);
-            router.push('/dashboard');
+            router.push('/recipes');
         } catch (error) {
             flash('danger', mensagemErro(error, 'Não foi possível entrar.'));
             setEnviando(false);
@@ -53,12 +53,6 @@ export default function LoginContent() {
                             required
                         />
                     </span>
-                    <Link
-                        href="/forgot-password"
-                        className="mt-1 self-end text-sm font-semibold text-acao hover:underline"
-                    >
-                        Esqueceu a senha?
-                    </Link>
                 </div>
                 <button type="submit" className="btn-primario mt-2 w-full" disabled={enviando}>
                     Entrar <i className="ph ph-sign-in" aria-hidden="true" />

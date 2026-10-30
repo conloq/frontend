@@ -17,7 +17,7 @@ O frontend e o Back-End continuam em repositórios separados. O Next.js (Pages R
 - O frontend não conecta ao banco. A tabela `sessions` do app EJS foi removida pela migration `20261028120000-remover-tabela-sessions` do Back-End.
 - O JWT fica no `localStorage`, acessível ao JavaScript da página (ver `CONCERNS.md`).
 - O Back-End não tem rota de logout: sair só apaga o token do navegador; o JWT continua válido até expirar.
-- Rotas sem dados no Back-End (painel, lotes, sessão do iodo, recuperação de senha, análise) mostram estados vazios honestos; `/analyses/new` é a simulação do teste de iodo.
+- Rotas sem dados no Back-End (lotes, sessão do iodo) mostram estados vazios honestos. Painel, recuperação de senha, configuração, teste de iodo da receita e detalhe da análise foram removidos em 29/10/2026 por não terem funcionalidade; após o login o usuário vai para `/recipes`. `/analyses/new` é a simulação do teste de iodo (preparar sessão e leitura automática, como no Figma).
 - As páginas são estáticas no build (sem `getServerSideProps`); os dados chegam depois da hidratação, com `esqueleto` enquanto carregam.
 
 ## Camadas

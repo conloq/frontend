@@ -10,6 +10,7 @@ import {
     plural,
     ServerError,
 } from '@/components/Feedback';
+import { SeloLote } from '@/components/LotsContent';
 import { pedidoExcluirReceita, RecipeNameModal } from '@/components/RecipesContent';
 import { api, mensagemErro } from '@/services/api';
 
@@ -181,7 +182,7 @@ function PerfilRampas({ rampas }) {
     );
 }
 
-function LinhaRampa({ rampa, ordem, recipeId }) {
+function LinhaRampa({ rampa, ordem, recipeId, onExcluir }) {
     const celula = (rotulo, valor, coluna) => (
         <span
             className={`max-lg:col-span-3 max-lg:flex max-lg:justify-between max-lg:text-sm ${coluna} lg:row-start-1`}
@@ -206,11 +207,10 @@ function LinhaRampa({ rampa, ordem, recipeId }) {
                 >
                     <i className="ph ph-pencil-simple" aria-hidden="true" />
                 </Link>
-                {/* shortcut: sem rota de exclusão de rampa (conloq/mash#97), o botão não faz nada; ligar quando a rota existir */}
                 <button
                     type="button"
                     className="btn-icone-perigo"
-                    data-sem-api="conloq/mash#97"
+                    onClick={onExcluir}
                     aria-label={`Excluir rampa ${ordem}`}
                 >
                     <i className="ph ph-trash" aria-hidden="true" />
@@ -233,6 +233,16 @@ function Receita({ edit, onNome }) {
     const { id, recipe, rampas, erro, carregar } = useReceita();
     const [renomeando, setRenomeando] = useState(false);
     const [confirmacao, setConfirmacao] = useState(null);
+    const [lotes, setLotes] = useState(null);
+
+    useEffect(() => {
+        if (!id) return;
+        api.get('/lots')
+            .then(({ data }) =>
+                setLotes((data.lots ?? []).filter((lote) => String(lote.recipeId) === id))
+            )
+            .catch(() => setLotes([]));
+    }, [id]);
 
     useEffect(() => {
         if (recipe) onNome(recipe.name);
@@ -268,6 +278,16 @@ function Receita({ edit, onNome }) {
             router.push('/recipes');
         } catch (error) {
             flash('danger', mensagemErro(error, 'Não foi possível excluir a receita.'));
+        }
+    };
+
+    const excluirRampa = async (rampaId) => {
+        try {
+            await api.delete(`/temperatures/${rampaId}`);
+            flash('success', 'Rampa excluída.');
+            carregar();
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível excluir a rampa.'));
         }
     };
 
@@ -321,14 +341,6 @@ function Receita({ edit, onNome }) {
                             <i className="ph ph-pencil-simple" aria-hidden="true" />
                             Renomear
                         </button>
-                        <Link
-                            id="iodoReceitaLink"
-                            href={`/recipes/${id}/iodine`}
-                            className="btn-secundario max-lg:order-2 max-lg:col-span-2"
-                        >
-                            <i className="ph ph-test-tube" aria-hidden="true" />
-                            Teste de iodo
-                        </Link>
                         <Link
                             id="newTemperatureLink"
                             href={novaRampa}
@@ -391,12 +403,19 @@ function Receita({ edit, onNome }) {
                                 rampa={rampa}
                                 ordem={rampa.orderRamp ?? i + 1}
                                 recipeId={id}
+                                onExcluir={() =>
+                                    setConfirmacao({
+                                        titulo: `Excluir a rampa ${rampa.orderRamp ?? i + 1}?`,
+                                        mensagem: 'Não dá para desfazer.',
+                                        botao: 'Excluir rampa',
+                                        aoConfirmar: () => excluirRampa(rampa.id),
+                                    })
+                                }
                             />
                         ))}
                     </div>
                 </section>
 
-                {/* sem rota de lotes na API (conloq/mash#31): estado vazio até a lista existir */}
                 <section className="card overflow-hidden" aria-labelledby="tituloLotesReceita">
                     <h2
                         id="tituloLotesReceita"
@@ -404,7 +423,22 @@ function Receita({ edit, onNome }) {
                     >
                         Lotes desta receita
                     </h2>
-                    <EmptyState icon="ph-cube" title="Nenhum lote ainda" compact />
+                    {!lotes && (
+                        <div className="esqueleto m-5 h-16 rounded-xl" aria-label="Carregando" />
+                    )}
+                    {lotes?.length === 0 && (
+                        <EmptyState icon="ph-cube" title="Nenhum lote ainda" compact />
+                    )}
+                    {lotes?.map((lote) => (
+                        <Link
+                            key={lote.id}
+                            href={`/lots/${lote.id}`}
+                            className="tabela-linha flex min-h-14 items-center justify-between gap-3 px-6 hover:bg-hover-neutro"
+                        >
+                            <span className="truncate font-semibold">{lote.name}</span>
+                            <SeloLote status={lote.status} />
+                        </Link>
+                    ))}
                 </section>
             </div>
 

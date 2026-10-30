@@ -26,10 +26,10 @@
 | Perfil | `PUT /user`, `PUT /user/upload` (multipart, campo `image`), `DELETE /user` |
 | Perfil e histórico | `GET /user/login-history`; `404` vira lista vazia (conloq/mash#102) |
 | Receitas | `GET /recipes`, `POST /recipes`, `DELETE /recipes/:id` e `GET /recipes/:id/temperatures` por receita |
-| Receita | `GET`, `PUT` e `DELETE /recipes/:id`, `GET /recipes/:id/temperatures` |
-| Iodo da receita | receita e rampas (salvar sem rota, conloq/mash#101) |
+| Receita | `GET`, `PUT` e `DELETE /recipes/:id`, `GET /recipes/:id/temperatures`, `DELETE /temperatures/:id`, `GET /lots` |
 | Nova rampa | receita e `POST /recipes/:id/temperatures` |
-| Editar rampa | receita e rampas (salvar e excluir sem rota, conloq/mash#97) |
-| Lote novo/edição | `GET /recipes` para o seletor |
+| Editar rampa | receita, rampas, `PUT` e `DELETE /temperatures/:id` |
+| Lotes | `GET` e `POST /lots`, `GET /recipes` |
+| Lote | `GET`, `PUT` e `DELETE /lots/:id`, `GET /recipes/:id` |
 
-Lotes, recuperação de senha e análises não chamam rotas que não existem; as telas mostram estados vazios ou formulários que só bloqueiam o envio.
+Leituras de iodo e de temperatura do lote não têm rota; as telas mostram estados vazios.
