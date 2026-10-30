@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import AppShell from '@/components/AppShell';
-import { Field, flash, ServerError } from '@/components/Feedback';
+import { ConfirmDialog, Field, flash, ServerError } from '@/components/Feedback';
 import { useReceita } from '@/components/RecipeContent';
 import { api, mensagemErro } from '@/services/api';
 import { comSegundos, HORARIOS, TEMPERATURAS, validarRampa } from '@/services/rampa';
@@ -17,6 +17,7 @@ function Formulario() {
     const rampa = rampas?.find((t) => String(t.id) === idRampa);
     const [valores, setValores] = useState(Object.fromEntries(CAMPOS.map((key) => [key, ''])));
     const [erros, setErros] = useState({});
+    const [confirmacao, setConfirmacao] = useState(null);
 
     useEffect(() => {
         if (rampa)
@@ -37,18 +38,29 @@ function Formulario() {
             flash('danger', 'Confira os campos marcados. Corrija e salve de novo.');
             return event.target.querySelector(`[name="${Object.keys(novos)[0]}"]`)?.focus();
         }
-        // shortcut: edição de rampa sem rota na API (conloq/mash#97) só valida; ligar o PUT quando existir
-        if (editando) return;
+        const corpo = {
+            ...Object.fromEntries(TEMPERATURAS.map((key) => [key, Number(valores[key])])),
+            ...Object.fromEntries(HORARIOS.map((key) => [key, comSegundos(valores[key])])),
+            ...(valores.orderRamp !== '' && { orderRamp: Number(valores.orderRamp) }),
+        };
         try {
-            const { data } = await api.post(`/recipes/${id}/temperatures`, {
-                ...Object.fromEntries(TEMPERATURAS.map((key) => [key, Number(valores[key])])),
-                ...Object.fromEntries(HORARIOS.map((key) => [key, comSegundos(valores[key])])),
-                ...(valores.orderRamp !== '' && { orderRamp: Number(valores.orderRamp) }),
-            });
+            const { data } = editando
+                ? await api.put(`/temperatures/${idRampa}`, corpo)
+                : await api.post(`/recipes/${id}/temperatures`, corpo);
             flash('success', data?.message ?? 'Temperatura criada com sucesso.');
             router.push(`/recipes/${id}`);
         } catch (error) {
             flash('danger', mensagemErro(error, 'Não foi possível salvar os dados.'));
+        }
+    };
+
+    const excluir = async () => {
+        try {
+            await api.delete(`/temperatures/${idRampa}`);
+            flash('success', 'Rampa excluída.');
+            router.push(`/recipes/${id}`);
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível excluir a rampa.'));
         }
     };
 
@@ -108,7 +120,6 @@ function Formulario() {
             className="flex flex-1 flex-col gap-6"
             noValidate
             onSubmit={salvar}
-            data-sem-api={editando ? 'conloq/mash#97' : undefined}
         >
             <div className="flex flex-col gap-1 max-lg:contents">
                 <Link
@@ -196,8 +207,16 @@ function Formulario() {
                 {editando && (
                     <button
                         type="button"
+                        id="btnExcluir"
                         className="btn-perigo max-sm:w-full"
-                        data-sem-api="conloq/mash#97"
+                        onClick={() =>
+                            setConfirmacao({
+                                titulo: 'Excluir esta rampa?',
+                                mensagem: 'Não dá para desfazer.',
+                                botao: 'Excluir rampa',
+                                aoConfirmar: excluir,
+                            })
+                        }
                     >
                         <i className="ph ph-trash" aria-hidden="true" />
                         Excluir rampa
@@ -212,6 +231,7 @@ function Formulario() {
                     </button>
                 </div>
             </div>
+            <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
         </form>
     );
 }

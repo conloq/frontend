@@ -21,22 +21,17 @@
 
 | Rota | Componente |
 |---|---|
-| `/` | redireciona para `/dashboard` |
+| `/` | redireciona para `/recipes` |
 | `/login`, `/signup` | `LoginContent`, `SignupContent` (em `AuthLayout`) |
-| `/forgot-password`, `/forgot-password/code`, `/forgot-password/reset` | `ForgotPasswordContent` (`etapa`) |
-| `/dashboard` | `DashboardContent` |
 | `/profile`, `/profile/access-history` | `ProfileContent`, `AccessHistory` |
-| `/settings`, `/settings/security` | `SettingsContent` (`seguranca`) |
 | `/recipes` | `RecipesContent` |
 | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` (`edit` abre o modal Renomear) |
-| `/recipes/:id/iodine` | `RecipeIodineContent` |
 | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` |
 | `/lots`, `/lots/new` | `LotsContent` (`form` abre `LotForm`) |
 | `/lots/:id`, `/lots/:id/edit` | `LotDetail` (`editando` abre `LotForm`) |
 | `/lots/:id/monitoring` | `LotMonitoring` |
 | `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `IodineSession` (`leitura`) |
 | `/analyses/new` | `IodineDemoContent` |
-| `/analyses/:id` | página própria com estado vazio |
 
 ## 3) Module Boundaries
 

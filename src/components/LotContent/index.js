@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import AppShell from '@/components/AppShell';
-import { EmptyState } from '@/components/Feedback';
-import { LotForm } from '@/components/LotsContent';
+import { ConfirmDialog, EmptyState, flash, ServerError } from '@/components/Feedback';
+import { LotForm, SeloLote } from '@/components/LotsContent';
+import { api, mensagemErro } from '@/services/api';
 
-// Telas do lote: sem rota de lotes na API (conloq/mash#31), cada área mostra o estado vazio.
+// Telas do lote: o lote e a receita vêm da API; leituras de iodo e de temperatura ainda não têm rota, ficam no estado vazio.
 
 function Cabecalho({ id, titulo, descricao, children }) {
     return (
@@ -50,65 +52,161 @@ function CardTemperatura({ texto, compact }) {
     );
 }
 
+// Lote e a receita dele; receita null = não carregou
+function useLote(id) {
+    const [estado, setEstado] = useState({ lote: null, receita: null, erro: null });
+    useEffect(() => {
+        if (!id) return;
+        api.get(`/lots/${id}`)
+            .then(async ({ data }) => {
+                const receita = await api
+                    .get(`/recipes/${data.lot.recipeId}`)
+                    .then((r) => r.data.recipe)
+                    .catch(() => null);
+                setEstado({ lote: data.lot, receita, erro: null });
+            })
+            .catch((error) =>
+                setEstado({
+                    lote: null,
+                    receita: null,
+                    erro: mensagemErro(error, 'Não foi possível carregar o lote.'),
+                })
+            );
+    }, [id]);
+    return estado;
+}
+
 export function LotDetail({ editando = false }) {
     const router = useRouter();
     const lote = `/lots/${router.query.id}`;
+    const { lote: dados, receita, erro } = useLote(router.query.id);
+    const [confirmacao, setConfirmacao] = useState(null);
+
+    const excluir = async () => {
+        try {
+            await api.delete(lote);
+            flash('success', 'Lote excluído.');
+            router.push('/lots');
+        } catch (error) {
+            flash('danger', mensagemErro(error, 'Não foi possível excluir o lote.'));
+        }
+    };
+
     return (
-        <AppShell title="Lote" trail={['Lotes', 'Lote']} back="/lots">
-            <div className="flex flex-col gap-2">
-                <VoltarLotes />
-                <div className="flex flex-wrap items-end justify-between gap-4">
-                    <h1 className="text-[30px] font-semibold max-lg:sr-only">Lote</h1>
-                    <div className="acoes">
-                        {/* shortcut: sem rota de lotes, excluir não faz nada; ligar quando conloq/mash#31 sair */}
-                        <button
-                            type="button"
-                            className="btn-perigo max-lg:order-1"
-                            data-sem-api="conloq/mash#31"
-                        >
-                            <i className="ph ph-trash" aria-hidden="true" />
-                            Excluir
-                        </button>
-                        <Link href={`${lote}/edit`} className="btn-secundario">
-                            <i className="ph ph-pencil-simple" aria-hidden="true" />
-                            Editar
-                        </Link>
-                        <Link
-                            href={`${lote}/monitoring`}
-                            className="btn-secundario max-lg:order-2 max-lg:col-span-2"
-                        >
-                            <i className="ph ph-chart-line" aria-hidden="true" />
-                            <span className="lg:hidden">Ver monitoramento</span>
-                            <span className="max-lg:hidden">Monitoramento</span>
-                        </Link>
-                        <Link href={`${lote}/iodine`} className="btn-primario max-lg:hidden">
-                            <i className="ph ph-video-camera" aria-hidden="true" />
-                            Iniciar leitura do iodo
-                        </Link>
+        <AppShell
+            title={dados?.name ?? 'Lote'}
+            trail={['Lotes', dados?.name ?? 'Lote']}
+            back="/lots"
+        >
+            {erro && <ServerError message={erro} />}
+            {!erro && !dados && (
+                <div className="esqueleto h-40 rounded-xl" aria-label="Carregando" />
+            )}
+            {dados && (
+                <>
+                    <div className="flex flex-col gap-2">
+                        <VoltarLotes />
+                        <div className="flex flex-wrap items-end justify-between gap-4">
+                            <div className="flex min-w-0 flex-wrap items-center gap-3">
+                                <h1 className="truncate text-[30px] font-semibold max-lg:sr-only">
+                                    {dados.name}
+                                </h1>
+                                <SeloLote status={dados.status} />
+                            </div>
+                            <div className="acoes">
+                                <button
+                                    type="button"
+                                    id="btnExcluir"
+                                    className="btn-perigo max-lg:order-1"
+                                    onClick={() =>
+                                        setConfirmacao({
+                                            titulo: `Excluir o lote ${dados.name}?`,
+                                            mensagem: 'Não dá para desfazer.',
+                                            botao: 'Excluir lote',
+                                            aoConfirmar: excluir,
+                                        })
+                                    }
+                                >
+                                    <i className="ph ph-trash" aria-hidden="true" />
+                                    Excluir
+                                </button>
+                                <Link href={`${lote}/edit`} className="btn-secundario">
+                                    <i className="ph ph-pencil-simple" aria-hidden="true" />
+                                    Editar
+                                </Link>
+                                <Link
+                                    href={`${lote}/monitoring`}
+                                    className="btn-secundario max-lg:order-2 max-lg:col-span-2"
+                                >
+                                    <i className="ph ph-chart-line" aria-hidden="true" />
+                                    <span className="lg:hidden">Ver monitoramento</span>
+                                    <span className="max-lg:hidden">Monitoramento</span>
+                                </Link>
+                                <Link
+                                    href={`${lote}/iodine`}
+                                    className="btn-primario max-lg:hidden"
+                                >
+                                    <i className="ph ph-video-camera" aria-hidden="true" />
+                                    Iniciar leitura do iodo
+                                </Link>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
-                <section className="card overflow-hidden" aria-label="Leituras do iodo">
-                    <Cabecalho
-                        titulo="Leituras do iodo"
-                        descricao="Da coleta mais recente para a mais antiga."
-                    />
-                    <EmptyState
-                        icon="ph-test-tube"
-                        title="Nenhuma leitura neste lote"
-                        text="Cada captura da câmera aparece aqui com hora, temperatura e classe."
-                        compact
-                    />
-                </section>
-                <section className="card overflow-hidden" aria-label="Receita do lote">
-                    <Cabecalho titulo="Receita do lote" />
-                    <EmptyState icon="ph-scroll" title="Receita não informada" compact />
-                </section>
-            </div>
-            <CardTemperatura texto="A curva da mosturação aparece quando o sensor enviar leituras deste lote." />
-            <IniciarIodoMobile lote={lote} />
-            {editando && <LotForm editando onClose={() => router.push(lote)} />}
+                    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px] xl:items-start">
+                        <section className="card overflow-hidden" aria-label="Leituras do iodo">
+                            <Cabecalho
+                                titulo="Leituras do iodo"
+                                descricao="Da coleta mais recente para a mais antiga."
+                            />
+                            <EmptyState
+                                icon="ph-test-tube"
+                                title="Nenhuma leitura neste lote"
+                                text="Cada captura da câmera aparece aqui com hora, temperatura e classe."
+                                compact
+                            />
+                        </section>
+                        <section className="card overflow-hidden" aria-label="Receita do lote">
+                            <Cabecalho titulo="Receita do lote" />
+                            <dl className="flex flex-col px-6 py-2 text-sm">
+                                <div className="flex justify-between gap-4 border-b border-linha py-3">
+                                    <dt className="text-texto-2">Receita</dt>
+                                    <dd className="font-semibold">
+                                        {receita ? (
+                                            <Link
+                                                href={`/recipes/${receita.id}`}
+                                                className="text-acao hover:underline"
+                                            >
+                                                {receita.name}
+                                            </Link>
+                                        ) : (
+                                            '—'
+                                        )}
+                                    </dd>
+                                </div>
+                                <div className="flex justify-between gap-4 py-3">
+                                    <dt className="text-texto-2">Início da mosturação</dt>
+                                    <dd className="font-semibold">
+                                        {new Date(dados.mashStart).toLocaleString('pt-BR', {
+                                            dateStyle: 'short',
+                                            timeStyle: 'short',
+                                        })}
+                                    </dd>
+                                </div>
+                            </dl>
+                        </section>
+                    </div>
+                    <CardTemperatura texto="A curva da mosturação aparece quando o sensor enviar leituras deste lote." />
+                    <IniciarIodoMobile lote={lote} />
+                </>
+            )}
+            {editando && dados && (
+                <LotForm
+                    lote={dados}
+                    onClose={() => router.push(lote)}
+                    onSalvo={() => router.push(lote)}
+                />
+            )}
+            <ConfirmDialog pedido={confirmacao} onClose={() => setConfirmacao(null)} />
         </AppShell>
     );
 }

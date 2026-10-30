@@ -92,8 +92,8 @@ export function ServerError({ message }) {
                 Não foi possível carregar esta página
             </h1>
             <p className="text-texto-2">{message}</p>
-            <Link href="/dashboard" className="btn-primario">
-                Voltar ao painel
+            <Link href="/recipes" className="btn-primario">
+                Voltar às receitas
             </Link>
         </div>
     );

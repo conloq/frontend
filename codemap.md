@@ -21,24 +21,19 @@ Dois repositórios, um papel cada: este tem as telas; o Back-End (`conloq/Back-E
 
 | Rota | Componente | Chamadas à API |
 |---|---|---|
-| `/` | - | redireciona para `/dashboard` |
+| `/` | - | redireciona para `/recipes` |
 | `/login`, `/signup` | `LoginContent`, `SignupContent` em `AuthLayout` | `POST /login`, `POST /user` |
-| `/forgot-password`, `/code`, `/reset` | `ForgotPasswordContent` (`etapa`) | nenhuma (conloq/mash#73); `data-sem-api` |
-| `/dashboard` | `DashboardContent` | só `GET /user` do shell; dados de exemplo fixos até a conloq/mash#104 (decisão de 28/10/2026) |
 | `/profile` | `ProfileContent` | `PUT /user`, `PUT /user/upload`, `DELETE /user`, `GET /user/login-history` (404 = lista vazia, conloq/mash#102) |
 | `/profile/access-history` | `AccessHistory` | `GET /user/login-history` |
-| `/settings`, `/settings/security` | `SettingsContent` | nenhuma; salvar só bloqueia o envio |
 | `/recipes` | `RecipesContent` | `GET`/`POST /recipes`, `DELETE /recipes/:id`, `GET /recipes/:id/temperatures` por receita |
-| `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` (`edit` abre o modal Renomear) | `GET`/`PUT`/`DELETE /recipes/:id`, `GET /recipes/:id/temperatures` |
-| `/recipes/:id/iodine` | `RecipeIodineContent` | receita e rampas; salvar é `data-sem-api` (conloq/mash#101) |
+| `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` (`edit` abre o modal Renomear) | `GET`/`PUT`/`DELETE /recipes/:id`, `GET /recipes/:id/temperatures`, `DELETE /temperatures/:id`, `GET /lots` (lotes da receita) |
 | `/recipes/:id/temperatures/new` | `TemperatureContent` | `POST /recipes/:id/temperatures` |
-| `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` | leitura das rampas; salvar e excluir são `data-sem-api` (conloq/mash#97) |
-| `/lots`, `/lots/new` | `LotsContent` (`form` abre `LotForm`) | `GET /recipes` no seletor; salvar é `data-sem-api` (conloq/mash#31) |
-| `/lots/:id`, `/lots/:id/edit` | `LotDetail` (`editando` abre `LotForm`) | nenhuma; estado vazio |
+| `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` | leitura das rampas, `PUT`/`DELETE /temperatures/:id` |
+| `/lots`, `/lots/new` | `LotsContent` (`form` abre `LotForm`) | `GET`/`POST /lots`, `GET /recipes` (nomes e seletor) |
+| `/lots/:id`, `/lots/:id/edit` | `LotDetail` (`editando` abre `LotForm`) | `GET`/`PUT`/`DELETE /lots/:id`, `GET /recipes/:id`; leituras em estado vazio |
 | `/lots/:id/monitoring` | `LotMonitoring` | nenhuma; estado vazio |
 | `/lots/:id/iodine`, `/lots/:id/iodine/reading` | `IodineSession` (`leitura`) | nenhuma; câmera desconectada (conloq/mash#34) |
-| `/analyses/new` | `IodineDemoContent` | nenhuma; simulação do teste de iodo, sem rótulo de simulação (conloq/mash#9) |
-| `/analyses/:id` | página própria | nenhuma; estado vazio |
+| `/analyses/new` | `IodineDemoContent` | nenhuma; simulação do teste de iodo nas duas telas do Figma (preparar sessão e leitura automática), sem rótulo de simulação (conloq/mash#9) |
 
 ## Repository Directory Map
 

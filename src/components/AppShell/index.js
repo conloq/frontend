@@ -13,12 +13,10 @@ const COLLAPSED_KEY = 'mash-sidebar-collapsed';
 
 // secoes: prefixos de URL que acendem o item (o mais específico vence, como no script.js antigo)
 const MENU = [
-    ['/dashboard', 'ph-squares-four', 'Painel', ['/dashboard']],
     ['/recipes', 'ph-scroll', 'Receitas', ['/recipes']],
     ['/lots', 'ph-cube', 'Lotes', ['/lots']],
-    ['/analyses/new', 'ph-test-tube', 'Teste de iodo', ['/analyses', '/lots/[id]/iodine']],
+    ['/analyses/new', 'ph-test-tube', 'Teste de iodo', ['/analyses']],
     ['/profile', 'ph-user-circle', 'Perfil', ['/profile']],
-    ['/settings', 'ph-gear', 'Configuração', ['/settings']],
 ];
 
 function itemAtivo(pathname) {
@@ -83,9 +81,9 @@ function Sidebar({ aberto, setAberto }) {
             >
                 <div className="sidebar-marca flex min-h-18 items-center justify-between gap-2">
                     <Link
-                        href="/dashboard"
+                        href="/recipes"
                         className="flex min-w-0 items-center gap-2.5 rounded-[10px]"
-                        aria-label="MASH, ir para o painel"
+                        aria-label="MASH, ir para as receitas"
                     >
                         <img
                             src="/img/logo-mash.png"

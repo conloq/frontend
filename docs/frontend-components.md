@@ -53,6 +53,5 @@ Este documento registra a camada visual do Sistema MASH: componentes React em `s
 - `src/components/AuthLayout/index.js`
 - `src/components/Feedback/index.js`
 - `src/components/RecipeContent/index.js`
-- `src/components/SettingsContent/index.js`
 - `src/pages/_document.js`, `src/pages/_app.js`
 - `public/css/tailwind.css`

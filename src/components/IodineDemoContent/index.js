@@ -1,262 +1,667 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import AppShell from '@/components/AppShell';
 
 // Simulação do teste de iodo, sem etiqueta na tela por decisão de 21/10/2026 (conloq/mash#9); a leitura real virá do serviço Python + OpenCV (#34)
-const COLETAS_DEMO = [
-    {
-        hora: '14:25',
-        resultado: 'Amido presente',
-        cor: '#2b1a3d',
-        posicao: 6,
-        detalhe: 'Coleta 1 · 66 ºC',
-        descricao: 'Ainda há amido no mosto. A mosturação continua.',
+// Telas do Figma: "v2 · Iodo · Preparar sessão" e "v2 · Iodo · Leitura automática"
+const POSITIVO = '#2e1f4a';
+const PARCIAL = '#8a4b2a';
+const NEGATIVO = '#d9a441';
+
+const CLASSES = {
+    amido: {
+        nome: 'Presença de amido',
+        icone: 'ph-x-circle text-perigo',
+        descricao: 'A amostra ainda reage ao iodo. A mosturação continua.',
     },
-    {
-        hora: '14:35',
-        resultado: 'Conversão parcial',
-        cor: '#7a2f3a',
-        posicao: 32,
-        detalhe: 'Coleta 2 · 66 ºC',
-        descricao: 'A conversão avançou, mas ainda reage ao iodo.',
+    parcial: {
+        nome: 'Conversão parcial',
+        icone: 'ph-circle-half text-aviso',
+        descricao:
+            'Ainda há amido em degradação. Mantenha 66 °C; a próxima captura confirma o avanço.',
     },
-    {
-        hora: '14:45',
-        resultado: 'Conversão parcial',
-        cor: '#9c3d1e',
-        posicao: 58,
-        detalhe: 'Coleta 3 · 67 ºC',
-        descricao: 'Quase lá. Próxima coleta em 10 minutos.',
+    inconclusiva: {
+        nome: 'Inconclusiva',
+        icone: 'ph-warning text-texto-2',
+        descricao: 'Reflexo forte na amostra. A captura foi repetida em seguida.',
     },
-    {
-        hora: '14:55',
-        resultado: 'Sem amido detectável',
-        cor: '#e9b949',
-        posicao: 94,
-        detalhe: 'Coleta 4 · 67 ºC',
+    ausencia: {
+        nome: 'Ausência de amido',
+        icone: 'ph-check-circle text-sucesso',
         descricao: 'A amostra ficou amarela: não há amido detectável.',
+    },
+};
+
+// minuto: minutos desde 14:05 (início da sessão); posicao: lugar na escala positivo → negativo, em %
+const CAPTURAS = [
+    { minuto: 5, classe: 'amido', cor: '#2a1c45', temp: 64.4, mostura: 10, posicao: 6 },
+    { minuto: 15, classe: 'amido', cor: POSITIVO, temp: 65.9, mostura: 20, posicao: 14 },
+    { minuto: 17, classe: 'inconclusiva', cor: null, temp: 66, mostura: 22 },
+    { minuto: 25, classe: 'parcial', cor: '#6b3a3a', temp: 66.6, mostura: 30, posicao: 44 },
+    { minuto: 35, classe: 'parcial', cor: PARCIAL, temp: 66.9, mostura: 40, posicao: 68 },
+    { minuto: 45, classe: 'ausencia', cor: NEGATIVO, temp: 67.2, mostura: 50, posicao: 95 },
+];
+
+const ETAPAS_CALIBRACAO = [
+    {
+        nome: 'Padrão branco',
+        esperado: 'Branco do suporte',
+        cor: '#f2f0ec',
+        hora: '14:02',
+    },
+    {
+        nome: 'Controle positivo',
+        esperado: 'Esperado: violeta ou azul-escuro',
+        cor: POSITIVO,
+        hora: '14:03',
+        suporte: 'Controle positivo no suporte',
+        instrucao:
+            'Mosto cru com iodo, na mesma proporção das coletas. Centralize a amostra dentro do quadro laranja.',
+    },
+    {
+        nome: 'Controle negativo',
+        esperado: 'Esperado: amarelo ou âmbar',
+        cor: NEGATIVO,
+        hora: '14:04',
+        suporte: 'Controle negativo no suporte',
+        instrucao: 'Água com iodo, sem mosto. Centralize a amostra dentro do quadro laranja.',
     },
 ];
 
-const INICIAL = { coletas: 0, lendo: false, fase: 'aguardando' };
-const SELO = { aguardando: 'Aguardando início', aoVivo: 'Ao vivo', concluido: 'Teste concluído' };
+const INTERVALO = 600; // segundos simulados entre capturas (10 min)
+const TICK = 250; // ms reais; cada tick avança 30 s simulados, então 10 min passam em 5 s
 
-const relogio = (min) =>
-    [Math.floor(min / 60), min % 60].map((n) => String(n).padStart(2, '0')).join(':');
+const hora = (minuto) => {
+    const total = 14 * 60 + 5 + minuto;
+    return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+};
+const mmss = (s) =>
+    `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const grau = (t) => `${Math.floor(t)} °C`;
 
-function Demo() {
-    const [estado, setEstado] = useState(INICIAL);
-    const timers = useRef([]);
+function Selo({ className, icone, children }) {
+    return (
+        <span className={`${className} gap-2 before:hidden`}>
+            <i className={`ph ${icone}`} aria-hidden="true" />
+            {children}
+        </span>
+    );
+}
 
-    const limpar = () => {
-        timers.current.forEach(clearTimeout);
-        timers.current = [];
-    };
-    useEffect(() => limpar, []);
+function Cabecalho({ titulo, selo, subtitulo, children }) {
+    return (
+        <div className="flex flex-wrap items-end justify-between gap-4">
+            <div className="flex flex-col gap-1.5">
+                <div className="flex flex-wrap items-center gap-3.5">
+                    <h1 className="text-[30px] font-semibold">{titulo}</h1>
+                    {selo}
+                </div>
+                <p className="text-texto-2">{subtitulo}</p>
+            </div>
+            {children}
+        </div>
+    );
+}
 
-    const reiniciar = () => {
-        limpar();
-        setEstado(INICIAL);
-    };
+function Rotulo({ icone, children, className = '' }) {
+    return (
+        <span
+            className={`absolute left-4 flex items-center gap-2 rounded-lg bg-black/40 px-2.5 py-1.5 text-[13px] font-semibold text-[#f2e9e1] ${className}`}
+        >
+            <i className={`ph ${icone}`} aria-hidden="true" />
+            {children}
+        </span>
+    );
+}
 
-    const iniciar = () => {
-        reiniciar();
-        setEstado({ ...INICIAL, fase: 'aoVivo' });
-        const passo = matchMedia('(prefers-reduced-motion: reduce)').matches ? 1200 : 2200;
-        const agendar = (fn, ms) => timers.current.push(setTimeout(fn, ms));
-        COLETAS_DEMO.forEach((_, i) => {
-            agendar(() => setEstado((atual) => ({ ...atual, lendo: true })), i * passo + 200);
-            agendar(
-                () => setEstado((atual) => ({ ...atual, lendo: false, coletas: i + 1 })),
-                i * passo + passo * 0.6
-            );
-        });
-        agendar(
-            () => setEstado((atual) => ({ ...atual, fase: 'concluido' })),
-            COLETAS_DEMO.length * passo
-        );
-    };
+function Amostra({ cor, grande }) {
+    return (
+        <span
+            className={`grid place-items-center border-2 border-[#f5a04d] ${grande ? 'size-56 rounded-[28px] sm:size-70' : 'size-48 rounded-3xl sm:size-59'}`}
+        >
+            <span
+                className={`rounded-full transition-colors duration-700 motion-reduce:transition-none ${grande ? 'size-40 sm:size-50' : 'size-34 sm:size-42'}`}
+                style={{ background: cor ?? '#3a2e29' }}
+            />
+        </span>
+    );
+}
 
-    const atual = COLETAS_DEMO[estado.coletas - 1];
-    const feitas = COLETAS_DEMO.slice(0, estado.coletas).reverse();
+function Preparar({ onIniciar }) {
+    const [passo, setPasso] = useState(1);
+    const pronto = passo === ETAPAS_CALIBRACAO.length;
+    const atual = ETAPAS_CALIBRACAO[passo];
+    const faltam = ETAPAS_CALIBRACAO.length - passo;
+    const amostra = ETAPAS_CALIBRACAO[Math.min(passo, ETAPAS_CALIBRACAO.length - 1)].cor;
 
     return (
         <>
-            <div className="flex flex-wrap items-end justify-between gap-4">
-                <div className="flex flex-col gap-1.5">
-                    <h1 className="text-[30px] font-semibold">Teste de iodo</h1>
-                    <p className="max-w-3xl text-texto-2">
-                        Como vai funcionar: a câmera da bancada fotografará cada amostra com iodo e
-                        o MASH classificará a cor; a decisão de seguir para a fervura continuará
-                        sendo sua.
-                    </p>
-                </div>
-                <div className="acoes">
-                    <button
-                        type="button"
-                        id="demoReiniciar"
-                        className="btn-secundario"
-                        onClick={reiniciar}
-                    >
-                        <i className="ph ph-arrow-counter-clockwise" aria-hidden="true" />
-                        Reiniciar
-                    </button>
-                    <button
-                        type="button"
-                        id="demoIniciar"
-                        className="btn-primario"
-                        onClick={iniciar}
-                        disabled={estado.fase === 'aoVivo'}
-                    >
-                        <i className="ph ph-play" aria-hidden="true" />
-                        Iniciar teste
-                    </button>
-                </div>
-            </div>
+            <Cabecalho
+                titulo="Preparar a leitura do iodo"
+                selo={
+                    pronto ? (
+                        <Selo className="selo-sucesso" icone="ph-check">
+                            Calibrada
+                        </Selo>
+                    ) : (
+                        <Selo className="selo-info" icone="ph-crosshair">
+                            Calibrando
+                        </Selo>
+                    )
+                }
+                subtitulo="Lote 12/03 · American Pale Ale · a câmera fica fixa e as configurações travam até o fim da sessão"
+            />
 
-            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
+            <div className="grid flex-1 gap-6 xl:grid-cols-[minmax(0,1fr)_460px]">
                 <section
                     className="card flex flex-col overflow-hidden"
-                    aria-labelledby="tituloCamera"
+                    aria-label="Câmera da bancada"
                 >
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linha px-6 py-5">
-                        <div className="flex flex-col gap-0.5">
-                            <h2 id="tituloCamera" className="text-lg font-semibold">
-                                Lote 12/03 · American Pale Ale
-                            </h2>
+                    <div className="relative grid min-h-90 flex-1 place-items-center bg-[#1e1714] pt-24 pb-10 sm:py-16">
+                        <Rotulo icone="ph-video-camera" className="top-4">
+                            Câmera da bancada
+                        </Rotulo>
+                        <Rotulo icone="ph-lock-simple" className="top-14">
+                            Foco, exposição e balanço de branco travados
+                        </Rotulo>
+                        <Amostra cor={amostra} grande />
+                    </div>
+                    <div
+                        className="flex flex-wrap items-center gap-4 border-t border-linha px-6 py-4.5"
+                        aria-live="polite"
+                    >
+                        <div className="flex min-w-60 flex-1 flex-col gap-0.5">
+                            <p className="font-semibold">
+                                {atual?.suporte ?? 'Calibração concluída'}
+                            </p>
                             <p className="text-sm text-texto-2">
-                                Rampa 2 de 3 · 66 ºC · mosturação há{' '}
-                                <span id="demoTempo">
-                                    {relogio(estado.coletas ? 30 + (estado.coletas - 1) * 10 : 20)}
-                                </span>
+                                {atual?.instrucao ??
+                                    'As duas referências estão salvas. Inicie a leitura automática.'}
                             </p>
                         </div>
-                        <span id="demoAoVivo" className="selo-info">
-                            {SELO[estado.fase]}
-                        </span>
+                        {atual && (
+                            <button
+                                type="button"
+                                id="demoCapturarControle"
+                                className="btn-primario max-sm:w-full"
+                                onClick={() => setPasso(passo + 1)}
+                            >
+                                <i className="ph ph-camera" aria-hidden="true" />
+                                Capturar {atual.nome.toLowerCase()}
+                            </button>
+                        )}
                     </div>
+                </section>
 
-                    <div className="grid flex-1 gap-6 p-6 md:grid-cols-[260px_minmax(0,1fr)] md:items-center">
-                        <div
-                            className="relative mx-auto grid aspect-square w-full max-w-[260px] place-items-center rounded-2xl bg-mash-brown-dark"
-                            aria-hidden="true"
-                        >
-                            <span className="absolute left-3 top-3 flex items-center gap-1.5 text-xs font-semibold text-header-texto-2">
-                                <i className="ph-fill ph-camera" />
-                                Câmera da bancada
-                            </span>
-                            <span
-                                id="demoAmostra"
-                                className="size-36 rounded-full shadow-[inset_0_-12px_24px_rgba(0,0,0,0.35)] transition-colors duration-700 motion-reduce:transition-none"
-                                style={{ background: atual?.cor ?? '#b9b0a8' }}
-                            />
-                            {estado.lendo && (
-                                <span
-                                    id="demoLendo"
-                                    className="absolute bottom-3 flex items-center gap-1.5 text-xs font-semibold text-white"
+                <div className="flex flex-col gap-4">
+                    <section
+                        className="card flex flex-col gap-3 p-5"
+                        aria-labelledby="tituloCalibracao"
+                    >
+                        <h2 id="tituloCalibracao" className="text-lg font-semibold">
+                            Calibração da sessão
+                        </h2>
+                        <p className="text-sm leading-5 text-texto-2">
+                            A luz muda de um dia para outro. Os controles desta sessão definem onde
+                            fica cada classe.
+                        </p>
+                        {ETAPAS_CALIBRACAO.map((etapa, i) => {
+                            const feito = i < passo;
+                            const ativo = i === passo;
+                            return (
+                                <div
+                                    key={etapa.nome}
+                                    className={`flex items-center gap-3.5 rounded-xl bg-superficie px-4 py-3.5 ${ativo ? 'border-2 border-acao' : 'border border-linha'}`}
                                 >
-                                    <i className="ph ph-circle-notch animate-spin motion-reduce:animate-none" />
-                                    Lendo a cor…
-                                </span>
-                            )}
-                        </div>
-
-                        <div className="flex flex-col gap-4" aria-live="polite">
-                            <div className="flex flex-col gap-1">
-                                <span className="text-sm text-texto-2">Leitura atual</span>
-                                <p
-                                    id="demoResultado"
-                                    className="font-display text-[28px] font-semibold"
-                                >
-                                    {atual?.resultado ?? 'Nenhuma coleta ainda'}
-                                </p>
-                                <p id="demoDescricao" className="text-texto-2">
-                                    {atual?.descricao ??
-                                        'Inicie o teste para ver as coletas acontecendo.'}
-                                </p>
-                            </div>
-                            <div>
-                                <div className="mb-2 flex justify-between text-xs font-semibold text-texto-2">
-                                    <span>Amido presente</span>
-                                    <span>Sem amido</span>
-                                </div>
-                                <div className="relative h-3 rounded-full bg-linear-to-r from-[#2b1a3d] via-[#9c3d1e] to-[#e9b949]">
-                                    {atual && (
+                                    <span
+                                        className={`grid size-8 shrink-0 place-items-center rounded-full ${feito ? 'bg-sucesso-suave text-sucesso' : ativo ? 'bg-acao-suave text-acao' : 'bg-fundo text-texto-2'}`}
+                                    >
+                                        <i
+                                            className={`ph ${feito ? 'ph-check' : ativo ? 'ph-camera' : 'ph-circle'}`}
+                                            aria-hidden="true"
+                                        />
+                                    </span>
+                                    <span
+                                        className={`flex flex-1 flex-col gap-0.5 ${feito || ativo ? '' : 'text-texto-2'}`}
+                                    >
+                                        <span className="font-semibold">{etapa.nome}</span>
+                                        <span className="text-[13px] text-texto-2">
+                                            {feito ? `Capturado às ${etapa.hora}` : etapa.esperado}
+                                        </span>
+                                    </span>
+                                    {feito && (
                                         <span
-                                            id="demoMarcador"
-                                            className="absolute -top-1.5 size-6 -translate-x-1/2 rounded-full border-4 border-superficie bg-texto shadow transition-[left] duration-700 motion-reduce:transition-none"
-                                            style={{ left: `${atual.posicao}%` }}
+                                            className="size-7 shrink-0 rounded-lg border border-linha"
+                                            style={{ background: etapa.cor }}
                                         />
                                     )}
                                 </div>
-                            </div>
-                            {estado.fase === 'concluido' && (
-                                <div
-                                    id="demoPronto"
-                                    className="flex items-center gap-3 rounded-[10px] bg-sucesso-suave px-4 py-3"
-                                >
-                                    <i
-                                        className="ph-fill ph-check-circle text-[22px] text-sucesso"
-                                        aria-hidden="true"
-                                    />
-                                    <p>
-                                        <strong className="font-semibold">
-                                            Pronto para a fervura.
-                                        </strong>{' '}
-                                        A amostra não reage mais ao iodo.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </section>
+                            );
+                        })}
+                    </section>
 
-                <section
-                    className="card self-start overflow-hidden"
-                    aria-labelledby="tituloColetas"
-                >
-                    <div className="flex flex-col gap-0.5 border-b border-linha px-6 py-5">
-                        <h2 id="tituloColetas" className="text-lg font-semibold">
-                            Coletas deste lote
-                        </h2>
-                        <p className="text-sm text-texto-2">
-                            Uma coleta a cada 10 minutos, até 6 testes.
-                        </p>
-                    </div>
-                    <ol id="demoColetas" className="flex flex-col px-6 py-2">
-                        {!feitas.length && (
-                            <li className="py-6 text-center text-sm text-texto-2">
-                                As coletas aparecem aqui.
-                            </li>
-                        )}
-                        {feitas.map((coleta) => (
-                            <li
-                                key={coleta.hora}
-                                className="tabela-linha flex items-center gap-3 py-3.5"
+                    <section
+                        className="card flex flex-col px-5 py-2"
+                        aria-label="Configuração da sessão"
+                    >
+                        {[
+                            ['ph-timer', 'Intervalo entre capturas', '10 min'],
+                            ['ph-stack', 'Capturas no máximo', '6'],
+                            ['ph-thermometer-simple', 'Começa na', 'Rampa 2 · 66 °C'],
+                        ].map(([icone, rotulo, valor]) => (
+                            <div
+                                key={rotulo}
+                                className="flex items-center gap-3 border-b border-linha py-3 text-sm"
                             >
-                                <span
-                                    className="size-7 shrink-0 rounded-md"
-                                    style={{ background: coleta.cor }}
+                                <i
+                                    className={`ph ${icone} text-xl text-texto-2`}
+                                    aria-hidden="true"
                                 />
-                                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                                    <span className="font-semibold">{coleta.resultado}</span>
-                                    <span className="text-[13px] text-texto-2">
-                                        {coleta.detalhe}
-                                    </span>
-                                </span>
-                                <span className="text-sm font-medium">{coleta.hora}</span>
-                            </li>
+                                <span className="flex-1 text-texto-2">{rotulo}</span>
+                                <span className="font-semibold">{valor}</span>
+                            </div>
                         ))}
-                    </ol>
-                </section>
+                        <span className="pt-1 pb-3 text-sm font-semibold text-acao">
+                            Alterar na receita
+                        </span>
+                    </section>
+
+                    <section
+                        className="card flex flex-col gap-3.5 p-5"
+                        aria-labelledby="tituloEscala"
+                    >
+                        <h2 id="tituloEscala" className="text-lg font-semibold">
+                            Escala desta sessão
+                        </h2>
+                        <div className="grid grid-cols-2 gap-3">
+                            {ETAPAS_CALIBRACAO.slice(1).map((etapa, i) => {
+                                const feito = passo > i + 1;
+                                return (
+                                    <div
+                                        key={etapa.nome}
+                                        className="flex items-center gap-2.5 rounded-[10px] bg-fundo p-3"
+                                    >
+                                        <span
+                                            className="size-9 shrink-0 rounded-lg border border-linha bg-superficie transition-colors duration-700 motion-reduce:transition-none"
+                                            style={feito ? { background: etapa.cor } : undefined}
+                                        />
+                                        <span className="flex min-w-0 flex-col gap-0.5">
+                                            <span className="text-[13px] font-semibold">
+                                                {etapa.nome}
+                                            </span>
+                                            <span className="text-xs text-texto-2">
+                                                {feito
+                                                    ? `Capturado às ${etapa.hora}`
+                                                    : i === 0 || passo === 2
+                                                      ? 'Aguardando captura'
+                                                      : 'Depois do positivo'}
+                                            </span>
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <p className="text-sm leading-[21px] text-texto-2">
+                            Cada captura é comparada com essas duas cores. Perto do positivo, ainda
+                            há amido; perto do negativo, a conversão terminou. O que fica no meio é
+                            conversão parcial.
+                        </p>
+                    </section>
+                </div>
+            </div>
+
+            <div className="sticky bottom-0 -mx-4 -mb-4 mt-auto flex flex-wrap items-center justify-end gap-3 border-t border-linha bg-superficie px-4 py-4 sm:-mx-6 sm:-mb-6 sm:px-6 lg:-mx-10 lg:-mb-8 lg:px-10">
+                <p className="text-sm text-texto-2 max-sm:hidden">
+                    {pronto
+                        ? 'Calibração concluída'
+                        : `Falta${faltam > 1 ? 'm' : ''} ${faltam} etapa${faltam > 1 ? 's' : ''} da calibração`}
+                </p>
+                <button
+                    type="button"
+                    className="btn-secundario max-sm:hidden"
+                    onClick={() => setPasso(1)}
+                >
+                    Cancelar
+                </button>
+                <button
+                    type="button"
+                    id="demoIniciar"
+                    className="btn-primario max-sm:w-full"
+                    disabled={!pronto}
+                    onClick={onIniciar}
+                >
+                    <i className="ph ph-play" aria-hidden="true" />
+                    Iniciar leitura automática
+                </button>
             </div>
         </>
     );
 }
 
-export default function IodineDemoContent() {
+function Grafico({ feitas }) {
+    // 14:05 a 15:05 no eixo x; 64 a 68 °C no eixo y
+    const x = (minuto) => (minuto / 60) * 100;
+    const y = (temp) => ((68 - temp) / 4) * 100;
+    const pontos = [{ minuto: 0, temp: 64 }, ...feitas];
+    const ultima = feitas.at(-1);
+
     return (
-        <AppShell title="Teste de iodo" trail={['Teste de iodo', 'Nova análise']}>
-            <Demo />
+        <section className="card flex flex-col overflow-hidden" aria-labelledby="tituloGrafico">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-linha px-6 py-4.5">
+                <div className="flex flex-col gap-0.5">
+                    <h2 id="tituloGrafico" className="text-lg font-semibold">
+                        Temperatura e capturas
+                    </h2>
+                    <p className="text-sm text-texto-2">
+                        Cada ponto é uma captura, na cor da classe, sobre a curva da mosturação
+                    </p>
+                </div>
+                <ul className="flex flex-wrap gap-5 text-[13px] text-texto-2">
+                    {[
+                        [POSITIVO, 'amido'],
+                        [PARCIAL, 'parcial'],
+                        [NEGATIVO, 'ausencia'],
+                    ].map(([cor, classe]) => (
+                        <li key={classe} className="flex items-center gap-2">
+                            <span className="size-3 rounded-full" style={{ background: cor }} />
+                            {CLASSES[classe].nome}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+            <div className="flex gap-3 px-6 py-4">
+                <div className="flex h-64 flex-col justify-between pb-5.5 text-xs text-texto-2">
+                    <span>68 °C</span>
+                    <span>66 °C</span>
+                    <span>64 °C</span>
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div
+                        className="relative h-58"
+                        role="img"
+                        aria-label="Curva de temperatura com as capturas"
+                    >
+                        {[0, 50, 100].map((top) => (
+                            <span
+                                key={top}
+                                className="absolute inset-x-0 h-px bg-linha"
+                                style={{ top: `${top}%` }}
+                            />
+                        ))}
+                        <svg
+                            className="absolute inset-0 size-full overflow-visible"
+                            viewBox="0 0 100 100"
+                            preserveAspectRatio="none"
+                            aria-hidden="true"
+                        >
+                            <polyline
+                                points={pontos.map((p) => `${x(p.minuto)},${y(p.temp)}`).join(' ')}
+                                fill="none"
+                                stroke="#6b5f57"
+                                strokeWidth="2"
+                                vectorEffect="non-scaling-stroke"
+                            />
+                        </svg>
+                        {ultima && (
+                            <span
+                                className="absolute inset-y-0 w-px bg-acao"
+                                style={{ left: `${x(ultima.minuto)}%` }}
+                            />
+                        )}
+                        {feitas.map((p) => (
+                            <span
+                                key={p.minuto}
+                                className={`absolute size-4 -translate-1/2 rounded-full border-2 ${p.cor ? 'border-superficie' : 'border-texto-2 bg-superficie'}`}
+                                style={{
+                                    left: `${x(p.minuto)}%`,
+                                    top: `${y(p.temp)}%`,
+                                    background: p.cor ?? undefined,
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex justify-between text-xs text-texto-2">
+                        {[0, 15, 30, 45, 60].map((m) => (
+                            <span key={m}>{hora(m)}</span>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </section>
+    );
+}
+
+function Leitura({ onEncerrar }) {
+    const [feitas, setFeitas] = useState(0);
+    const [restante, setRestante] = useState(INTERVALO);
+    const fim = feitas === CAPTURAS.length;
+
+    const capturar = () => setRestante(0);
+
+    useEffect(() => {
+        if (fim) return undefined;
+        const id = setInterval(() => setRestante((s) => s - 30), TICK);
+        return () => clearInterval(id);
+    }, [fim]);
+
+    useEffect(() => {
+        if (restante > 0) return;
+        setFeitas((n) => Math.min(n + 1, CAPTURAS.length));
+        setRestante(INTERVALO);
+    }, [restante]);
+
+    const lista = CAPTURAS.slice(0, feitas);
+    const atual = lista.at(-1);
+    const classe = atual && CLASSES[atual.classe];
+    // a inconclusiva não move o marcador: fica a última classificação válida
+    const marcador = lista.findLast((c) => c.posicao !== undefined);
+
+    return (
+        <>
+            <Cabecalho
+                titulo="Leitura automática"
+                selo={
+                    fim ? (
+                        <Selo className="selo-sucesso" icone="ph-check">
+                            Leitura concluída
+                        </Selo>
+                    ) : (
+                        <Selo className="selo bg-acao-suave text-acao" icone="ph-camera">
+                            Capturando a cada 10 min
+                        </Selo>
+                    )
+                }
+                subtitulo="Lote 12/03 · American Pale Ale · sessão calibrada às 14:05"
+            >
+                <div className="acoes">
+                    <button
+                        type="button"
+                        id="demoEncerrar"
+                        className="btn-secundario"
+                        onClick={onEncerrar}
+                    >
+                        <i className="ph ph-stop" aria-hidden="true" />
+                        Encerrar leitura
+                    </button>
+                    <button
+                        type="button"
+                        id="demoCapturar"
+                        className="btn-primario"
+                        onClick={capturar}
+                        disabled={fim}
+                    >
+                        <i className="ph ph-camera" aria-hidden="true" />
+                        Capturar agora
+                    </button>
+                </div>
+            </Cabecalho>
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
+                <section
+                    className="card grid overflow-hidden md:grid-cols-[minmax(0,520px)_minmax(0,1fr)]"
+                    aria-label="Última captura"
+                >
+                    <div className="relative grid min-h-110 place-items-center bg-[#1e1714]">
+                        <Rotulo icone="ph-video-camera" className="top-4">
+                            Câmera da bancada
+                        </Rotulo>
+                        <Amostra cor={atual?.cor} />
+                        {!fim && (
+                            <Rotulo icone="ph-timer" className="bottom-4">
+                                Próxima captura em {mmss(Math.max(restante, 0))}
+                            </Rotulo>
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-5 p-8" aria-live="polite">
+                        <div className="flex flex-col gap-1.5">
+                            <p className="text-[13px] text-texto-2">
+                                {atual
+                                    ? `Última captura · ${hora(atual.minuto)}`
+                                    : 'Sessão iniciada · 14:05'}
+                            </p>
+                            <p
+                                id="demoResultado"
+                                className="flex items-center gap-2.5 font-display text-[32px] font-semibold"
+                            >
+                                {classe && (
+                                    <i
+                                        className={`ph-fill ${classe.icone} text-[28px]`}
+                                        aria-hidden="true"
+                                    />
+                                )}
+                                {classe?.nome ?? 'Aguardando a primeira captura'}
+                            </p>
+                            <p className="leading-[23px] text-texto-2">
+                                {classe?.descricao ??
+                                    'A câmera fotografa a amostra a cada 10 minutos e classifica a cor.'}
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col gap-2.5">
+                            <div className="relative h-6">
+                                <span className="absolute inset-x-0 top-1.5 h-3 rounded-full bg-linear-to-r from-[#2e1f4a] via-[#8a4b2a] to-[#d9a441]" />
+                                {marcador && (
+                                    <span
+                                        className="absolute top-0 size-6 -translate-x-1/2 rounded-full border-3 border-texto bg-superficie transition-[left] duration-700 motion-reduce:transition-none"
+                                        style={{ left: `${marcador.posicao}%` }}
+                                    />
+                                )}
+                            </div>
+                            <div className="flex justify-between gap-2 text-xs">
+                                <span className="flex flex-col gap-0.5">
+                                    <strong className="font-semibold">Controle positivo</strong>
+                                    <span className="text-texto-2">com amido</span>
+                                </span>
+                                <strong className="font-semibold">Conversão parcial</strong>
+                                <span className="flex flex-col items-end gap-0.5">
+                                    <strong className="font-semibold">Controle negativo</strong>
+                                    <span className="text-texto-2">sem amido</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <dl className="grid grid-cols-2 gap-4 border-t border-linha pt-5 sm:grid-cols-4">
+                            {[
+                                ['Temperatura', grau(atual?.temp ?? 64)],
+                                ['Mosturação', `${atual?.mostura ?? 0} min`],
+                                ['Rampa', '2 de 3'],
+                                ['Resposta da análise', atual ? '1,4 s' : '–'],
+                            ].map(([rotulo, valor]) => (
+                                <div key={rotulo} className="flex flex-col gap-1">
+                                    <dt className="text-[13px] text-texto-2">{rotulo}</dt>
+                                    <dd className="font-display text-xl font-semibold">{valor}</dd>
+                                </div>
+                            ))}
+                        </dl>
+
+                        {fim && (
+                            <div
+                                id="demoPronto"
+                                className="flex items-center gap-3 rounded-[10px] bg-sucesso-suave px-4 py-3"
+                            >
+                                <i
+                                    className="ph-fill ph-check-circle text-[22px] text-sucesso"
+                                    aria-hidden="true"
+                                />
+                                <p>
+                                    <strong className="font-semibold">
+                                        Pronto para a fervura.
+                                    </strong>{' '}
+                                    A amostra não reage mais ao iodo.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+
+                <section
+                    className="card self-start overflow-hidden"
+                    aria-labelledby="tituloCapturas"
+                >
+                    <div className="flex flex-col gap-0.5 border-b border-linha px-5 py-4.5">
+                        <h2 id="tituloCapturas" className="text-lg font-semibold">
+                            Capturas da sessão
+                        </h2>
+                        <p className="text-sm text-texto-2">Da mais recente para a mais antiga</p>
+                    </div>
+                    <ol id="demoColetas" className="flex flex-col">
+                        {!lista.length && (
+                            <li className="px-5 py-8 text-center text-sm text-texto-2">
+                                As capturas aparecem aqui.
+                            </li>
+                        )}
+                        {[...lista].reverse().map((c) => (
+                            <li
+                                key={c.minuto}
+                                className="tabela-linha flex items-center gap-3 px-5 py-3"
+                            >
+                                <span
+                                    className={`size-8 shrink-0 rounded-lg ${c.cor ? '' : 'border border-linha bg-fundo'}`}
+                                    style={c.cor ? { background: c.cor } : undefined}
+                                />
+                                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                    <span className="flex items-center gap-1.5 text-sm font-semibold">
+                                        <i
+                                            className={`ph-fill ${CLASSES[c.classe].icone}`}
+                                            aria-hidden="true"
+                                        />
+                                        {CLASSES[c.classe].nome}
+                                    </span>
+                                    <span className="text-[13px] text-texto-2">
+                                        {c.cor
+                                            ? `${grau(c.temp)} · ${c.mostura} min`
+                                            : 'Reflexo forte · repetida'}
+                                    </span>
+                                </span>
+                                <span className="text-sm font-semibold text-texto-2">
+                                    {hora(c.minuto)}
+                                </span>
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+            </div>
+
+            <Grafico feitas={lista} />
+        </>
+    );
+}
+
+export default function IodineDemoContent() {
+    const [lendo, setLendo] = useState(false);
+
+    return (
+        <AppShell
+            title="Teste de iodo"
+            trail={[
+                'Teste de iodo',
+                lendo ? 'Lote 12/03 · Leitura automática' : 'Lote 12/03 · Preparar sessão',
+            ]}
+        >
+            {lendo ? (
+                <Leitura onEncerrar={() => setLendo(false)} />
+            ) : (
+                <Preparar onIniciar={() => setLendo(true)} />
+            )}
         </AppShell>
     );
 }

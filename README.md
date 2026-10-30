@@ -40,6 +40,6 @@ Para voltar a uma versão anterior, use **Rollback** no histórico de deploys do
 
 ## Telas
 
-As rotas ficam em `src/pages/` e o conteúdo de cada tela em `src/components/`. Login, cadastro, perfil, receitas e rampas usam a API real. Lotes, sessão do iodo, recuperação de senha e análise detalhada mostram estados vazios enquanto a API não tem essas rotas. O painel e `/analyses/new` (simulação do teste de iodo) usam dados de exemplo para o pitch.
+As rotas ficam em `src/pages/` e o conteúdo de cada tela em `src/components/`. Login, cadastro, perfil, receitas e rampas usam a API real. Lotes e sessão do iodo mostram estados vazios enquanto a API não tem essas rotas. `/analyses/new` simula o teste de iodo para o pitch, nas telas do Figma. Após o login o usuário vai para `/recipes`.
 
 Consulte `codemap.md`, `AGENTS.md` e `docs/codebase/` para os mapas e convenções do projeto.
