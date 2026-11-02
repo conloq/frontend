@@ -23,7 +23,7 @@ Dois repositórios, um papel cada: este tem as telas; o Back-End (`conloq/Back-E
 |---|---|---|
 | `/` | - | redireciona para `/recipes` |
 | `/login`, `/signup` | `LoginContent`, `SignupContent` em `AuthLayout` | `POST /login`, `POST /user` |
-| `/profile` | `ProfileContent` | `PUT /user`, `PUT /user/upload`, `DELETE /user`, `GET /user/login-history` (404 = lista vazia, conloq/mash#102) |
+| `/profile` | `ProfileContent` | `PUT /user`, `PUT /user/upload`, `DELETE /user`, `GET /user/login-history` (conloq/mash#102; 404 de API antiga = lista vazia) |
 | `/profile/access-history` | `AccessHistory` | `GET /user/login-history` |
 | `/recipes` | `RecipesContent` | `GET`/`POST /recipes`, `DELETE /recipes/:id`, `GET /recipes/:id/temperatures` por receita |
 | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` (`edit` abre o modal Renomear) | `GET`/`PUT`/`DELETE /recipes/:id`, `GET /recipes/:id/temperatures`, `DELETE /temperatures/:id`, `GET /lots` (lotes da receita) |

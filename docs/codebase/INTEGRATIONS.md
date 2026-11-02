@@ -24,7 +24,7 @@
 |---|---|
 | Shell autenticado | `GET /user` |
 | Perfil | `PUT /user`, `PUT /user/upload` (multipart, campo `image`), `DELETE /user` |
-| Perfil e histórico | `GET /user/login-history`; `404` vira lista vazia (conloq/mash#102) |
+| Perfil e histórico | `GET /user/login-history` (conloq/mash#102, conloq/Back-End#37); `404` de API sem a rota vira lista vazia |
 | Receitas | `GET /recipes`, `POST /recipes`, `DELETE /recipes/:id` e `GET /recipes/:id/temperatures` por receita |
 | Receita | `GET`, `PUT` e `DELETE /recipes/:id`, `GET /recipes/:id/temperatures`, `DELETE /temperatures/:id`, `GET /lots` |
 | Nova rampa | receita e `POST /recipes/:id/temperatures` |
