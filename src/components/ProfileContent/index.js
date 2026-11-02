@@ -6,7 +6,7 @@ import { ConfirmDialog, dataBr, Field, flash, PasswordInput } from '@/components
 import { api, mensagemErro } from '@/services/api';
 import { getAxiosConfig, logout } from '@/services/auth';
 
-// GET /user/login-history ainda não existe no Back-End (conloq/mash#102): 404 vira lista vazia.
+// GET /user/login-history (conloq/mash#102, conloq/Back-End#37); 404 de API sem a rota vira lista vazia.
 function useAcessos() {
     const [estado, setEstado] = useState({ acessos: [], erro: false });
     useEffect(() => {

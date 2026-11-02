@@ -12,7 +12,7 @@
 | Tela | Rota | Componente | Composição visual |
 |---|---|---|---|
 | Perfil | `/profile` | `ProfileContent` | Foto (troca envia na hora), dados da conta, troca de senha, últimos acessos e exclusão com confirmação. |
-| Últimos acessos | `/profile/access-history` | `AccessHistory` | Histórico de logins (`GET /user/login-history`; `404` = "Nenhum acesso registrado"). |
+| Últimos acessos | `/profile/access-history` | `AccessHistory` | Histórico de logins (`GET /user/login-history`): local, data e hora, IP e "Dispositivo conhecido" ou "Novo dispositivo"; lista vazia mostra "Nenhum acesso registrado". |
 | Receitas | `/recipes` | `RecipesContent` | Busca, contagem, tabela (cards no mobile), modal "Nova receita" e exclusão com confirmação. |
 | Receita | `/recipes/:id`, `/recipes/:id/edit` | `RecipeContent` | Rampas, exclusão de rampa, card "Lotes desta receita", perfil das rampas com grade de 10 ºC, modal Renomear, exclusão e link para o teste de iodo. |
 | Rampa de temperatura | `/recipes/:id/temperatures/new`, `/recipes/:id/temperatures/:temperatureId/edit` | `TemperatureContent` | Faixa, tempos e limites com erro por campo; na edição, salva e exclui a rampa. |
