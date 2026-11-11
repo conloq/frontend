@@ -23,7 +23,7 @@
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.5",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "husky": "^9.1.7",
